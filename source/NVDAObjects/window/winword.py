@@ -480,6 +480,30 @@ class WordDocument(EditableTextWithoutAutoSelectDetection, Window):
 	def script_previousColumn(self,gesture):
 		self._moveInTable(row=False,forward=False)
 
+	def _moveBySentence(self, direction=1):
+		""" Helper method to move by sentence
+		@param direction: positive for next negative for or previous
+		@type direction: int
+		"""
+		info=self.makeTextInfo(textInfos.POSITION_CARET)
+		try:
+			info.expand(textInfos.UNIT_SENTENCE)
+			end = True if direction > 0 else False
+			info.collapse(end) #This will fail at the last sentence of the document.
+		except:
+			pass
+		info.move(textInfos.UNIT_CHARACTER, direction)
+		info.expand(textInfos.UNIT_SENTENCE)
+		speech.speakTextInfo(info,reason=controlTypes.REASON_CARET)
+		info.collapse()
+		info.updateCaret()
+
+	def script_nextSentence(self, gesture):
+		self._moveBySentence(1)
+
+	def script_previousSentence(self, gesture):
+		self._moveBySentence(-1)
+
 	__gestures = {
 		"kb:tab": "tab",
 		"kb:shift+tab": "tab",
@@ -489,5 +513,7 @@ class WordDocument(EditableTextWithoutAutoSelectDetection, Window):
 		"kb:control+alt+rightArrow": "nextColumn",
 		"kb:control+pageUp": "caret_moveByLine",
 		"kb:control+pageDown": "caret_moveByLine",
+		"kb:NVDA+control+upArrow": "previousSentence",
+		"kb:NVDA+control+downArrow": "nextSentence",
 	}
 
