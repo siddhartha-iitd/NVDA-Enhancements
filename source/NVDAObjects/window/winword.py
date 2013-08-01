@@ -26,6 +26,7 @@ import colors
 import controlTypes
 from . import Window
 from ..behaviors import EditableTextWithoutAutoSelectDetection
+import eventHandler
  
 #Word constants
 
@@ -480,6 +481,56 @@ class WordDocument(EditableTextWithoutAutoSelectDetection, Window):
 	def script_previousColumn(self,gesture):
 		self._moveInTable(row=False,forward=False)
 
+
+	def _moveInList(self, gesture, unit, forward):
+		try:
+			info=self.makeTextInfo(textInfos.POSITION_CARET)
+		except:
+			gesture.send()
+			return
+		bookmark=info.bookmark
+		gesture.send()
+		caretMoved,newInfo=self._hasCaretMoved(bookmark) 
+		if not caretMoved and self.shouldFireCaretMovementFailedEvents:
+			eventHandler.executeEvent("caretMovementFailed", self, gesture=gesture)
+		formatConfig=config.conf['documentFormatting'].copy()
+		formatConfig['reportList']=True
+		info = self.makeTextInfo(textInfos.POSITION_CARET)
+		info.expand(textInfos.UNIT_PARAGRAPH)
+		commandList=info.getTextWithFields(formatConfig)
+		islist = len(commandList) > 3 and (commandList[1].field.get('line-prefix','') != '')
+		if islist:
+			bulletstr = commandList[1].field.get('line-prefix','')
+			if not caretMoved:
+				if forward: 
+					speech.speakMessage(bulletstr)
+					speech.speakTextInfo(info,reason=controlTypes.REASON_CARET)
+				else:
+					gesture.send()
+                                        ## The caret moved, find new Info.
+                                        caretMoved,newInfo=self._hasCaretMoved(bookmark) 
+                                        formatConfig=config.conf['documentFormatting'].copy()
+                                        formatConfig['reportList']=True
+                                        info = self.makeTextInfo(textInfos.POSITION_CARET)
+                                        info.expand(textInfos.UNIT_PARAGRAPH)
+                                        commandList=info.getTextWithFields(formatConfig)
+                                        islist = len(commandList) > 3 and (commandList[1].field.get('line-prefix','') != '')
+                                        if islist:
+                                                bulletstr = commandList[1].field.get('line-prefix','')
+                                                speech.speakMessage(bulletstr)
+					speech.speakTextInfo(info,reason=controlTypes.REASON_CARET)
+
+			else:
+				if forward:
+					speech.speakMessage(bulletstr)
+					speech.speakTextInfo(info,reason=controlTypes.REASON_CARET)
+					gesture.send()
+				else:
+					speech.speakMessage(bulletstr)
+					speech.speakTextInfo(info,reason=controlTypes.REASON_CARET)
+		else:
+			speech.speakTextInfo(info,reason=controlTypes.REASON_CARET)
+
 	__gestures = {
 		"kb:tab": "tab",
 		"kb:shift+tab": "tab",
@@ -489,5 +540,7 @@ class WordDocument(EditableTextWithoutAutoSelectDetection, Window):
 		"kb:control+alt+rightArrow": "nextColumn",
 		"kb:control+pageUp": "caret_moveByLine",
 		"kb:control+pageDown": "caret_moveByLine",
+		"kb:control+upArrow": "previousParagraph",
+		"kb:control+downArrow": "nextParagraph",
 	}
 
