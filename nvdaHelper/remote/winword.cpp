@@ -12,7 +12,7 @@ This license can be found at:
 http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 */
 
-#define WIN32_LEAN_AND_MEAN 
+#define WIN32_LEAN_AND_MEAN
 
 #include <sstream>
 #include <comdef.h>
@@ -50,6 +50,8 @@ using namespace std;
 #define wdDISPID_STYLE_NAMELOCAL 0
 #define wdDISPID_RANGE_SPELLINGERRORS 316
 #define wdDISPID_SPELLINGERRORS_COUNT 1
+#define wdDISPID_RANGE_APPLICATION 1000
+#define wdDISPID_APPLICATION_ISSANDBOX 492
 #define wdDISPID_RANGE_FONT 5
 #define wdDISPID_FONT_COLOR 159
 #define wdDISPID_FONT_BOLD 130
@@ -77,7 +79,7 @@ using namespace std;
 #define wdDISPID_ENDNOTE_INDEX 6
 #define wdDISPID_RANGE_INLINESHAPES 319
 #define wdDISPID_INLINESHAPES_COUNT 1
-#define wdDISPID_INLINESHAPES_ITEM 0 
+#define wdDISPID_INLINESHAPES_ITEM 0
 #define wdDISPID_INLINESHAPE_TYPE 6
 #define wdDISPID_INLINESHAPE_ALTERNATIVETEXT 131
 #define wdDISPID_RANGE_HYPERLINKS 156
@@ -407,13 +409,22 @@ void generateXMLAttribsForFormatting(IDispatch* pDispatchRange, int startOffset,
 				}
 			}
 		}
-	} 
+	}
 	if(formatConfig&formatConfig_reportSpellingErrors) {
-		IDispatchPtr pDispatchSpellingErrors=NULL;
-		if(_com_dispatch_raw_propget(pDispatchRange,wdDISPID_RANGE_SPELLINGERRORS,VT_DISPATCH,&pDispatchSpellingErrors)==S_OK&&pDispatchSpellingErrors) {
-			_com_dispatch_raw_propget(pDispatchSpellingErrors,wdDISPID_SPELLINGERRORS_COUNT,VT_I4,&iVal);
-			if(iVal>0) {
-				formatAttribsStream<<L"invalid-spelling=\""<<iVal<<L"\" ";
+		IDispatchPtr pDispatchApplication=NULL;
+		if(_com_dispatch_raw_propget(pDispatchRange,wdDISPID_RANGE_APPLICATION ,VT_DISPATCH,&pDispatchApplication)==S_OK && pDispatchApplication) {
+			bool isSandbox = true;
+			// We need to ironically enter the if block if the call to get IsSandbox property fails
+			// for backward compatibility because IsSandbox was introduced with word 2010 and earlier versions will return a failure for this property access.
+			// This however, means that if this property access fails for some reason in word 2010, then we will incorrectly enter this section.
+			if(_com_dispatch_raw_propget(pDispatchApplication,wdDISPID_APPLICATION_ISSANDBOX ,VT_BOOL,&isSandbox)!=S_OK || !isSandbox ) {
+				IDispatchPtr pDispatchSpellingErrors=NULL;
+				if(_com_dispatch_raw_propget(pDispatchRange,wdDISPID_RANGE_SPELLINGERRORS,VT_DISPATCH,&pDispatchSpellingErrors)==S_OK&&pDispatchSpellingErrors) {
+					_com_dispatch_raw_propget(pDispatchSpellingErrors,wdDISPID_SPELLINGERRORS_COUNT,VT_I4,&iVal);
+					if(iVal>0) {
+						formatAttribsStream<<L"invalid-spelling=\""<<iVal<<L"\" ";
+					}
+				}
 			}
 		}
 	}
@@ -435,7 +446,7 @@ inline int getInlineShapesCount(IDispatch* pDispatchRange) {
 	}
 	if(_com_dispatch_raw_propget(pDispatchShapes,wdDISPID_INLINESHAPES_COUNT,VT_I4,&count)!=S_OK||count<=0) {
 		return 0;
-	} 
+	}
 	return count;
 }
 
@@ -656,7 +667,7 @@ error_status_t nvdaInProcUtils_winword_expandToLine(handle_t bindingHandle, cons
 	return RPC_S_OK;
 }
 
-error_status_t nvdaInProcUtils_winword_getTextInRange(handle_t bindingHandle, const long windowHandle, const int startOffset, const int endOffset, const long formatConfig, BSTR* text) { 
+error_status_t nvdaInProcUtils_winword_getTextInRange(handle_t bindingHandle, const long windowHandle, const int startOffset, const int endOffset, const long formatConfig, BSTR* text) {
 	winword_getTextInRange_args args={startOffset,endOffset,formatConfig,NULL};
 	SendMessage((HWND)windowHandle,wm_winword_getTextInRange,(WPARAM)&args,0);
 	*text=args.text;
