@@ -481,6 +481,12 @@ class WordDocument(EditableTextWithoutAutoSelectDetection, Window):
 	def script_previousColumn(self,gesture):
 		self._moveInTable(row=False,forward=False)
 
+	def script_previousParagraph(self,gesture):
+		self._moveInList(gesture, textInfos.UNIT_PARAGRAPH,forward=False)
+
+	def script_nextParagraph(self,gesture):
+		self._moveInList(gesture, textInfos.UNIT_PARAGRAPH,forward=True)
+        
 
 	def _moveInList(self, gesture, unit, forward):
 		try:
@@ -507,19 +513,18 @@ class WordDocument(EditableTextWithoutAutoSelectDetection, Window):
 					speech.speakTextInfo(info,reason=controlTypes.REASON_CARET)
 				else:
 					gesture.send()
-                                        ## The caret moved, find new Info.
-                                        caretMoved,newInfo=self._hasCaretMoved(bookmark) 
-                                        formatConfig=config.conf['documentFormatting'].copy()
-                                        formatConfig['reportList']=True
-                                        info = self.makeTextInfo(textInfos.POSITION_CARET)
-                                        info.expand(textInfos.UNIT_PARAGRAPH)
-                                        commandList=info.getTextWithFields(formatConfig)
-                                        islist = len(commandList) > 3 and (commandList[1].field.get('line-prefix','') != '')
-                                        if islist:
-                                                bulletstr = commandList[1].field.get('line-prefix','')
-                                                speech.speakMessage(bulletstr)
+					## The caret moved, find new Info.
+					caretMoved,newInfo=self._hasCaretMoved(bookmark) 
+					formatConfig=config.conf['documentFormatting'].copy()
+					formatConfig['reportList']=True
+					info = self.makeTextInfo(textInfos.POSITION_CARET)
+					info.expand(textInfos.UNIT_PARAGRAPH)
+					commandList=info.getTextWithFields(formatConfig)
+					islist = len(commandList) > 3 and (commandList[1].field.get('line-prefix','') != '')
+					if islist:
+						bulletstr = commandList[1].field.get('line-prefix','')
+						speech.speakMessage(bulletstr)
 					speech.speakTextInfo(info,reason=controlTypes.REASON_CARET)
-
 			else:
 				if forward:
 					speech.speakMessage(bulletstr)
