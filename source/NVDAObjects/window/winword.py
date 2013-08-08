@@ -486,56 +486,111 @@ class WordDocument(EditableTextWithoutAutoSelectDetection, Window):
 
 	def script_nextParagraph(self,gesture):
 		self._moveInList(gesture, textInfos.UNIT_PARAGRAPH,forward=True)
-        
 
-	def _moveInList(self, gesture, unit, forward):
-		try:
-			info=self.makeTextInfo(textInfos.POSITION_CARET)
-		except:
-			gesture.send()
-			return
-		bookmark=info.bookmark
-		gesture.send()
-		caretMoved,newInfo=self._hasCaretMoved(bookmark) 
-		if not caretMoved and self.shouldFireCaretMovementFailedEvents:
-			eventHandler.executeEvent("caretMovementFailed", self, gesture=gesture)
+	## Logic of _moveInList and helper functions:
+	## 1. Save current info
+	## 2. Move in direction
+	## 3. Get new info
+	## 4. At list now ?
+	##   No => speak and exit
+	##   Yes 
+	##   Forward   | Moved  | Means  | TODO
+	##    Yes      |  Yes   |  bullet| Move Forward, speak
+	##    Yes      |  No    |  bullet|  speak
+	##    No       |  Yes   |  text  |  speak
+	##    No       |  No    |  bullet|  Move backward, speak
+	def _moveInList(self, gesture, unit, forward):		
+		info=self.makeTextInfo(textInfos.POSITION_CARET)		
+		initbookmark = info.bookmark
+		self._moveInListHelperMove(info, forward)
+		maybe_bulletstr = self._moveInListHelperBulletStrOrNone(info)
+		if maybe_bulletstr == None:
+			info.expand(textInfos.UNIT_PARAGRAPH)  
+			speech.speakTextInfo(info,reason=controlTypes.REASON_CARET)  
+		else:
+			moved = ( initbookmark != info.bookmark )
+			## See table above in comments to understand this condition
+			if forward == moved and forward == False:
+				self._moveInListHelperMove (info,forward)
+				maybe_bulletstr = self._moveInListHelperBulletStrOrNone(info)
+			## TODO: map here to standard unicode characters
+			speech.speakMessage(maybe_bulletstr)
+			speech.speakTextInfo(info,reason=controlTypes.REASON_CARET)
+		info.expand(textInfos.UNIT_PARAGRAPH)  
+		info.collapse()  
+		info.updateCaret()  
+
+	def _moveInListHelperBulletStrOrNone(self, info):
 		formatConfig=config.conf['documentFormatting'].copy()
 		formatConfig['reportList']=True
-		info = self.makeTextInfo(textInfos.POSITION_CARET)
-		info.expand(textInfos.UNIT_PARAGRAPH)
 		commandList=info.getTextWithFields(formatConfig)
 		islist = len(commandList) > 3 and (commandList[1].field.get('line-prefix','') != '')
 		if islist:
-			bulletstr = commandList[1].field.get('line-prefix','')
-			if not caretMoved:
-				if forward: 
-					speech.speakMessage(bulletstr)
-					speech.speakTextInfo(info,reason=controlTypes.REASON_CARET)
-				else:
-					gesture.send()
-					## The caret moved, find new Info.
-					caretMoved,newInfo=self._hasCaretMoved(bookmark) 
-					formatConfig=config.conf['documentFormatting'].copy()
-					formatConfig['reportList']=True
-					info = self.makeTextInfo(textInfos.POSITION_CARET)
-					info.expand(textInfos.UNIT_PARAGRAPH)
-					commandList=info.getTextWithFields(formatConfig)
-					islist = len(commandList) > 3 and (commandList[1].field.get('line-prefix','') != '')
-					if islist:
-						bulletstr = commandList[1].field.get('line-prefix','')
-						speech.speakMessage(bulletstr)
-					speech.speakTextInfo(info,reason=controlTypes.REASON_CARET)
-			else:
-				if forward:
-					speech.speakMessage(bulletstr)
-					speech.speakTextInfo(info,reason=controlTypes.REASON_CARET)
-					gesture.send()
-				else:
-					speech.speakMessage(bulletstr)
-					speech.speakTextInfo(info,reason=controlTypes.REASON_CARET)
+			return commandList[1].field.get('line-prefix','')
 		else:
-			speech.speakTextInfo(info,reason=controlTypes.REASON_CARET)
+			return None
 
+	def _moveInListHelperMove( self, info, forward):
+		info.expand(textInfos.UNIT_PARAGRAPH)  
+		if forward:
+			try:
+				info.collapse(True)
+			except:
+				pass
+		else:
+			info.collapse(False)
+			info.move(textInfos.UNIT_CHARACTER, -1)  
+		info.expand(textInfos.UNIT_PARAGRAPH)
+			
+
+
+#		try:
+#			info=self.makeTextInfo(textInfos.POSITION_CARET)
+#		except:
+#			gesture.send()
+#			return
+#		bookmark=info.bookmark
+#		gesture.send()
+#		caretMoved,newInfo=self._hasCaretMoved(bookmark) 
+#		if not caretMoved and self.shouldFireCaretMovementFailedEvents:
+#			eventHandler.executeEvent("caretMovementFailed", self, gesture=gesture)
+#		formatConfig=config.conf['documentFormatting'].copy()
+#		formatConfig['reportList']=True
+#		info = self.makeTextInfo(textInfos.POSITION_CARET)
+#		info.expand(textInfos.UNIT_PARAGRAPH)
+#		commandList=info.getTextWithFields(formatConfig)
+#		islist = len(commandList) > 3 and (commandList[1].field.get('line-prefix','') != '')
+#		if islist:
+#			bulletstr = commandList[1].field.get('line-prefix','')
+#			if not caretMoved:
+#				if forward: 
+#					speech.speakMessage(bulletstr)
+#					speech.speakTextInfo(info,reason=controlTypes.REASON_CARET)
+#				else:
+#					gesture.send()
+#					## The caret moved, find new Info.
+#					caretMoved,newInfo=self._hasCaretMoved(bookmark) 
+#					formatConfig=config.conf['documentFormatting'].copy()
+#					formatConfig['reportList']=True
+#					info = self.makeTextInfo(textInfos.POSITION_CARET)
+#					info.expand(textInfos.UNIT_PARAGRAPH)
+#					commandList=info.getTextWithFields(formatConfig)
+#					islist = len(commandList) > 3 and (commandList[1].field.get('line-prefix','') != '')
+#					if islist:
+#						bulletstr = commandList[1].field.get('line-prefix','')
+#						speech.speakMessage(bulletstr)
+#					speech.speakTextInfo(info,reason=controlTypes.REASON_CARET)
+#			else:
+#				if forward:
+#					speech.speakMessage(bulletstr)
+#					speech.speakTextInfo(info,reason=controlTypes.REASON_CARET)
+#					gesture.send()
+#				else:
+#					speech.speakMessage(bulletstr)
+#					speech.speakTextInfo(info,reason=controlTypes.REASON_CARET)
+#		else:
+#			speech.speakTextInfo(info,reason=controlTypes.REASON_CARET)
+#
 	__gestures = {
 		"kb:tab": "tab",
 		"kb:shift+tab": "tab",
