@@ -29,6 +29,8 @@ class SpellCheckErrorField(IAccessible,WordDocument):
 		return super(IAccessible,self).location
 
 	def _get_errorText(self):
+		if self.WinwordVersion>=13:
+			return self.value
 		fields=EditableTextDisplayModelTextInfo(self,textInfos.POSITION_ALL).getTextWithFields()
 		inBold=False
 		textList=[]
