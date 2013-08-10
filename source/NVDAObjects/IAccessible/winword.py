@@ -66,7 +66,8 @@ class SpellCheckErrorField(IAccessible,WordDocument):
 
 	def reportFocus(self):
 		errorText=self.errorText
-		speech.speakObjectProperties(self,name=True,role=True)
+		if self.WinwordVersion<13:		
+			speech.speakObjectProperties(self,name=True,role=True)
 		if errorText:
 			speech.speakText(errorText)
 			speech.speakSpelling(errorText)
