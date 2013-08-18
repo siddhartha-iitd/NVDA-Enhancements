@@ -748,7 +748,7 @@ class GlobalCommands(ScriptableObject):
 	def script_reportFormatting(self,gesture):
 		formatConfig={
 			"detectFormatAfterCursor":False,
-			"reportFontName":True,"reportFontSize":True,"reportFontAttributes":True,"reportColor":True,
+			"reportFontName":True,"reportFontSize":True,"reportFontAttributes":True,"reportColor":True,"reportRevisions":False,
 			"reportStyle":True,"reportAlignment":True,"reportSpellingErrors":True,
 			"reportPage":False,"reportLineNumber":False,"reportTables":False,
 			"reportLinks":False,"reportHeadings":False,"reportLists":False,
@@ -1217,6 +1217,11 @@ class GlobalCommands(ScriptableObject):
 		if isinstance(obj,NVDAObjects.UIA.UIA) and obj.UIAElement.cachedClassName=="CRootKey":
 			obj.doAction()
 
+	def script_activateConfigProfilesDialog(self, gesture):
+		wx.CallAfter(gui.mainFrame.onConfigProfilesCommand, None)
+	# Translators: Describes the command to open the Configuration Profiles dialog.
+	script_activateConfigProfilesDialog.__doc__ = _("Shows the NVDA Configuration Profiles dialog")
+	
 	__gestures = {
 		# Basic
 		"kb:NVDA+n": "showGui",
@@ -1357,9 +1362,10 @@ class GlobalCommands(ScriptableObject):
 		"kb:NVDA+control+b": "activateBrowseModeDialog",
 		"kb:NVDA+control+d": "activateDocumentFormattingDialog",
 
-		# Save/reload configuration
+		# Configuration management
 		"kb:NVDA+control+c": "saveConfiguration",
 		"kb:NVDA+control+r": "revertConfiguration",
+		"kb:NVDA+control+p": "activateConfigProfilesDialog",
 
 		# Settings
 		"kb:NVDA+2": "toggleSpeakTypedCharacters",
