@@ -623,35 +623,14 @@ class WordDocument(EditableTextWithoutAutoSelectDetection, Window):
 	def script_nextParagraph(self,gesture):
 		self._moveInList(gesture, textInfos.UNIT_PARAGRAPH,forward=True)
 
-	## Logic of _moveInList and helper functions:
-	## 1. Save current info
-	## 2. Move in direction
-	## 3. Get new info
-	## 4. At list now ?
-	##   No => speak and exit
-	##   Yes 
-	##   Forward   | Moved  | Means  | TODO
-	##    Yes      |  Yes   |  bullet| Move Forward, speak
-	##    Yes      |  No    |  bullet|  speak
-	##    No       |  Yes   |  text  |  speak
-	##    No       |  No    |  bullet|  Move backward, speak
 	def _moveInList(self, gesture, unit, forward):		
 		info=self.makeTextInfo(textInfos.POSITION_CARET)		
 		initbookmark = info.bookmark
 		self._moveInListHelperMove(info, forward)
 		maybe_bulletstr = self._moveInListHelperBulletStrOrNone(info)
-		if maybe_bulletstr == None:
-			info.expand(textInfos.UNIT_PARAGRAPH)  
-			speech.speakTextInfo(info,reason=controlTypes.REASON_CARET)  
-		else:
-			moved = ( initbookmark != info.bookmark )
-			## See table above in comments to understand this condition
-			if forward == moved and forward == False:
-				self._moveInListHelperMove (info,forward)
-				maybe_bulletstr = self._moveInListHelperBulletStrOrNone(info)
-			## TODO: map here to standard unicode characters
+		if maybe_bulletstr != None:
 			speech.speakMessage(maybe_bulletstr)
-			speech.speakTextInfo(info,reason=controlTypes.REASON_CARET)
+                speech.speakTextInfo(info,reason=controlTypes.REASON_CARET)
 		info.expand(textInfos.UNIT_PARAGRAPH)  
 		info.collapse()  
 		info.updateCaret()  
