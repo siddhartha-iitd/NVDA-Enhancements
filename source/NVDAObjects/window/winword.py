@@ -624,16 +624,22 @@ class WordDocument(EditableTextWithoutAutoSelectDetection, Window):
 		self._moveInList(gesture, textInfos.UNIT_PARAGRAPH,forward=True)
 
 	def _moveInList(self, gesture, unit, forward):		
-		info=self.makeTextInfo(textInfos.POSITION_CARET)		
-		initbookmark = info.bookmark
-		self._moveInListHelperMove(info, forward)
-		maybe_bulletstr = self._moveInListHelperBulletStrOrNone(info)
-		if maybe_bulletstr != None:
-			speech.speakMessage(maybe_bulletstr)
-                speech.speakTextInfo(info,reason=controlTypes.REASON_CARET)
-		info.expand(textInfos.UNIT_PARAGRAPH)  
-		info.collapse()  
-		info.updateCaret()  
+                loop = True
+                while loop:
+                        loop = False
+                        info=self.makeTextInfo(textInfos.POSITION_CARET)		
+                        initbookmark = info.bookmark
+                        moved = self._moveInListHelperMove(info, forward)
+                        maybe_bulletstr = self._moveInListHelperBulletStrOrNone(info)
+                        if maybe_bulletstr != None:
+                                speech.speakMessage(maybe_bulletstr)
+                        if info.text == '\r' and moved == True and maybe_bulletstr == None:
+                                loop = True
+                        else:
+                                speech.speakTextInfo(info,reason=controlTypes.REASON_CARET)
+                        info.expand(textInfos.UNIT_PARAGRAPH)  
+                        info.collapse()  
+                        info.updateCaret()  
 
 	def _moveInListHelperBulletStrOrNone(self, info):
 		formatConfig=config.conf['documentFormatting'].copy()
@@ -645,17 +651,22 @@ class WordDocument(EditableTextWithoutAutoSelectDetection, Window):
 		else:
 			return None
 
+        ## Returns True if caret actually moved
 	def _moveInListHelperMove( self, info, forward):
+                ret = True
 		info.expand(textInfos.UNIT_PARAGRAPH)  
 		if forward:
 			try:
 				info.collapse(True)
 			except:
+                                ret = False
 				pass
 		else:
 			info.collapse(False)
-			info.move(textInfos.UNIT_CHARACTER, -1)  
+			x = info.move(textInfos.UNIT_CHARACTER, -1)  
+                        ret = x != 0
 		info.expand(textInfos.UNIT_PARAGRAPH)
+                return ret
 
 	__gestures = {
 		"kb:tab": "tab",
