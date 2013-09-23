@@ -122,6 +122,7 @@ class ExcelWorksheet(ExcelBase):
 		"kb:control+pageUp",
 		"kb:control+pageDown",
 		"kb:control+v",
+		"kb:control+a",
 	)
 
 class ExcelCellTextInfo(NVDAObjectTextInfo):
