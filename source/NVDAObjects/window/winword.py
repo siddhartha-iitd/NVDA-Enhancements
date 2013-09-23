@@ -609,6 +609,49 @@ class WordDocument(EditableTextWithoutAutoSelectDetection, Window):
 	def script_previousColumn(self,gesture):
 		self._moveInTable(row=False,forward=False)
 
+	def script_previousParagraph(self, gesture):
+		self._moveInList(gesture, textInfos.UNIT_PARAGRAPH, forward=False)
+	
+	def script_nextParagraph(self, gesture):
+		self._moveInList(gesture, textInfos.UNIT_PARAGRAPH, forward=True)
+
+	def _moveInList(self, gesture, unit, forward):
+		info = self.makeTextInfo(textInfos.POSITION_CARET)
+		initbookmark = info.bookmark
+		self._moveInListHelperMove(info, forward)
+		maybe_bulletstr = self._moveInListHelperBulletStrOrNone(info)
+		if maybe_bulletstr != None:
+			speech.speakText(maybe_bulletstr, reason=controlTypes.REASON_CARET)
+		speech.speakTextInfo(info, reason=controlTypes.REASON_CARET)
+		info.expand(textInfos.UNIT_PARAGRAPH)
+		info.collapse()
+		info.updateCaret()
+
+	def _moveInListHelperBulletStrOrNone(self, info):
+		formatConfig = config.conf['documentFormatting'].copy()
+		formatConfig['reportList'] = True
+		commandList = info.getTextWithFields(formatConfig)
+		islist = len(commandList) > 3 and (commandList[1].field.get('line-prefix','') != '')
+		if islist:
+			return commandList[1].field.get('line-prefix','')
+		else:
+			return None
+
+	def _moveInListHelperMove( self, info, forward):
+		info.expand(textInfos.UNIT_PARAGRAPH)
+		if forward:
+			try:
+				info.collapse(True)
+			except:
+				pass
+		else:
+			info.collapse(False)
+			info.move(textInfos.UNIT_CHARACTER, -1)
+		info.expand(textInfos.UNIT_PARAGRAPH)
+
+		
+	
+
 	__gestures = {
 		"kb:tab": "tab",
 		"kb:shift+tab": "tab",
@@ -618,5 +661,7 @@ class WordDocument(EditableTextWithoutAutoSelectDetection, Window):
 		"kb:control+alt+rightArrow": "nextColumn",
 		"kb:control+pageUp": "caret_moveByLine",
 		"kb:control+pageDown": "caret_moveByLine",
+		"kb:control+upArrow": "previousParagraph",
+		"kb:control+downArrow": "nextParagraph",
 	}
 
