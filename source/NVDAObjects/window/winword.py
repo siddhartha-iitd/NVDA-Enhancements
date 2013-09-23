@@ -615,13 +615,30 @@ class WordDocument(EditableTextWithoutAutoSelectDetection, Window):
 	def script_nextParagraph(self, gesture):
 		self._moveInList(gesture, textInfos.UNIT_PARAGRAPH, forward=True)
 
+		## Map often used character of webding, windig, symbol etc 
+	## ref :http://www.alanwood.net/demos/wingdings.html
+	## ref: http://www.unicode.org/charts/PDF/U2700.pdf
+	_specialFontToUnicode = {                
+		u'\uf0b7' : u'\u2022',    # black circle, office logo
+		u'\uf0a7' : u'\u25a0',    # black square
+		u'\uf076' : u'\u2756',    # black diamond minus white X
+		u'\uf0d8' : u'\u27a2',    # arrow head
+		u'\uf0fc' : u'\u2713',    # check
+	}
+	def _mapSpecialFontToUnicode( self,char):
+		try:
+			return self._specialFontToUnicode[char]
+		except KeyError:
+			return char	
+
 	def _moveInList(self, gesture, unit, forward):
 		info = self.makeTextInfo(textInfos.POSITION_CARET)
 		initbookmark = info.bookmark
 		self._moveInListHelperMove(info, forward)
 		maybe_bulletstr = self._moveInListHelperBulletStrOrNone(info)
 		if maybe_bulletstr != None:
-			speech.speakText(maybe_bulletstr, reason=controlTypes.REASON_CARET)
+			uniarr = map(self._mapSpecialFontToUnicode,maybe_bulletstr)
+			speech.speakMessage(''.join(uniarr))			
 		speech.speakTextInfo(info, reason=controlTypes.REASON_CARET)
 		info.expand(textInfos.UNIT_PARAGRAPH)
 		info.collapse()
