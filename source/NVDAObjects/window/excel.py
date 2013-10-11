@@ -281,8 +281,15 @@ class ExcelCell(ExcelBase):
 		return self.excelCellObject.Text
 
 	def _get_description(self):
+		hasFormula = self.excelCellObject.HasFormula 
+		hasComment = self.excelCellObject.Comment != None
 		# Translators: This is presented in Excel when the current cell contains a formula.
-		return _("has formula") if self.excelCellObject.HasFormula else ""
+		say = [ _("has") ]
+		if hasFormula:
+			say.append(_("formula"))
+		if hasComment:
+			say.append(_("comment"))
+		return " ".join(say) if len(say) > 1 else ""
 
 	def _get_parent(self):
 		worksheet=self.excelCellObject.Worksheet
