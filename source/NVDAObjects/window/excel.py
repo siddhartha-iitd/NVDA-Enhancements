@@ -283,7 +283,7 @@ class ExcelCell(ExcelBase):
 	def _get_description(self):
 		hasFormula = self.excelCellObject.HasFormula 
 		hasComment = self.excelCellObject.Comment != None
-		# Translators: This is presented in Excel when the current cell contains a formula.
+		# Translators: This is presented in Excel when the current cell contains a formula or comment
 		say = [ _("has") ]
 		if hasFormula:
 			say.append(_("formula"))
