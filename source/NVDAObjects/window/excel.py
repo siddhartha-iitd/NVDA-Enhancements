@@ -21,6 +21,7 @@ import controlTypes
 from . import Window
 from .. import NVDAObjectTextInfo
 import scriptHandler
+import speech
 
 xlA1 = 1
 xlRC = 2
@@ -304,10 +305,34 @@ class ExcelCell(ExcelBase):
 		if previous:
 			return ExcelCell(windowHandle=self.windowHandle,excelWindowObject=self.excelWindowObject,excelCellObject=previous)
 
+	def script_moreInfo(self, gesture):
+		scriptCount=scriptHandler.getLastScriptRepeatCount()
+		if scriptCount  == 0:
+			if self.excelCellObject.HasFormula:
+				speech.speakMessage( _("formula is {formula}").format(formula=self.excelCellObject.Formula))
+			else:
+				speech.speakMessage( _("no formula"))
+		if scriptCount  == 1:
+			cmt = self.excelCellObject.Comment
+			if cmt:
+				speech.speakMessage( _("comment is {comment}").format(comment=cmt.Text()))
+			else:
+				speech.speakMessage( _("no comment"))
+		if scriptCount  == 2:
+			links = self.excelCellObject.Hyperlinks
+			## For now, speak only the first link. FIXME
+			if self.excelCellObject.HyperLinks.Count >= 1:
+				speech.speakMessage( _("link to {link}").format(link=self.excelCellObject.HyperLinks.Item(1).Address))
+			else:
+				speech.speakMessage( _("no link"))
+	script_moreInfo.__doc__=_("Press multiple times to know cell formula, comment and link")
+
+
 	__gestures = {
 		"kb:NVDA+shift+c": "setColumnHeaderRow",
 		"kb:NVDA+shift+r": "setRowHeaderColumn",
 		"kb:alt+downArrow":"openDropdown",
+		"kb:NVDA+shift+m": "moreInfo",
 	}
 
 class ExcelSelection(ExcelBase):
