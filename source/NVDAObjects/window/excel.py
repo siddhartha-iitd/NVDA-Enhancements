@@ -283,12 +283,15 @@ class ExcelCell(ExcelBase):
 	def _get_description(self):
 		hasFormula = self.excelCellObject.HasFormula 
 		hasComment = self.excelCellObject.Comment != None
-		# Translators: This is presented in Excel when the current cell contains a formula or comment
+		hasLink = self.excelCellObject.HyperLinks.Count >= 1
+		# Translators: This is presented in Excel when the current cell contains a formula or comment or link
 		say = [ _("has") ]
 		if hasFormula:
 			say.append(_("formula"))
 		if hasComment:
 			say.append(_("comment"))
+		if hasLink:
+			say.append(_("link"))
 		return " ".join(say) if len(say) > 1 else ""
 
 	def _get_parent(self):
