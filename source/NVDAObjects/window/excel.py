@@ -305,20 +305,28 @@ class ExcelCell(ExcelBase):
 		if previous:
 			return ExcelCell(windowHandle=self.windowHandle,excelWindowObject=self.excelWindowObject,excelCellObject=previous)
 
+	lastCell = ""
+	moreInfoState = 0
+
 	def script_moreInfo(self, gesture):
-		scriptCount=scriptHandler.getLastScriptRepeatCount()
-		if scriptCount  == 0:
+		if self.lastCell != self.excelCellObject.Address(False,False,1,False):
+			self.moreInfoState = 0
+			self.lastCell = self.excelCellObject.Address(False,False,1,False)
+		else:
+			self.moreInfoState = 0 if self.moreInfoState >= 2 else self.moreInfoState + 1
+				
+		if self.moreInfoState  == 0:
 			if self.excelCellObject.HasFormula:
 				speech.speakMessage( _("formula is {formula}").format(formula=self.excelCellObject.Formula))
 			else:
 				speech.speakMessage( _("no formula"))
-		if scriptCount  == 1:
+		if self.moreInfoState  == 1:
 			cmt = self.excelCellObject.Comment
 			if cmt:
 				speech.speakMessage( _("comment is {comment}").format(comment=cmt.Text()))
 			else:
 				speech.speakMessage( _("no comment"))
-		if scriptCount  == 2:
+		if self.moreInfoState  == 2:
 			links = self.excelCellObject.Hyperlinks
 			## For now, speak only the first link. FIXME
 			if self.excelCellObject.HyperLinks.Count >= 1:
