@@ -22,6 +22,8 @@ from . import Window
 from .. import NVDAObjectTextInfo
 import scriptHandler
 import speech
+import characterProcessing
+import controlTypes
 
 xlA1 = 1
 xlRC = 2
@@ -317,7 +319,7 @@ class ExcelCell(ExcelBase):
 				
 		if self.moreInfoState  == 0:
 			if self.excelCellObject.HasFormula:
-				speech.speakMessage( _("formula is {formula}").format(formula=self.excelCellObject.Formula))
+				speech.speakText( _("formula is {formula}").format(formula=self.excelCellObject.Formula),reason=controlTypes.REASON_MESSAGE,symbolLevel=characterProcessing.SYMLVL_ALL)
 			else:
 				speech.speakMessage( _("no formula"))
 		if self.moreInfoState  == 1:
