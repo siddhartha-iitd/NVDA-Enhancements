@@ -308,27 +308,40 @@ class ExcelCell(ExcelBase):
 			return ExcelCell(windowHandle=self.windowHandle,excelWindowObject=self.excelWindowObject,excelCellObject=previous)
 
 	lastCell = ""
-	moreInfoState = 0
+	script_states = { }
+
+	def resetStatesIfCellChanged(self):
+		if self.lastCell != self.excelCellObject.Address(False,False,1,False):
+			self.lastCell = self.excelCellObject.Address(False,False,1,False)
+			self.script_states = { }
+
+	def nextState(self, script_name, highest_value):
+		try:
+			val = self.script_states[script_name]
+			val = val + 1 if val < highest_value else 0
+		except:
+			val = 0
+		self.script_states[script_name] = val
+		return val
+
+	
 
 	def script_moreInfo(self, gesture):
-		if self.lastCell != self.excelCellObject.Address(False,False,1,False):
-			self.moreInfoState = 0
-			self.lastCell = self.excelCellObject.Address(False,False,1,False)
-		else:
-			self.moreInfoState = 0 if self.moreInfoState >= 2 else self.moreInfoState + 1
-				
-		if self.moreInfoState  == 0:
+		self.resetStatesIfCellChanged()
+		state = self.nextState('moreInfo',2)
+		
+		if state  == 0:
 			if self.excelCellObject.HasFormula:
 				speech.speakText( _("formula is {formula}").format(formula=self.excelCellObject.Formula),reason=controlTypes.REASON_MESSAGE,symbolLevel=characterProcessing.SYMLVL_ALL)
 			else:
 				speech.speakMessage( _("no formula"))
-		if self.moreInfoState  == 1:
+		if state  == 1:
 			cmt = self.excelCellObject.Comment
 			if cmt:
 				speech.speakMessage( _("comment is {comment}").format(comment=cmt.Text()))
 			else:
 				speech.speakMessage( _("no comment"))
-		if self.moreInfoState  == 2:
+		if state  == 2:
 			links = self.excelCellObject.Hyperlinks
 			## For now, speak only the first link. FIXME
 			if self.excelCellObject.HyperLinks.Count >= 1:
