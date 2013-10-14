@@ -304,6 +304,25 @@ class ExcelCell(ExcelBase):
 		if previous:
 			return ExcelCell(windowHandle=self.windowHandle,excelWindowObject=self.excelWindowObject,excelCellObject=previous)
 
+	lastCell = ""
+	script_states = { }
+
+	def resetStatesIfCellChanged(self):
+		""" resets all states if user has moved to a different cell """
+		if self.lastCell != self.excelCellObject.Address(False,False,1,False):
+			self.lastCell = self.excelCellObject.Address(False,False,1,False)
+			self.script_states = { }
+
+	def nextState(self, script_name, highest_value):
+		""" Usage: st = self.nextState('foo',2), goes 0/1/2/0/1/2.. on succesive calls """
+		try:
+			val = self.script_states[script_name]
+			val = val + 1 if val < highest_value else 0
+		except:
+			val = 0
+		self.script_states[script_name] = val
+		return val
+
 	__gestures = {
 		"kb:NVDA+shift+c": "setColumnHeaderRow",
 		"kb:NVDA+shift+r": "setRowHeaderColumn",
