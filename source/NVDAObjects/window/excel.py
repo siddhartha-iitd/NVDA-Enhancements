@@ -124,6 +124,7 @@ class ExcelWorksheet(ExcelBase):
 		"kb:control+space",
 		"kb:control+pageUp",
 		"kb:control+pageDown",
+		"kb:control+a",
 		"kb:control+v",
 	)
 
@@ -311,11 +312,13 @@ class ExcelCell(ExcelBase):
 	script_states = { }
 
 	def resetStatesIfCellChanged(self):
+		""" resets all states if user has moved to a different cell """
 		if self.lastCell != self.excelCellObject.Address(False,False,1,False):
 			self.lastCell = self.excelCellObject.Address(False,False,1,False)
 			self.script_states = { }
 
 	def nextState(self, script_name, highest_value):
+		""" Usage: st = self.nextState('foo',2), goes 0/1/2/0/1/2.. on succesive calls """
 		try:
 			val = self.script_states[script_name]
 			val = val + 1 if val < highest_value else 0
