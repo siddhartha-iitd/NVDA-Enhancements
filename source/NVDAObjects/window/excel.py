@@ -324,10 +324,45 @@ class ExcelCell(ExcelBase):
 		self.script_states[script_name] = val
 		return val
 
+
+	def script_formatExtra(self, gesture):
+		tosay = []
+		c = self.excelCellObject
+		# Indent Level
+		indentlevel = c.IndentLevel
+		if indentlevel > 0:
+			tosay.append( _("indent level ") + str(indentlevel))
+		# Number Format
+		numberformat = c.NumberFormat
+		tosay.append(_("number format "))
+		#TODO: map this format to understandable english text
+		tosay.append(numberformat)
+		# Horizontal Alignment
+		horizontal_alignment = c.HorizontalAlignment
+		tosay.append(_("horizontal align"))
+		tosay.append(xlHAlign.get(horizontal_alignment))
+		# Vertical  Alignment
+		vertical_alignment = c.VerticalAlignment
+		tosay.append(_("vertical align"))
+		tosay.append(xlVAlign.get(vertical_alignment))
+		# Border
+		borders  = c.Borders
+		for e in xlBordersIndex._list:
+			tosay.append(xlBordersIndex.get(e))
+			tosay.append("border")
+			border=borders[e]
+			tosay.append(_("line style"))
+			tosay.append(xlLineStyle.get(border.LineStyle))
+			tosay.append(_("weight"))
+			tosay.append(xlBordersWeight.get(border.Weight))
+ 
+		speech.speakMessage(" ".join(tosay))
+
 	__gestures = {
 		"kb:NVDA+shift+c": "setColumnHeaderRow",
 		"kb:NVDA+shift+r": "setRowHeaderColumn",
 		"kb:alt+downArrow":"openDropdown",
+		"kb:NVDA+shift+f": "formatExtra",
 	}
 
 class ExcelSelection(ExcelBase):
