@@ -21,6 +21,9 @@ import controlTypes
 from . import Window
 from .. import NVDAObjectTextInfo
 import scriptHandler
+import speech
+import characterProcessing
+import controlTypes
 
 xlA1 = 1
 xlRC = 2
@@ -315,10 +318,57 @@ class ExcelCell(ExcelBase):
 		if previous:
 			return ExcelCell(windowHandle=self.windowHandle,excelWindowObject=self.excelWindowObject,excelCellObject=previous)
 
+	lastCell = ""
+	script_states = { }
+
+	def resetStatesIfCellChanged(self):
+		""" resets all states if user has moved to a different cell """
+		if self.lastCell != self.excelCellObject.Address(False,False,1,False):
+			self.lastCell = self.excelCellObject.Address(False,False,1,False)
+			self.script_states = { }
+
+	def nextState(self, script_name, highest_value):
+		""" Usage: st = self.nextState('foo',2), goes 0/1/2/0/1/2.. on succesive calls """
+		try:
+			val = self.script_states[script_name]
+			val = val + 1 if val < highest_value else 0
+		except:
+			val = 0
+		self.script_states[script_name] = val
+		return val
+
+	
+
+	def script_moreInfo(self, gesture):
+		self.resetStatesIfCellChanged()
+		state = self.nextState('moreInfo',2)
+		
+		if state  == 0:
+			if self.excelCellObject.HasFormula:
+				speech.speakText( _("formula is {formula}").format(formula=self.excelCellObject.Formula),reason=controlTypes.REASON_MESSAGE,symbolLevel=characterProcessing.SYMLVL_ALL)
+			else:
+				speech.speakMessage( _("no formula"))
+		if state  == 1:
+			cmt = self.excelCellObject.Comment
+			if cmt:
+				speech.speakMessage( _("comment is {comment}").format(comment=cmt.Text()))
+			else:
+				speech.speakMessage( _("no comment"))
+		if state  == 2:
+			links = self.excelCellObject.Hyperlinks
+			## For now, speak only the first link. FIXME
+			if self.excelCellObject.HyperLinks.Count >= 1:
+				speech.speakMessage( _("link to {link}").format(link=self.excelCellObject.HyperLinks.Item(1).Address))
+			else:
+				speech.speakMessage( _("no link"))
+	script_moreInfo.__doc__=_("Press multiple times to know cell formula, comment and link")
+
+
 	__gestures = {
 		"kb:NVDA+shift+c": "setColumnHeaderRow",
 		"kb:NVDA+shift+r": "setRowHeaderColumn",
 		"kb:alt+downArrow":"openDropdown",
+		"kb:NVDA+shift+m": "moreInfo",
 	}
 
 class ExcelSelection(ExcelBase):
