@@ -21,6 +21,8 @@ import controlTypes
 from . import Window
 from .. import NVDAObjectTextInfo
 import scriptHandler
+import speech
+
 
 xlA1 = 1
 xlRC = 2
@@ -220,6 +222,16 @@ class ExcelCell(ExcelBase):
 			ui.message(_("Cleared row header column"))
 	script_setRowHeaderColumn.__doc__=_("Pressing once will set the current column as the column where row headers should be found. Pressing twice clears the setting.")
 
+	def script_openComment(self, gesture):
+		cmt = self.excelCellObject.Comment
+		if cmt :
+			speech.speakMessage(_("Editing comment"))
+			speech.speakText(cmt.Text(),reason=controlTypes.REASON_FOCUS)
+		else:
+			speech.speakMessage(_("Creating new comment"))			
+		gesture.send()
+	script_openComment.__doc__=_("Create or edit cell comment")
+
 	@classmethod
 	def kwargsFromSuper(cls,kwargs,relation=None):
 		windowHandle=kwargs['windowHandle']
@@ -309,6 +321,7 @@ class ExcelCell(ExcelBase):
 		"kb:NVDA+shift+c": "setColumnHeaderRow",
 		"kb:NVDA+shift+r": "setRowHeaderColumn",
 		"kb:alt+downArrow":"openDropdown",
+		"kb:shift+f2":"openComment",
 	}
 
 class ExcelSelection(ExcelBase):
