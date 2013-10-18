@@ -3,6 +3,39 @@ Que hai de Novo no NVDA
 
 %!includeconf: ../changes.t2tconf
 
+= 2013.3 =
+
+== Novas Características ==
+- Os campos de formulario  agora anúncianse nos documentos de Microsoft word. (#2295)
+- As listas despregables no Microsoft Excel 2003 ó 2010 agora anúncianse cando se abran e naveguen. (#3382)
+- Unha nova opción 'Permitir Lectura superficial en falar Todo' no diálogo Opcións de Teclado permite a navegación por un documento cas ordes de navegación rápida do modo navegación e movementos de liña / parágrafo, mentres permañece lendo todo. Esta opción está desactivada de maneira predeterminada. (#2766) 
+- Agora hai un diálogo Xestos de Entrada para permitir a persoalización sinxela dos xestos de entrada(como teclas no teclado) para ordes do NVDA. (#1532)
+- Agora podes ter diferentes opcións para diferentes situacións utilizando perfiles de configuración. Os perfiles pódense activar de xeito manual ou automático (ex.: para unha aplicación en particular). (#87, #667, #1913)
+
+
+== Corrección de fallos ==
+- Zend Studio agora funciona igual que Eclipse. (#3420)
+- O cambio de estado de certas casiñas de verificación no diálogo de regras de correo do Microsoft Outlook 2010 agora anúnciase automáticamente. (#3063)
+- NVDA agora anunciará o estado fixado para controis fixos como  pestanas en Mozilla Firefox. (#3372)
+- NVDA agora pode anunciar información de revisión no Microsoft Word cando o Control de Cambios  estea habilitado. Ten en conta que Anunciar revisións do editor debe estar habilitado no diálogo de formateado de documentos do NVDA (desactivado predeterminadamente) tamén para que sexan anunciados. (#1670)
+- Agora é posible vincular scripts a xestos de teclado que conteñan as teclas Alt e/ou Windows como modificadoras. Anteriormente, se se facía esto, a execución do script causaba a activación do menú Inicio ou da barra de menú. (#3472)
+- Ó seleccionar texto en documentos en modo navegación (por exemplo ó utilizar control+shift+fin) xa non causa que se cambie a distribución de teclado en sistemas con varias distribucións de teclado instaladas. (#3472)
+- Internet Explorer xa non debería colgarse ou voltarse inusable  cando se pecha NVDA. (#3397)
+- O movemento físico e outros eventos nalgúns ordenadores modernos xa  non se trata como pulsacións de teclas inapropriadas. Anteriormente, esto silenciaba a voz e algunhas veces facía funcionar ordes do NVDA. (#3468)
+- NVDA agora compórtase como se esperaba enPoedit 1.5.7. os usuarios que utilicen versións anteriores necesitarán actualizar. (#3485)
+- NVDA agora pode ler documentos protexidos en Microsoft Word 2010,  non causando xa que Microsoft Word se bloquee. (#1686)
+- Se se da un parámetro de línea de comando descoñecido ó executar o paquete de distribución de NVDA, xa non se provoca un bucle sen fin de diálogos de mesaxes de erro. (# 3463)- 
+-NVDA xa non falla ó anunciar o texto alternativo dos gráficos e obxectos en Microsoft Word se o texto alternativo contén comiñas ou outros caracteres non estándar. (#3579)
+- O número de elementos de certas listas horizontais en modo navegación agora está correcto. Anteriormente podía ter sido o doble da cantidade real. (#2151)
+- Ó premer control+e nunha folla de cálculo de Microsoft Excel, agora anunciarase a selección actualizada. (#3043)
+- NVDA agora pode ler correctamente os documentos XHTML en Microsoft Internet Explorer e outros controis MSHTML. (#3542)
+- Diálogo de Opcións de teclado: se non se seleccionou ningunha tecla para ser utilizada como a tecla NVDA, preséntase un erro ó usuario cando se descarte o diálogo. Polo menos unha das teclas debe ser seleccionada para o uso apropriado do NVDA. (#2871)
+
+
+== Cambios para Desenroladores ==
+- Podes especificar a categoría a ser amosada ó usuario polos scripts utilizando o atributo scriptCategory en clases ScriptableObject e o atributo category en métodos de script. Mira a documentación para baseObject.ScriptableObject para máis detalles. (#1532)
+
+
 = 2013.2 =
 
 == Novas Características ==
@@ -20,6 +53,7 @@ Que hai de Novo no NVDA
 - As pantallas braille Freedom Scientific Focus 14 Blue e Focus 80 Blue, así como a Focus 40 Blue en certas configuracións que non se soportaba previamente, agora sopórtanse cando se conecten a traverso do Bluetooth. (#3307)
 - Agora anúncianse as suxerencias de Autocompletado en Outlook 2010. (#2816)
 - Novas táboas de transcripción braille: Braille computerizado Inglés (U.K.), Coreán grao 2, braille ruso para código informático.
+- Nova lingua: Farsi. (#1427)
 
 
 == Cambios ==
@@ -64,6 +98,10 @@ Que hai de Novo no NVDA
 - Os espazos múltiples xa non se comprimen a un so espazo nas pantallas braille. (#1366)
 - As Zend Eclipse PHP Developer Tools agora funcionan igual que o Eclipse. (#3353)
 - En Internet Explorer, xa non é necesario premer de novo tab para interactuar cun obxecto integrado (como o contido Flash) despois de premer intro sobre el. (#3364)
+- Ó editar texto no Microsoft PowerPoint, a última liña xa non se presenta como a liña anterior se a última liña está en branco. (#3403)
+- No Microsoft PowerPoint, os obxectos xa non  se falan ás veces  dúas veces cando os seleccionas ou escolles para editar. (#3394)
+- NVDA xa non causa que o Adobe Reader se bloquee ou se colgue para certos documentos PDF mal formados que conteñan filas fora das táboas. (#3399)
+- NVDA agora detecta correctamente a seguinte diapositiva co foco cando se elimine unha na  vista de miniaturas no Microsoft PowerPoint. (#3415)
 
 
 == Cambios para Desenvolvedores ==

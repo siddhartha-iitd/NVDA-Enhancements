@@ -4,19 +4,20 @@ msgid ""
 msgstr ""
 "Project-Id-Version: master-9366\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-07-30 23:19+1000\n"
+"POT-Creation-Date: 2013-09-12 19:09+1000\n"
 "PO-Revision-Date: 2013-07-31 10:46+0800\n"
 "Last-Translator: Eric Yip <cyeric20@yahoo.com.hk>\n"
 "Language-Team: Eric Yip@ HKBU <cyeric20@yahoo.com.hk>\n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: pygettext.py 1.5\n"
-"X-Poedit-SourceCharset: UTF-8\n"
 "X-Generator: Poedit 1.5.4\n"
+"X-Poedit-SourceCharset: UTF-8\n"
 
 #. Translators: Message to indicate User Account Control (UAC) or other secure desktop screen is active.
-#: IAccessibleHandler.py:678
+#: IAccessibleHandler.py:679
 msgid "Secure Desktop"
 msgstr "安全桌面"
 
@@ -143,7 +144,7 @@ msgstr "搜尋區"
 
 #. Translators: Reported for the form landmark, normally found on web pages.
 #. Translators: Identifies a form (controls such as edit boxes, combo boxes and so on).
-#: aria.py:81 controlTypes.py:267
+#: aria.py:81 controlTypes.py:268
 msgid "form"
 msgstr "表單"
 
@@ -680,7 +681,7 @@ msgstr "vlnk"
 #. Separate strings have now been defined for commonly negated states (e.g. not selected and not checked),
 #. but this still might be used in some other cases.
 #. %s will be replaced with the negated state.
-#: braille.py:467 speech.py:818
+#: braille.py:467 speech.py:821
 #, python-format
 msgid "not %s"
 msgstr "沒 %s"
@@ -691,7 +692,7 @@ msgstr "沒 %s"
 #. Translators: Spoken to indicate the position of an item in a group of items (such as a list).
 #. {number} is replaced with the number of the item in the group.
 #. {total} is replaced with the total number of items in the group.
-#: braille.py:483 speech.py:829
+#: braille.py:483 speech.py:832
 msgid "{number} of {total}"
 msgstr "第 {number} 項共 {total} 項"
 
@@ -877,866 +878,871 @@ msgstr "橙色"
 
 #. Translators: This is spoken to indicate what has been selected. for example 'selected hello world'
 #: compoundDocuments.py:404 globalCommands.py:141 speech.py:323 speech.py:515
-#: speech.py:531 appModules\powerpnt.py:736 virtualBuffers\__init__.py:741
+#: speech.py:531 appModules\powerpnt.py:758 virtualBuffers\__init__.py:741
 #, python-format
 msgid "selected %s"
 msgstr "選取, %s"
 
 #. Translators: The word for an unknown control type.
-#: controlTypes.py:189
+#: controlTypes.py:190
 msgid "unknown"
 msgstr "不明"
 
 #. Translators: The word for window of a program such as document window.
-#: controlTypes.py:191
+#: controlTypes.py:192
 msgid "window"
 msgstr "視窗"
 
 #. Translators: Used to identify title bar of a program.
-#: controlTypes.py:193
+#: controlTypes.py:194
 msgid "title bar"
 msgstr "標題列"
 
 #. Translators: The word used for pane such as desktop pane.
-#: controlTypes.py:195
+#: controlTypes.py:196
 msgid "pane"
 msgstr "窗格"
 
 #. Translators: The word used to denote a dialog box such as open dialog.
-#: controlTypes.py:197
+#: controlTypes.py:198
 msgid "dialog"
 msgstr "對話方塊"
 
 #. Translators: The text used to identify check boxes such as select check box.
-#: controlTypes.py:199
+#: controlTypes.py:200
 msgid "check box"
 msgstr "核取方塊"
 
 #. Translators: The text used to identify radio buttons such as yes or no radio button.
-#: controlTypes.py:201
+#: controlTypes.py:202
 msgid "radio button"
 msgstr "單選紐"
 
 #. Translators: The word used to identify a static text such as dialog text.
-#: controlTypes.py:203
+#: controlTypes.py:204
 msgid "text"
 msgstr "文字"
 
 #. Translators: The word used to identify edit fields such as subject edit field.
-#: controlTypes.py:205
+#: controlTypes.py:206
 msgid "edit"
 msgstr "編輯區"
 
 #. Translators: The word used to identify a button such as OK button.
-#: controlTypes.py:207
+#: controlTypes.py:208
 msgid "button"
 msgstr "按鈕"
 
 #. Translators: Text used to identify menu bar of a program.
-#: controlTypes.py:209
+#: controlTypes.py:210
 msgid "menu bar"
 msgstr "選單列"
 
 #. Translators: Used to identify a menu item such as an item in file menu.
-#: controlTypes.py:211
+#: controlTypes.py:212
 msgid "menu item"
 msgstr "選單項目"
 
 #. Translators: The word used for menus such as edit menu.
 #. Translators: Identifies a menu such as file menu.
-#: controlTypes.py:213 controlTypes.py:414
+#: controlTypes.py:214 controlTypes.py:415
 msgid "menu"
 msgstr "選單"
 
 #. Translators: Used to identify combo boxes such as file type combo box.
-#: controlTypes.py:215
+#: controlTypes.py:216
 msgid "combo box"
 msgstr "下拉方塊"
 
 #. Translators: The word used for lists such as folder list.
-#: controlTypes.py:217
+#: controlTypes.py:218
 msgid "list"
 msgstr "清單"
 
 #. Translators: Used to identify a list item such as email list items.
-#: controlTypes.py:219
+#: controlTypes.py:220
 msgid "list item"
 msgstr "清單項目"
 
 #. Translators: The word used to identify graphics such as webpage graphics.
-#: controlTypes.py:221
+#: controlTypes.py:222
 msgid "graphic"
 msgstr "圖片"
 
 #. Translators: Used to identify help balloon (a circular window with helpful text such as notification text).
-#: controlTypes.py:223
+#: controlTypes.py:224
 msgid "help balloon"
 msgstr "氣泡提示"
 
 #. Translators: Used to identify a tooltip (a small window with additional text about selected item such as file information).
-#: controlTypes.py:225
+#: controlTypes.py:226
 msgid "tool tip"
 msgstr "工具提示"
 
 #. Translators: Identifies a link in webpage documents.
-#: controlTypes.py:227 speech.py:1139
+#: controlTypes.py:228 speech.py:1151
 msgid "link"
 msgstr "連結"
 
 #. Translators: Identifies a treeview (a tree-like structure such as treeviews for subfolders).
-#: controlTypes.py:229
+#: controlTypes.py:230
 msgid "tree view"
 msgstr "樹狀檢視"
 
 #. Translators: Identifies a tree view item.
-#: controlTypes.py:231
+#: controlTypes.py:232
 msgid "tree view item"
 msgstr "樹狀檢視項目"
 
 #. Translators: The word presented for tabs in a tab enabled window.
-#: controlTypes.py:233
+#: controlTypes.py:234
 msgctxt "controlType"
 msgid "tab"
 msgstr "索引標籤"
 
 #. Translators: Identifies a tab control such as webpage tabs in web browsers.
-#: controlTypes.py:235
+#: controlTypes.py:236
 msgid "tab control"
 msgstr "索引標籤"
 
 #. Translators: Identifies a slider such as volume slider.
-#: controlTypes.py:237
+#: controlTypes.py:238
 msgid "slider"
 msgstr "滑桿"
 
 #. Translators: Identifies a progress bar such as NvDA update progress.
-#: controlTypes.py:239
+#: controlTypes.py:240
 msgid "progress bar"
 msgstr "進度列"
 
 #. Translators: Identifies a scroll bar.
-#: controlTypes.py:241
+#: controlTypes.py:242
 msgid "scroll bar"
 msgstr "捲軸"
 
 #. Translators: Identifies a status bar (text at the bottom bar of the screen such as cursor position in a document).
-#: controlTypes.py:243
+#: controlTypes.py:244
 msgid "status bar"
 msgstr "狀態列"
 
 #. Translators: Identifies a table such as ones used in various websites.
-#: controlTypes.py:245
+#: controlTypes.py:246
 msgid "table"
 msgstr "表格"
 
 #. Translators: Identifies a cell in a table.
-#: controlTypes.py:247
+#: controlTypes.py:248
 msgid "cell"
 msgstr "儲存格"
 
 #. Translators: Identifies a column (a group of vertical cells in a table).
-#: controlTypes.py:249
+#: controlTypes.py:250
 msgid "column"
 msgstr "欄"
 
 #. Translators: Identifies a row (a group of horizontal cells in a table).
-#: controlTypes.py:251
+#: controlTypes.py:252
 msgid "row"
 msgstr "列"
 
 #. Translators: Identifies a frame (a smaller window in a webpage or a document).
-#: controlTypes.py:253
+#: controlTypes.py:254
 msgid "frame"
 msgstr "頁框"
 
 #. Translators: Identifies a tool bar.
-#: controlTypes.py:255
+#: controlTypes.py:256
 msgid "tool bar"
 msgstr "工具列"
 
 #. Translators: Identifies a column header in tables and spreadsheets.
-#: controlTypes.py:257
+#: controlTypes.py:258
 msgid "column header"
 msgstr "欄標題"
 
 #. Translators: Identifies a row header in tables and spreadsheets.
-#: controlTypes.py:259
+#: controlTypes.py:260
 msgid "row header"
 msgstr "列標題"
 
 #. Translators: Identifies a drop down button (a button that, when clicked, opens a menu of its own).
-#: controlTypes.py:261
+#: controlTypes.py:262
 msgid "drop down button"
 msgstr "下拉按鈕"
 
 #. Translators: Identifies an element.
-#: controlTypes.py:263
+#: controlTypes.py:264
 msgid "clock"
 msgstr "時鐘"
 
 #. Translators: Identifies a separator (a horizontal line drawn on the screen).
-#: controlTypes.py:265
+#: controlTypes.py:266
 msgid "separator"
 msgstr "分隔符號"
 
 #. Translators: Identifies a heading (a bold text used for identifying a section).
-#: controlTypes.py:269
+#: controlTypes.py:270
 msgid "heading"
 msgstr "標題"
 
 #. Translators: Identifies a heading level.
-#: controlTypes.py:271
+#: controlTypes.py:272
 msgid "heading 1"
 msgstr "第一級標題"
 
 #. Translators: Identifies a heading level.
-#: controlTypes.py:273
+#: controlTypes.py:274
 msgid "heading 2"
 msgstr "第二級標題"
 
 #. Translators: Identifies a heading level.
-#: controlTypes.py:275
+#: controlTypes.py:276
 msgid "heading 3"
 msgstr "第三級標題"
 
 #. Translators: Identifies a heading level.
-#: controlTypes.py:277
+#: controlTypes.py:278
 msgid "heading 4"
 msgstr "第四級標題"
 
 #. Translators: Identifies a heading level.
-#: controlTypes.py:279
+#: controlTypes.py:280
 msgid "heading 5"
 msgstr "第五級標題"
 
 #. Translators: Identifies a heading level.
-#: controlTypes.py:281
+#: controlTypes.py:282
 msgid "heading 6"
 msgstr "第六級標題"
 
 #. Translators: Identifies a paragraph (a group of text surrounded by blank lines).
-#: controlTypes.py:283 textInfos\__init__.py:202
+#: controlTypes.py:284 textInfos\__init__.py:202
 msgid "paragraph"
 msgstr "段落"
 
 #. Translators: Presented for a section in a document which is a block quotation;
 #. i.e. a long quotation in a separate paragraph distinguished by indentation, etc.
 #. See http://en.wikipedia.org/wiki/Block_quotation
-#: controlTypes.py:287
+#: controlTypes.py:288
 msgid "block quote"
 msgstr "引述區"
 
 #. Translators: Identifies a table header (a short text at the start of a table which describes what the table is about).
-#: controlTypes.py:289
+#: controlTypes.py:290
 msgid "table header"
 msgstr "表頭"
 
 #. Translators: Identifies a table body (the main body of the table).
-#: controlTypes.py:291
+#: controlTypes.py:292
 msgid "table body"
 msgstr "表身"
 
 #. Translators: Identifies a table footer (text placed at the end of the table).
-#: controlTypes.py:293
+#: controlTypes.py:294
 msgid "table footer"
 msgstr "表尾"
 
 #. Translators: Identifies a document (for example, a webpage document).
-#: controlTypes.py:295
+#: controlTypes.py:296
 msgid "document"
 msgstr "文件"
 
 #. Translators: Identifies an animation in a document or a webpage.
-#: controlTypes.py:297
+#: controlTypes.py:298
 msgid "animation"
 msgstr "動畫"
 
 #. Translators: Identifies an application in webpages.
-#: controlTypes.py:299
+#: controlTypes.py:300
 msgid "application"
 msgstr "應用程式"
 
 #. Translators: Identifies a box element.
-#: controlTypes.py:301
+#: controlTypes.py:302
 msgid "box"
 msgstr "方塊"
 
 #. Translators: Identifies a grouping (a number of related items grouped together, such as related options in dialogs).
-#: controlTypes.py:303
+#: controlTypes.py:304
 msgid "grouping"
 msgstr "群組"
 
 #. Translators: Identifies a property page such as drive properties dialog.
-#: controlTypes.py:305
+#: controlTypes.py:306
 msgid "property page"
 msgstr "內容頁"
 
 #. Translators: Identifies a canvas element on webpages (a box with some background color with some text drawn on the box, like a canvas).
-#: controlTypes.py:307
+#: controlTypes.py:308
 msgid "canvas"
 msgstr "繪圖畫布"
 
 #. Translators: Identifies a caption (usually a short text identifying a picture or a graphic on websites).
-#: controlTypes.py:309
+#: controlTypes.py:310
 msgid "caption"
 msgstr "文字描述"
 
 #. Translators: Identifies a check menu item (a menu item with a checkmark as part of the menu item's name).
-#: controlTypes.py:311
+#: controlTypes.py:312
 msgid "check menu item"
 msgstr "可核取選單項目"
 
 #. Translators: Identifies a data edit field.
-#: controlTypes.py:313
+#: controlTypes.py:314
 msgid "date edit"
 msgstr "日期編輯區"
 
 #. Translators: Identifies an icon.
-#: controlTypes.py:315
+#: controlTypes.py:316
 msgid "icon"
 msgstr "圖示"
 
 #. Translators: Identifies a directory pane.
-#: controlTypes.py:317
+#: controlTypes.py:318
 msgid "directory pane"
 msgstr "目錄窗格"
 
 #. Translators: Identifies an embedded object such as flash content on webpages.
-#: controlTypes.py:319 NVDAObjects\window\edit.py:625
+#: controlTypes.py:320 NVDAObjects\window\edit.py:625
 msgid "embedded object"
 msgstr "嵌入式物件"
 
 #. Translators: Identifies an end note.
-#: controlTypes.py:321
+#: controlTypes.py:322
 msgid "end note"
 msgstr "章節附註"
 
 #. Translators: Identifies a footer (usually text).
-#: controlTypes.py:323
+#: controlTypes.py:324
 msgid "footer"
 msgstr "頁尾"
 
 #. Translators: Identifies a foot note (text at the end of a passage or used for anotations).
-#: controlTypes.py:325
+#: controlTypes.py:326
 msgid "foot note"
 msgstr "註腳"
 
 #. Translators: Reported for an object which is a glass pane; i.e.
 #. a pane that is guaranteed to be on top of all panes beneath it.
-#: controlTypes.py:328
+#: controlTypes.py:329
 msgid "glass pane"
 msgstr "透明窗格"
 
 #. Translators: Identifies a header (usually text at top of documents or on tops of pages).
-#: controlTypes.py:330
+#: controlTypes.py:331
 msgid "header"
 msgstr "頁首"
 
 #. Translators: Identifies an image map (a type of graphical link).
-#: controlTypes.py:332
+#: controlTypes.py:333
 msgid "image map"
 msgstr "圖像地圖"
 
 #. Translators: Identifies an input window.
-#: controlTypes.py:334
+#: controlTypes.py:335
 msgid "input window"
 msgstr "輸入區"
 
 #. Translators: Identifies a label.
-#: controlTypes.py:336
+#: controlTypes.py:337
 msgid "label"
 msgstr "標記"
 
 #. Translators: Identifies a note field.
-#: controlTypes.py:338
+#: controlTypes.py:339
 msgid "note"
 msgstr "註解"
 
 #. Translators: Identifies a page.
-#: controlTypes.py:340
+#: controlTypes.py:341
 msgid "page"
 msgstr "頁"
 
 #. Translators: Identifies a radio menu item.
-#: controlTypes.py:342
+#: controlTypes.py:343
 msgid "radio menu item"
 msgstr "單選選單項目"
 
-#: controlTypes.py:343
+#: controlTypes.py:344
 msgid "layered pane"
 msgstr "分層窗格"
 
-#: controlTypes.py:344
+#: controlTypes.py:345
 msgid "redundant object"
 msgstr "多餘物件"
 
-#: controlTypes.py:345
+#: controlTypes.py:346
 msgid "root pane"
 msgstr "群組窗格"
 
 #. Translators: May be reported for an editable text object in a toolbar.
 #. This is deprecated and is not often (if ever) used.
-#: controlTypes.py:348
+#: controlTypes.py:349
 msgid "edit bar"
 msgstr "編輯列"
 
 #. Translators: Identifies a terminal window such as command prompt.
-#: controlTypes.py:350
+#: controlTypes.py:351
 msgid "terminal"
 msgstr "終端機"
 
 #. Translators: Identifies a rich edit box (an edit box which allows entering formatting commands in addition to text; encountered on webpages and NvDA log viewer).
-#: controlTypes.py:352
+#: controlTypes.py:353
 msgid "rich edit"
 msgstr "Rich text 編輯模式"
 
-#: controlTypes.py:353
+#: controlTypes.py:354
 msgid "ruler"
 msgstr "尺規"
 
 #. Translators: Identifies a scroll pane.
-#: controlTypes.py:355
+#: controlTypes.py:356
 msgid "scroll pane"
 msgstr "捲軸窗格"
 
 #. Translators: Identifies a section of text.
-#: controlTypes.py:357
+#: controlTypes.py:358
 msgid "section"
 msgstr "區塊"
 
 #. Translators: Identifies a shape.
-#: controlTypes.py:359
+#: controlTypes.py:360
 msgid "shape"
 msgstr "外型"
 
 #. Translators: Identifies a split pane.
-#: controlTypes.py:361
+#: controlTypes.py:362
 msgid "split pane"
 msgstr "分開的窗格"
 
 #. Translators: Reported for a view port; i.e. an object usually used in a scroll pane
 #. which represents the portion of the entire data that the user can see.
 #. As the user manipulates the scroll bars, the contents of the view port can change.
-#: controlTypes.py:365
+#: controlTypes.py:366
 msgid "view port"
 msgstr "檢視端口"
 
 #. Translators: Reported for an object that forms part of a menu system
 #. but which can be undocked from or torn off the menu system
 #. to exist as a separate window.
-#: controlTypes.py:369
+#: controlTypes.py:370
 msgid "tear off menu"
 msgstr "分離式選單"
 
 #. Translators: Identifies a text frame (a frame window which contains text).
-#: controlTypes.py:371
+#: controlTypes.py:372
 msgid "text frame"
 msgstr "文字框架"
 
 #. Translators: Identifies a toggle button (a button used to toggle something).
-#: controlTypes.py:373
+#: controlTypes.py:374
 msgid "toggle button"
 msgstr "切換按鈕"
 
-#: controlTypes.py:374
+#: controlTypes.py:375
 msgid "border"
 msgstr "邊界"
 
-#: controlTypes.py:375
+#: controlTypes.py:376
 msgid "caret"
 msgstr "次方號"
 
-#: controlTypes.py:376 textInfos\__init__.py:199
+#: controlTypes.py:377 textInfos\__init__.py:199
 msgid "character"
 msgstr "字元"
 
-#: controlTypes.py:377
+#: controlTypes.py:378
 msgid "chart"
 msgstr "圖表"
 
-#: controlTypes.py:378
+#: controlTypes.py:379
 msgid "cursor"
 msgstr "游標"
 
-#: controlTypes.py:379
+#: controlTypes.py:380
 msgid "diagram"
 msgstr "圖解"
 
-#: controlTypes.py:380
+#: controlTypes.py:381
 msgid "dial"
 msgstr "撥打"
 
-#: controlTypes.py:381
+#: controlTypes.py:382
 msgid "drop list"
 msgstr "下拉清單"
 
-#: controlTypes.py:382
+#: controlTypes.py:383
 msgid "split button"
 msgstr "跳出選項的按鈕"
 
-#: controlTypes.py:383
+#: controlTypes.py:384
 msgid "menu button"
 msgstr "選單按鈕"
 
 #. Translators: Reported for a button which expands a grid when it is pressed.
-#: controlTypes.py:385
+#: controlTypes.py:386
 msgid "drop down button grid"
 msgstr "下拉按鈕區塊"
 
 #. Translators: Identifies an equation.
-#: controlTypes.py:387
+#: controlTypes.py:388
 msgid "equation"
 msgstr "公式"
 
-#: controlTypes.py:388
+#: controlTypes.py:389
 msgid "grip"
 msgstr "抓緊"
 
 #. Translators: Identifies a hot key field (a field where one can enter a hot key for something, such as assigning shortcut for icons on the desktop).
-#: controlTypes.py:390
+#: controlTypes.py:391
 msgid "hot key field"
 msgstr "快速鍵欄位"
 
-#: controlTypes.py:391
+#: controlTypes.py:392
 msgid "indicator"
 msgstr "指示標記"
 
 #. Translators: Identifies a spin button (a button used to go through options in a spinning fashion).
-#: controlTypes.py:393
+#: controlTypes.py:394
 msgid "spin button"
 msgstr "調整按鈕"
 
 #. Translators: Identifies a sound clip on websites.
-#: controlTypes.py:395
+#: controlTypes.py:396
 msgid "sound"
 msgstr "聲音"
 
 #. Translators: Identifies a whitespace.
-#: controlTypes.py:397
+#: controlTypes.py:398
 msgid "white space"
 msgstr "空白字元"
 
 #. Translators: Identifies a tree view button.
-#: controlTypes.py:399
+#: controlTypes.py:400
 msgid "tree view button"
 msgstr "樹狀檢視按鈕"
 
 #. Translators: Identifies an IP address (an IP address field element).
-#: controlTypes.py:401
+#: controlTypes.py:402
 msgid "IP address"
 msgstr "IP 位址"
 
 #. Translators: Identifies a desktop icon (the icons on the desktop such as computer and various shortcuts for programs).
-#: controlTypes.py:403
+#: controlTypes.py:404
 msgid "desktop icon"
 msgstr "桌面圖示"
 
 #. Translators: Identifies an alert message such as file download alert in Internet explorer 9 and above.
 #. Translators: Identifies an alert window or bar (usually on Internet Explorer 9 and above for alerts such as file downloads or pop-up blocker).
-#: controlTypes.py:405 controlTypes.py:445
+#: controlTypes.py:406 controlTypes.py:446
 msgid "alert"
 msgstr "注意"
 
-#: controlTypes.py:406
+#: controlTypes.py:407
 msgid "IFrame"
 msgstr "內嵌頁框"
 
 #. Translators: Identifies desktop pane (the desktop window).
-#: controlTypes.py:408
+#: controlTypes.py:409
 msgid "desktop pane"
 msgstr "桌面窗格"
 
-#: controlTypes.py:409
+#: controlTypes.py:410
 msgid "option pane"
 msgstr "選項對話窗格"
 
-#: controlTypes.py:410
+#: controlTypes.py:411
 msgid "color chooser"
 msgstr "顏色選擇框"
 
-#: controlTypes.py:411
+#: controlTypes.py:412
 msgid "file chooser"
 msgstr "檔案選擇框"
 
-#: controlTypes.py:412
+#: controlTypes.py:413
 msgid "filler"
 msgstr "填寫框"
 
-#: controlTypes.py:415
+#: controlTypes.py:416
 msgid "panel"
 msgstr "面板"
 
 #. Translators: Identifies a password field (a protected edit field for entering passwords such as when logging into web-based email sites).
-#: controlTypes.py:417
+#: controlTypes.py:418
 msgid "password edit"
 msgstr "密碼編輯區"
 
-#: controlTypes.py:418
+#: controlTypes.py:419
 msgid "font chooser"
 msgstr "字型選擇框"
 
-#: controlTypes.py:419 textInfos\__init__.py:201
+#: controlTypes.py:420 textInfos\__init__.py:201
 msgid "line"
 msgstr "單行"
 
 #. Translators: Identifies a font name.
-#: controlTypes.py:421
+#: controlTypes.py:422
 msgid "font name"
 msgstr "字體名稱"
 
 #. Translators: Identifies font size.
-#: controlTypes.py:423
+#: controlTypes.py:424
 msgid "font size"
 msgstr "字體大小"
 
 #. Translators: Describes text formatting.
 #. Translators: Reported when text is bolded.
-#: controlTypes.py:425 speech.py:1068
+#: controlTypes.py:426 speech.py:1080
 msgid "bold"
 msgstr "粗體"
 
 #. Translators: Describes text formatting.
-#: controlTypes.py:427
+#: controlTypes.py:428
 msgid "ITALIC"
 msgstr "斜體"
 
 #. Translators: Describes text formatting.
-#: controlTypes.py:429
+#: controlTypes.py:430
 msgid "underline"
 msgstr "底線"
 
 #. Translators: Describes text formatting.
-#: controlTypes.py:431
+#: controlTypes.py:432
 msgid "foreground color"
 msgstr "前景色"
 
 #. Translators: Describes text formatting.
-#: controlTypes.py:433
+#: controlTypes.py:434
 msgid "background color"
 msgstr "背景色"
 
 #. Translators: Describes text formatting.
 #. Translators: Reported for superscript text.
-#: controlTypes.py:435 speech.py:1104
+#: controlTypes.py:436 speech.py:1116
 msgid "superscript"
 msgstr "上標"
 
 #. Translators: Describes text formatting.
 #. Translators: Reported for subscript text.
-#: controlTypes.py:437 speech.py:1107
+#: controlTypes.py:438 speech.py:1119
 msgid "subscript"
 msgstr "下標"
 
 #. Translators: Describes style of text.
-#: controlTypes.py:439
+#: controlTypes.py:440 NVDAObjects\window\winword.py:126
 msgid "style"
 msgstr "樣式"
 
 #. Translators: Describes text formatting.
-#: controlTypes.py:441
+#: controlTypes.py:442
 msgid "indent"
 msgstr "縮排"
 
 #. Translators: Describes text formatting.
-#: controlTypes.py:443
+#: controlTypes.py:444
 msgid "alignment"
 msgstr "對齊"
 
-#: controlTypes.py:446
+#: controlTypes.py:447
 msgid "data grid"
 msgstr "資料格網"
 
-#: controlTypes.py:447
+#: controlTypes.py:448
 msgid "data item"
 msgstr "資料項目"
 
-#: controlTypes.py:448
+#: controlTypes.py:449
 msgid "header item"
 msgstr "標題項目"
 
-#: controlTypes.py:449
+#: controlTypes.py:450
 msgid "thumb control"
 msgstr "滑桿控制按鈕"
 
-#: controlTypes.py:450
+#: controlTypes.py:451
 msgid "calendar"
 msgstr "行事曆"
 
 #. Translators: This is presented when a control or document is unavailable.
-#: controlTypes.py:455
+#: controlTypes.py:456
 msgid "unavailable"
 msgstr "無法使用"
 
 #. Translators: This is presented when a control has focus.
-#: controlTypes.py:457
+#: controlTypes.py:458
 msgid "focused"
 msgstr "焦點所在"
 
 #. Translators: This is presented when the control is selected.
-#: controlTypes.py:459
+#: controlTypes.py:460
 msgid "selected"
 msgstr "選取"
 
 #. Translators: This is presented when a document is busy.
-#: controlTypes.py:461
+#: controlTypes.py:462
 msgid "busy"
 msgstr "忙碌中"
 
 #. Translators: This is presented when a button is pressed.
-#: controlTypes.py:463
+#: controlTypes.py:464
 msgid "pressed"
 msgstr "按下"
 
 #. Translators: This is presented when a check box is checked.
-#: controlTypes.py:465
+#: controlTypes.py:466
 msgid "checked"
 msgstr "勾選"
 
 #. Translators: This is presented when a three state check box is half checked.
-#: controlTypes.py:467
+#: controlTypes.py:468
 msgid "half checked"
 msgstr "部份勾選"
 
 #. Translators: This is presented when the control is a read-only control such as read-only edit box.
-#: controlTypes.py:469
+#: controlTypes.py:470
 msgid "read only"
 msgstr "唯讀"
 
 #. Translators: This is presented when a tree view or submenu item is expanded.
-#: controlTypes.py:471
+#: controlTypes.py:472
 msgid "expanded"
 msgstr "展開"
 
 #. Translators: This is presented when a tree view or submenu is collapsed.
-#: controlTypes.py:473
+#: controlTypes.py:474
 msgid "collapsed"
 msgstr "折疊"
 
 #. Translators: This is presented when a control or a document becomes invisible.
-#: controlTypes.py:475
+#: controlTypes.py:476
 msgid "invisible"
 msgstr "隱藏"
 
 #. Translators: This is presented when a visited link is encountered.
-#: controlTypes.py:477
+#: controlTypes.py:478
 msgid "visited"
 msgstr "到訪過"
 
 #. Translators: This is presented when a link is encountered.
-#: controlTypes.py:479
+#: controlTypes.py:480
 msgid "linked"
 msgstr "連結"
 
 #. Translators: This is presented when the control menu item has a submenu.
-#: controlTypes.py:481
+#: controlTypes.py:482
 msgid "subMenu"
 msgstr "子選單"
 
 #. Translators: This is presented when a protected control or a document is encountered.
-#: controlTypes.py:483
+#: controlTypes.py:484
 msgid "protected"
 msgstr "保密"
 
 #. Translators: This is presented when a required form field is encountered.
-#: controlTypes.py:485
+#: controlTypes.py:486
 msgid "required"
 msgstr "需要"
 
 #. Translators: Reported when an object no longer exists in the user interface;
 #. i.e. it is dead and is no longer usable.
-#: controlTypes.py:488
+#: controlTypes.py:489
 msgid "defunct"
 msgstr "沒有功能"
 
 #. Translators: This is presented when an invalid entry has been made.
-#: controlTypes.py:490
+#: controlTypes.py:491
 msgid "invalid entry"
 msgstr "輸入錯誤"
 
-#: controlTypes.py:491
+#: controlTypes.py:492
 msgid "modal"
 msgstr "樣式的"
 
 #. Translators: This is presented when a field supports auto completion of entered text such as email address field in Microsoft Outlook.
-#: controlTypes.py:493
+#: controlTypes.py:494
 msgid "has auto complete"
 msgstr "可自動完成"
 
 #. Translators: This is presented when an edit field allows typing multiple lines of text such as comment fields on websites.
-#: controlTypes.py:495
+#: controlTypes.py:496
 msgid "multi line"
 msgstr "多行"
 
-#: controlTypes.py:496
+#: controlTypes.py:497
 msgid "iconified"
 msgstr "圖示化"
 
 #. Translators: Presented when the current control is located off screen.
-#: controlTypes.py:498
+#: controlTypes.py:499
 msgid "off screen"
 msgstr "畫面以外的"
 
 #. Translators: Presented when the control allows selection such as text fields.
-#: controlTypes.py:500
+#: controlTypes.py:501
 msgid "selectable"
 msgstr "可選取"
 
 #. Translators: Presented when a control can be moved to using system focus.
-#: controlTypes.py:502
+#: controlTypes.py:503
 msgid "focusable"
 msgstr "焦點可到達"
 
 #. Translators: Presented when a control allows clicking via mouse (mostly presented on web controls).
-#: controlTypes.py:504
+#: controlTypes.py:505
 msgid "clickable"
 msgstr "可點擊"
 
-#: controlTypes.py:505
+#: controlTypes.py:506
 msgid "editable"
 msgstr "可編輯"
 
-#: controlTypes.py:506
+#: controlTypes.py:507
 msgid "checkable"
 msgstr "可核取"
 
-#: controlTypes.py:507
+#: controlTypes.py:508
 msgid "draggable"
 msgstr "可拖曳"
 
-#: controlTypes.py:508
+#: controlTypes.py:509
 msgid "dragging"
 msgstr "拖曳"
 
 #. Translators: Reported where an object which is being dragged can be dropped.
 #. This is only reported for objects which support accessible drag and drop.
-#: controlTypes.py:511
+#: controlTypes.py:512
 msgid "drop target"
 msgstr "放置目標"
 
-#: controlTypes.py:512
+#: controlTypes.py:513
 msgid "sorted"
 msgstr "排序"
 
-#: controlTypes.py:513
+#: controlTypes.py:514
 msgid "sorted ascending"
 msgstr "遞增排序"
 
-#: controlTypes.py:514
+#: controlTypes.py:515
 msgid "sorted descending"
 msgstr "遞減排序"
 
 #. Translators: a state that denotes that an object (usually a graphic) has a long description.
-#: controlTypes.py:516
+#: controlTypes.py:517
 msgid "has long description"
 msgstr "有詳細描述"
 
+#. Translators: a state that denotes that an object is pinned in its current location
+#: controlTypes.py:519
+msgid "pinned"
+msgstr ""
+
 #. Translators: This is presented when a selectable object (e.g. a list item) is not selected.
-#: controlTypes.py:521
+#: controlTypes.py:524
 msgid "not selected"
 msgstr "沒選取"
 
 #. Translators: This is presented when a checkbox is not checked.
-#: controlTypes.py:523
+#: controlTypes.py:526
 msgid "not checked"
 msgstr "沒勾選"
 
@@ -2643,11 +2649,11 @@ msgstr ""
 msgid "Activates the NVDA Python Console, primarily useful for development"
 msgstr "開啟NVDA Python主控台, 主要是供程式開發者使用。"
 
-#: globalCommands.py:1053 gui\settingsDialogs.py:1336
+#: globalCommands.py:1053 gui\settingsDialogs.py:1342
 msgid "review"
 msgstr "瀏覽游標"
 
-#: globalCommands.py:1056 gui\settingsDialogs.py:1336
+#: globalCommands.py:1056 gui\settingsDialogs.py:1342
 msgid "focus"
 msgstr "系統焦點"
 
@@ -3160,24 +3166,24 @@ msgid "tab"
 msgstr "tab"
 
 #. Translators: One of the keyboard layouts for NVDA.
-#: keyboardHandler.py:240
+#: keyboardHandler.py:271
 msgid "desktop"
 msgstr "桌上型電腦"
 
 #. Translators: One of the keyboard layouts for NVDA.
-#: keyboardHandler.py:242
+#: keyboardHandler.py:273
 msgid "laptop"
 msgstr "筆記型電腦"
 
-#: keyboardHandler.py:361 synthSettingsRing.py:74 gui\settingsDialogs.py:1168
+#: keyboardHandler.py:392 synthSettingsRing.py:74 gui\settingsDialogs.py:1174
 msgid "on"
 msgstr "開"
 
 #. Translators: An option for progress bar output in the Object Presentation dialog
 #. which disables reporting of progress bars.
 #. See Progress bar output in the Object Presentation Settings section of the User Guide.
-#: keyboardHandler.py:361 synthSettingsRing.py:74 gui\settingsDialogs.py:813
-#: gui\settingsDialogs.py:1168
+#: keyboardHandler.py:392 synthSettingsRing.py:74 gui\settingsDialogs.py:813
+#: gui\settingsDialogs.py:1174
 msgid "off"
 msgstr "關"
 
@@ -3253,7 +3259,7 @@ msgstr "模擬在系統鍵盤上按 %s"
 
 #. Translators: This is spoken when NVDA moves to an empty line.
 #. Translators: This is spoken when the line is considered blank.
-#: speech.py:164 speech.py:346 speech.py:760
+#: speech.py:164 speech.py:346 speech.py:763
 msgid "blank"
 msgstr "空白"
 
@@ -3293,66 +3299,66 @@ msgstr "已選取的都移除了"
 
 #. Translators: Reported when drag and drop is finished.
 #. This is only reported for objects which support accessible drag and drop.
-#: speech.py:812
+#: speech.py:815
 msgid "done dragging"
 msgstr "拖曳完成"
 
 #. Translators: Speaks the item level in treeviews (example output: level 2).
-#: speech.py:835 speech.py:839
+#: speech.py:838 speech.py:842
 #, python-format
 msgid "level %s"
 msgstr "第 %s 級"
 
 #. Translators: Speaks current row number (example output: row 3).
-#: speech.py:853 speech.py:1195
+#: speech.py:856 speech.py:1207
 #, python-format
 msgid "row %s"
 msgstr "第 %s 列"
 
 #. Translators: Speaks current column number (example output: column 3).
-#: speech.py:861 speech.py:1191
+#: speech.py:864 speech.py:1203
 #, python-format
 msgid "column %s"
 msgstr "第 %s 欄"
 
 #. Translators: Speaks number of columns and rows in a table (example output: with 3 rows and 2 columns).
-#: speech.py:869
+#: speech.py:872
 msgid "with {rowCount} rows and {columnCount} columns"
 msgstr "有 {rowCount} 列和 {columnCount} 欄"
 
 #. Translators: Speaks number of columns (example output: with 4 columns).
-#: speech.py:872
+#: speech.py:875
 #, python-format
 msgid "with %s columns"
 msgstr "有 %s 欄"
 
 #. Translators: Speaks number of rows (example output: with 2 rows).
-#: speech.py:875
+#: speech.py:878
 #, python-format
 msgid "with %s rows"
 msgstr "有 %s 列"
 
 #. Translators: Speaks number of items in a list (example output: list with 5 items).
-#: speech.py:945
+#: speech.py:948
 #, python-format
 msgid "with %s items"
 msgstr "有 %s 個項目"
 
 #. Translators: Indicates end of something (example output: at the end of a list, speaks out of list).
-#: speech.py:972 speech.py:1139
+#: speech.py:975 speech.py:1151
 #, python-format
 msgid "out of %s"
 msgstr "離開 %s"
 
 #. Translators: Indicates the page number in a document.
 #. %s will be replaced with the page number.
-#: speech.py:998
+#: speech.py:1001
 #, python-format
 msgid "page %s"
 msgstr "第 %s 頁"
 
 #. Translators: Speaks the heading level (example output: heading level 2).
-#: speech.py:1005
+#: speech.py:1008
 #, python-format
 msgid "heading level %d"
 msgstr "第 %d 級標題"
@@ -3360,134 +3366,146 @@ msgstr "第 %d 級標題"
 #. Translators: Indicates the style of text.
 #. A style is a collection of formatting settings and depends on the application.
 #. %s will be replaced with the name of the style.
-#: speech.py:1015
+#: speech.py:1018
 #, python-format
 msgid "style %s"
 msgstr "樣式 %s"
 
 #. Translators: Indicates that text has reverted to the default style.
 #. A style is a collection of formatting settings and depends on the application.
-#: speech.py:1019
+#: speech.py:1022
 msgid "default style"
 msgstr "預設樣式"
 
 #. Translators: Reported when both the text and background colors change.
 #. {color} will be replaced with the text color.
 #. {backgroundColor} will be replaced with the background color.
-#: speech.py:1044
+#: speech.py:1047
 msgid "{color} on {backgroundColor}"
 msgstr "{backgroundColor}底配{color}"
 
 #. Translators: Reported when the text color changes (but not the background color).
 #. {color} will be replaced with the text color.
-#: speech.py:1050
+#: speech.py:1053
 msgid "{color}"
 msgstr "{color}"
 
 #. Translators: Reported when the background color changes (but not the text color).
 #. {backgroundColor} will be replaced with the background color.
-#: speech.py:1054
+#: speech.py:1057
 msgid "{backgroundColor} background"
 msgstr "{backgroundColor}為底色"
 
 #. Translators: Indicates the line number of the text.
 #. %s will be replaced with the line number.
-#: speech.py:1061
+#: speech.py:1064
 #, python-format
 msgid "line %s"
 msgstr "第 %s 行"
 
+#. Translators: Reported when text is revised.
+#: speech.py:1071
+#, fuzzy, python-format
+msgid "revised %s"
+msgstr "瀏覽游標"
+
+#. Translators: Reported when text is not revised.
+#: speech.py:1073
+#, fuzzy
+msgid "unrevised"
+msgstr "瀏覽游標"
+
 #. Translators: Reported when text is not bolded.
-#: speech.py:1070
+#: speech.py:1082
 msgid "no bold"
 msgstr "沒有粗體"
 
 #. Translators: Reported when text is italicized.
-#: speech.py:1076
+#: speech.py:1088
 msgid "italic"
 msgstr "斜體"
 
 #. Translators: Reported when text is not italicized.
-#: speech.py:1078
+#: speech.py:1090
 msgid "no italic"
 msgstr "沒有斜體"
 
 #. Translators: Reported when text is formatted with strikethrough.
 #. See http://en.wikipedia.org/wiki/Strikethrough
-#: speech.py:1085
+#: speech.py:1097
 msgid "strikethrough"
 msgstr "刪除線"
 
 #. Translators: Reported when text is formatted without strikethrough.
 #. See http://en.wikipedia.org/wiki/Strikethrough
-#: speech.py:1088
+#: speech.py:1100
 msgid "no strikethrough"
 msgstr "沒有刪除線"
 
 #. Translators: Reported when text is underlined.
-#: speech.py:1094
+#: speech.py:1106
 msgid "underlined"
 msgstr "已加底線"
 
 #. Translators: Reported when text is not underlined.
-#: speech.py:1096
+#: speech.py:1108
 msgid "not underlined"
 msgstr "沒有加底線"
 
 #. Translators: Reported for text which is at the baseline position;
 #. i.e. not superscript or subscript.
-#: speech.py:1111
+#: speech.py:1123
 msgid "baseline"
 msgstr "基準線"
 
 #. Translators: Reported when text is left-aligned.
-#: speech.py:1120
+#: speech.py:1132
 msgid "align left"
 msgstr "靠左對齊"
 
 #. Translators: Reported when text is centered.
-#: speech.py:1123
+#: speech.py:1135
 msgid "align center"
 msgstr "置中對齊"
 
 #. Translators: Reported when text is right-aligned.
-#: speech.py:1126
+#: speech.py:1138
 msgid "align right"
 msgstr "靠右對齊"
 
 #. Translators: Reported when text is justified.
 #. See http://en.wikipedia.org/wiki/Typographic_alignment#Justified
-#: speech.py:1130
+#: speech.py:1142
 msgid "align justify"
 msgstr "左右對齊"
 
 #. Translators: Reported when text has reverted to default alignment.
-#: speech.py:1133
+#: speech.py:1145
 msgid "align default"
 msgstr "預設對齊"
 
 #. Translators: Reported when text contains a comment.
-#: speech.py:1146
+#: speech.py:1158
 msgid "has comment"
 msgstr "有註解"
 
 #. Translators: Reported when text contains a spelling error.
-#: speech.py:1154
+#: speech.py:1166
 msgid "spelling error"
 msgstr "拼錯字"
 
 #. Translators: Reported when moving out of text containing a spelling error.
-#: speech.py:1157
+#: speech.py:1169
 msgid "out of spelling error"
 msgstr "離開拼錯字"
 
 #. Translators: Indicates end of a table.
-#: speech.py:1176
+#: speech.py:1188
 msgid "out of table"
 msgstr "離開表格"
 
 #. Translators: reports number of columns and rows in a table (example output: table with 3 columns and 5 rows).
-#: speech.py:1186
+#: speech.py:1198
 msgid "table with {columnCount} columns and {rowCount} rows"
 msgstr "表格有 {rowCount} 列和 {columnCount} 蘭"
 
@@ -4094,12 +4112,12 @@ msgid "Waiting for Powerpoint..."
 msgstr "正在等待 PowerPoint..."
 
 #. Translators: the label for a slide in Microsoft PowerPoint.
-#: appModules\powerpnt.py:499
+#: appModules\powerpnt.py:513
 msgid "Slide {slideNumber}"
 msgstr "投影片 {slideNumber}"
 
 #. Translators: The description for a script
-#: appModules\powerpnt.py:757
+#: appModules\powerpnt.py:779
 msgid ""
 "Toggles between reporting the speaker notes or the actual slide content. "
 "This does not change what is visible on-screen, but only what the user can "
@@ -4107,27 +4125,27 @@ msgid ""
 msgstr "切換 NVDA 讀出演講者備忘稿或實際投影片內容. 這不會改變畫面上的顯示"
 
 #. Translators: The title of the current slide (with notes) in a running Slide Show in Microsoft PowerPoint.
-#: appModules\powerpnt.py:787
+#: appModules\powerpnt.py:809
 msgid "Slide show notes - {slideName}"
 msgstr "投影片放映備忘稿-{slideName}"
 
 #. Translators: The title of the current slide in a running Slide Show in Microsoft PowerPoint.
-#: appModules\powerpnt.py:790
+#: appModules\powerpnt.py:812
 msgid "Slide show - {slideName}"
 msgstr "投影片放映-{slideName}"
 
 #. Translators: The title for a Slide show in Microsoft PowerPoint that has completed.
-#: appModules\powerpnt.py:793
+#: appModules\powerpnt.py:815
 msgid "Slide Show - complete"
 msgstr "投影片放映-完成"
 
 #. Translators: The message for no notes  for a slide in a slide show
-#: appModules\powerpnt.py:849
+#: appModules\powerpnt.py:871
 msgid "No notes"
 msgstr "沒有備忘稿"
 
 #. Translators: The message for an empty slide in a slide show
-#: appModules\powerpnt.py:852 appModules\powerpnt.py:853
+#: appModules\powerpnt.py:874 appModules\powerpnt.py:875
 msgid "Empty slide"
 msgstr "空白投影片"
 
@@ -4721,7 +4739,7 @@ msgstr "安裝(&I)"
 #. Translators: The label for a button to remove either:
 #. Remove the selected add-on in Add-ons Manager dialog.
 #. Remove a speech dictionary entry.
-#: gui\addonGui.py:60 gui\settingsDialogs.py:1184
+#: gui\addonGui.py:60 gui\settingsDialogs.py:1190
 msgid "&Remove"
 msgstr "移除(&R)"
 
@@ -5650,254 +5668,261 @@ msgstr "報出顏色(&C)"
 #. Translators: This is the label for a checkbox in the
 #. document formatting settings dialog.
 #: gui\settingsDialogs.py:1013
+#, fuzzy
+msgid "Report &editor revisions"
+msgstr "報出標題(&H)"
+
+#. Translators: This is the label for a checkbox in the
+#. document formatting settings dialog.
+#: gui\settingsDialogs.py:1018
 msgid "Report st&yle"
 msgstr "報出文字樣式(&Y)"
 
 #. Translators: This is the label for a checkbox in the
 #. document formatting settings dialog.
-#: gui\settingsDialogs.py:1018
+#: gui\settingsDialogs.py:1023
 msgid "Report spelling errors"
 msgstr "報出拼錯字(&R)"
 
 #. Translators: This is the label for a checkbox in the
 #. document formatting settings dialog.
-#: gui\settingsDialogs.py:1023
+#: gui\settingsDialogs.py:1028
 msgid "Report &pages"
 msgstr "報出頁碼(&P)"
 
 #. Translators: This is the label for a checkbox in the
 #. document formatting settings dialog.
-#: gui\settingsDialogs.py:1028
+#: gui\settingsDialogs.py:1033
 msgid "Report &line numbers"
 msgstr "報出行數(&L)"
 
 #. Translators: This message is presented in the document formatting settings dialogue
 #. If this option is selected, NVDA will cound the leading spaces and tabs of a line and speak it.
-#.
-#: gui\settingsDialogs.py:1034
+#. 
+#: gui\settingsDialogs.py:1039
 msgid "Report l&ine indentation"
 msgstr "報出單行的縮排(&I)"
 
 #. Translators: This is the label for a checkbox in the
 #. document formatting settings dialog.
-#: gui\settingsDialogs.py:1039
+#: gui\settingsDialogs.py:1044
 msgid "Report &tables"
 msgstr "報出表格(&T)"
 
 #. Translators: This is the label for a checkbox in the
 #. document formatting settings dialog.
-#: gui\settingsDialogs.py:1044
+#: gui\settingsDialogs.py:1049
 msgid "Report table row/column h&eaders"
 msgstr "報出表格的列及欄標題(&E)"
 
 #. Translators: This is the label for a checkbox in the
 #. document formatting settings dialog.
-#: gui\settingsDialogs.py:1049
+#: gui\settingsDialogs.py:1054
 msgid "Report table cell c&oordinates"
 msgstr "在表格中報出目前儲存格的座標(&O)"
 
 #. Translators: This is the label for a checkbox in the
 #. document formatting settings dialog.
-#: gui\settingsDialogs.py:1054
+#: gui\settingsDialogs.py:1059
 msgid "Report &links"
 msgstr "報出連結(&L)"
 
 #. Translators: This is the label for a checkbox in the
 #. document formatting settings dialog.
-#: gui\settingsDialogs.py:1059
+#: gui\settingsDialogs.py:1064
 msgid "Report &headings"
 msgstr "報出標題(&H)"
 
 #. Translators: This is the label for a checkbox in the
 #. document formatting settings dialog.
-#: gui\settingsDialogs.py:1064
+#: gui\settingsDialogs.py:1069
 msgid "Report l&ists"
 msgstr "報出清單(&I)"
 
 #. Translators: This is the label for a checkbox in the
 #. document formatting settings dialog.
-#: gui\settingsDialogs.py:1069
+#: gui\settingsDialogs.py:1074
 msgid "Report block &quotes"
 msgstr "報出引述區(&Q)"
 
 #. Translators: This is the label for a checkbox in the
 #. document formatting settings dialog.
-#: gui\settingsDialogs.py:1074
+#: gui\settingsDialogs.py:1079
 msgid "Report lan&dmarks"
 msgstr "報出地標(&D)"
 
 #. Translators: This is the label for a checkbox in the
 #. document formatting settings dialog.
-#: gui\settingsDialogs.py:1079
+#: gui\settingsDialogs.py:1084
 msgid "Report fra&mes"
 msgstr "報出頁框(&M)"
 
 #. Translators: This is the label for the edit dictionary entry dialog.
-#: gui\settingsDialogs.py:1112
+#: gui\settingsDialogs.py:1118
 msgid "Edit Dictionary Entry"
 msgstr "編輯字庫項目"
 
 #. Translators: This is a label for an edit field in add dictionary entry dialog.
-#: gui\settingsDialogs.py:1117
+#: gui\settingsDialogs.py:1123
 msgid "&Pattern"
 msgstr "原來文字(&P)"
 
 #. Translators: This is a label for an edit field in add dictionary entry dialog and in punctuation/symbol pronunciation dialog.
-#: gui\settingsDialogs.py:1121 gui\settingsDialogs.py:1448
+#: gui\settingsDialogs.py:1127 gui\settingsDialogs.py:1454
 msgid "&Replacement"
 msgstr "代替文字(&R)"
 
 #. Translators: This is a label for an edit field in add dictionary entry dialog.
-#: gui\settingsDialogs.py:1125
+#: gui\settingsDialogs.py:1131
 msgid "&Comment"
 msgstr "註解(&C)"
 
 #. Translators: This is a label for a checkbox in add dictionary entry dialog.
-#: gui\settingsDialogs.py:1129
+#: gui\settingsDialogs.py:1135
 msgid "Case &sensitive"
 msgstr "大小寫需相符(&S)"
 
 #. Translators: This is a label for a checkbox in add dictionary entry dialog.
-#: gui\settingsDialogs.py:1132
+#: gui\settingsDialogs.py:1138
 msgid "Regular &expression"
 msgstr "正規表達式(&E)"
 
 #. Translators: The label for the combo box of dictionary entries in speech dictionary dialog.
-#: gui\settingsDialogs.py:1155
+#: gui\settingsDialogs.py:1161
 msgid "&Dictionary entries"
 msgstr "字庫項目(&D)"
 
 #. Translators: The label for a column in dictionary entries list used to identify comments for the entry.
-#: gui\settingsDialogs.py:1159
+#: gui\settingsDialogs.py:1165
 msgid "Comment"
 msgstr "註解"
 
 #. Translators: The label for a column in dictionary entries list used to identify pattern (original word or a pattern).
-#: gui\settingsDialogs.py:1161
+#: gui\settingsDialogs.py:1167
 msgid "Pattern"
 msgstr "原來文字"
 
 #. Translators: The label for a column in dictionary entries list and in a list of symbols from symbol pronunciation dialog used to identify replacement for a pattern or a symbol
-#: gui\settingsDialogs.py:1163 gui\settingsDialogs.py:1434
+#: gui\settingsDialogs.py:1169 gui\settingsDialogs.py:1440
 msgid "Replacement"
 msgstr "代替文字"
 
 #. Translators: The label for a column in dictionary entries list used to identify whether the entry is case sensitive or not.
-#: gui\settingsDialogs.py:1165
+#: gui\settingsDialogs.py:1171
 msgid "case"
 msgstr "大小寫須相符"
 
 #. Translators: The label for a column in dictionary entries list used to identify whether the entry is a regular expression or not.
-#: gui\settingsDialogs.py:1167
+#: gui\settingsDialogs.py:1173
 msgid "Regexp"
 msgstr "正規表達式"
 
 #. Translators: The label for a button in speech dictionaries dialog to add new entries.
-#: gui\settingsDialogs.py:1177
+#: gui\settingsDialogs.py:1183
 msgid "&Add"
 msgstr "新增(&A)"
 
 #. Translators: The label for a button in speech dictionaries dialog to edit existing entries.
-#: gui\settingsDialogs.py:1181
+#: gui\settingsDialogs.py:1187
 msgid "&Edit"
 msgstr "編輯(&E)"
 
 #. Translators: This is the label for the add dictionary entry dialog.
-#: gui\settingsDialogs.py:1208
+#: gui\settingsDialogs.py:1214
 msgid "Add Dictionary Entry"
 msgstr "新增字庫項目"
 
 #. Translators: This is the label for the braille settings dialog.
-#: gui\settingsDialogs.py:1254
+#: gui\settingsDialogs.py:1260
 msgid "Braille Settings"
 msgstr "點字設定"
 
 #. Translators: The label for a setting in braille settings to choose a braille display.
-#: gui\settingsDialogs.py:1259
+#: gui\settingsDialogs.py:1265
 msgid "Braille &display:"
 msgstr "點字顯示器(&D):"
 
 #. Translators: The label for a setting in braille settings to choose the connection port (if the selected braille display supports port selection).
-#: gui\settingsDialogs.py:1275
+#: gui\settingsDialogs.py:1281
 msgid "&Port:"
 msgstr "連接埠(&P):"
 
 #. Translators: The label for a setting in braille settings to select the output table (the braille table used to read braille text on the braille display).
-#: gui\settingsDialogs.py:1284
+#: gui\settingsDialogs.py:1290
 msgid "&Output table:"
 msgstr "輸出轉換表(&O)"
 
 #. Translators: The label for a setting in braille settings to select the input table (the braille table used to type braille characters on a braille keyboard).
-#: gui\settingsDialogs.py:1298
+#: gui\settingsDialogs.py:1304
 msgid "&Input table:"
 msgstr "輸入轉換表(&I)"
 
 #. Translators: The label for a setting in braille settings to expand the current word under cursor to computer braille.
-#: gui\settingsDialogs.py:1311
+#: gui\settingsDialogs.py:1317
 msgid "E&xpand to computer braille for the word at the cursor"
 msgstr "把游標之下的文字以完整電腦點字顯示(&X)"
 
 #. Translators: The label for a setting in braille settings to change cursor blink rate in milliseconds (1 second is 1000 milliseconds).
-#: gui\settingsDialogs.py:1317
+#: gui\settingsDialogs.py:1323
 msgid "Cursor blink rate (ms)"
 msgstr "游標閃示率 (以千分之一秒計)(&C)"
 
 #. Translators: The label for a setting in braille settings to change how long a message stays on the braille display (in seconds).
-#: gui\settingsDialogs.py:1326
+#: gui\settingsDialogs.py:1332
 msgid "Message timeout (sec)"
 msgstr "訊息顯示的時間 (以秒計)(&M)"
 
 #. Translators: The label for a setting in braille settings to set whether braille should be tethered to focus or review cursor.
-#: gui\settingsDialogs.py:1335
+#: gui\settingsDialogs.py:1341
 msgid "Braille tethered to:"
 msgstr "點字游標跟隨(&B)"
 
 #. Translators: The label for a setting in braille settings to read by paragraph (if it is checked, the commands to move the display by lines moves the display by paragraphs instead).
-#: gui\settingsDialogs.py:1349
+#: gui\settingsDialogs.py:1355
 msgid "Read by &paragraph"
 msgstr "以段落顯示點字(&P)"
 
 #. Translators: The label for a setting in braille settings to enable word wrap (try to avoid spliting words at the end of the braille display).
-#: gui\settingsDialogs.py:1354
+#: gui\settingsDialogs.py:1360
 msgid "Avoid splitting &words when possible"
 msgstr "可能的話避免分讀文字"
 
-#: gui\settingsDialogs.py:1369
+#: gui\settingsDialogs.py:1375
 #, python-format
 msgid "Could not load the %s display."
 msgstr "未能連接點字顯示器 %s"
 
-#: gui\settingsDialogs.py:1369
+#: gui\settingsDialogs.py:1375
 msgid "Braille Display Error"
 msgstr "連接點字顯示器失敗"
 
 #. Translators: This is the label for the symbol pronunciation dialog.
-#: gui\settingsDialogs.py:1418
+#: gui\settingsDialogs.py:1424
 msgid "Symbol Pronunciation"
 msgstr "符號讀音"
 
 #. Translators: The label for symbols list in symbol pronunciation dialog.
-#: gui\settingsDialogs.py:1430
+#: gui\settingsDialogs.py:1436
 msgid "&Symbols"
 msgstr "符號(&S)"
 
 #. Translators: The label for a column in symbols list used to identify a symbol.
-#: gui\settingsDialogs.py:1433
+#: gui\settingsDialogs.py:1439
 msgid "Symbol"
 msgstr "符號"
 
 #. Translators: The label for a column in symbols list used to identify a symbol's speech level (either none, some, most, all or character).
-#: gui\settingsDialogs.py:1436
+#: gui\settingsDialogs.py:1442
 msgid "Level"
 msgstr "報讀等級"
 
 #. Translators: The label for the edit field in symbol pronunciation dialog to change the pronunciation of a symbol.
-#: gui\settingsDialogs.py:1446
+#: gui\settingsDialogs.py:1452
 msgid "Change symbol"
 msgstr "變更符號"
 
 #. Translators: The label for the combo box in symbol pronunciation dialog to change the speech level of a symbol.
-#: gui\settingsDialogs.py:1455
+#: gui\settingsDialogs.py:1461
 msgid "&Level"
 msgstr "報讀等級(&L)"
 
@@ -6653,7 +6678,7 @@ msgstr "%s 項目"
 msgid "invoke"
 msgstr "啟用"
 
-#: NVDAObjects\window\__init__.py:367
+#: NVDAObjects\window\__init__.py:370
 msgid "Desktop"
 msgstr "桌面"
 
@@ -6663,101 +6688,196 @@ msgstr "預設顏色"
 
 #. Translators: a message reported in the SetColumnHeaderRow script for Excel.
 #. Translators: a message reported in the SetRowHeaderColumn script for Excel.
-#: NVDAObjects\window\excel.py:176 NVDAObjects\window\excel.py:193
+#: NVDAObjects\window\excel.py:193 NVDAObjects\window\excel.py:210
 msgid ""
 "Cannot set headers. Please enable reporting of table headers in Document "
 "Formatting Settings"
 msgstr "沒能設為標題, 請在文件格式設定中勾選報出表格的列及欄標題"
 
 #. Translators: a message reported in the SetColumnHeaderRow script for Excel.
-#: NVDAObjects\window\excel.py:181
+#: NVDAObjects\window\excel.py:198
 msgid "Set column header row"
 msgstr "這一列定為欄標題"
 
 #. Translators: a message reported in the SetColumnHeaderRow script for Excel.
-#: NVDAObjects\window\excel.py:185
+#: NVDAObjects\window\excel.py:202
 msgid "Cleared column header row"
 msgstr "欄標題定義取消了"
 
-#: NVDAObjects\window\excel.py:186
+#: NVDAObjects\window\excel.py:203
 msgid ""
 "Pressing once will set the current row as the row where column headers "
 "should be found. Pressing twice clears the setting."
 msgstr "按一次把目前的一列定為欄標題, 連按兩次取消定義"
 
 #. Translators: a message reported in the SetRowHeaderColumn script for Excel.
-#: NVDAObjects\window\excel.py:198
+#: NVDAObjects\window\excel.py:215
 msgid "Set row header column"
 msgstr "這一欄定為列標題"
 
 #. Translators: a message reported in the SetRowHeaderColumn script for Excel.
-#: NVDAObjects\window\excel.py:202
+#: NVDAObjects\window\excel.py:219
 msgid "Cleared row header column"
 msgstr "列標題定義取消了"
 
-#: NVDAObjects\window\excel.py:203
+#: NVDAObjects\window\excel.py:220
 msgid ""
 "Pressing once will set the current column as the column where row headers "
 "should be found. Pressing twice clears the setting."
 msgstr "按一次把目前的一欄定為列標題, 連按兩次取消定義"
 
 #. Translators: This is presented in Excel when the current cell contains a formula.
-#: NVDAObjects\window\excel.py:268
+#: NVDAObjects\window\excel.py:285
 msgid "has formula"
 msgstr "有公式"
 
 #. Translators: This is presented in Excel to show the current selection, for example 'a1 c3 through a10 c10'
-#: NVDAObjects\window\excel.py:313
+#: NVDAObjects\window\excel.py:331
 msgid "{firstAddress} {firstContent} through {lastAddress} {lastContent}"
 msgstr "{firstAddress} {firstContent} 到 {lastAddress} {lastContent}"
 
-#: NVDAObjects\window\winword.py:85
+#: NVDAObjects\window\winword.py:119
+#, fuzzy
+msgid "insertion"
+msgstr "區塊"
+
+#: NVDAObjects\window\winword.py:120
+#, fuzzy
+msgid "deletion"
+msgstr "選取"
+
+#: NVDAObjects\window\winword.py:121
+#, fuzzy
+msgid "property"
+msgstr "內容頁"
+
+#: NVDAObjects\window\winword.py:122
+#, fuzzy
+msgid "paragraph number"
+msgstr "段落"
+
+#: NVDAObjects\window\winword.py:123
+#, fuzzy
+msgid "display field"
+msgstr "點字游標捲動"
+
+#: NVDAObjects\window\winword.py:124
+msgid "reconcile"
+msgstr ""
+
+#: NVDAObjects\window\winword.py:125
+msgid "conflict"
+msgstr ""
+
+#: NVDAObjects\window\winword.py:127
+#, fuzzy
+msgid "replace"
+msgstr "代替文字"
+
+#: NVDAObjects\window\winword.py:128
+#, fuzzy
+msgid "paragraph property"
+msgstr "段落"
+
+#: NVDAObjects\window\winword.py:129
+#, fuzzy
+msgid "table property"
+msgstr "表尾"
+
+#: NVDAObjects\window\winword.py:130
+#, fuzzy
+msgid "section property"
+msgstr "已選取的都移除了"
+
+#: NVDAObjects\window\winword.py:131
+msgid "style definition"
+msgstr ""
+
+#: NVDAObjects\window\winword.py:132
+#, fuzzy
+msgid "moved from"
+msgstr "移動焦點"
+
+#: NVDAObjects\window\winword.py:133
+#, fuzzy
+msgid "moved to"
+msgstr "移到系統焦點"
+
+#: NVDAObjects\window\winword.py:134
+#, fuzzy
+msgid "cell insertion"
+msgstr "加速(&A)"
+
+#: NVDAObjects\window\winword.py:135
+#, fuzzy
+msgid "cell deletion"
+msgstr "沒有選取文字"
+
+#: NVDAObjects\window\winword.py:136
+msgid "cell merge"
+msgstr ""
+
+#: NVDAObjects\window\winword.py:140
 msgid "Comments"
 msgstr "註解"
 
-#: NVDAObjects\window\winword.py:86
+#: NVDAObjects\window\winword.py:141
 msgid "Endnotes"
 msgstr "章節附註"
 
-#: NVDAObjects\window\winword.py:87
+#: NVDAObjects\window\winword.py:142
 msgid "Even pages footer"
 msgstr "雙數頁頁尾"
 
-#: NVDAObjects\window\winword.py:88
+#: NVDAObjects\window\winword.py:143
 msgid "Even pages header"
 msgstr "雙數頁頁首"
 
-#: NVDAObjects\window\winword.py:89
+#: NVDAObjects\window\winword.py:144
 msgid "First page footer"
 msgstr "首頁頁尾"
 
-#: NVDAObjects\window\winword.py:90
+#: NVDAObjects\window\winword.py:145
 msgid "First page header"
 msgstr "首頁頁首"
 
-#: NVDAObjects\window\winword.py:91
+#: NVDAObjects\window\winword.py:146
 msgid "Footnotes"
 msgstr "註腳"
 
-#: NVDAObjects\window\winword.py:92
+#: NVDAObjects\window\winword.py:147
 msgid "Primary footer"
 msgstr "初級頁尾"
 
-#: NVDAObjects\window\winword.py:93
+#: NVDAObjects\window\winword.py:148
 msgid "Primary header"
 msgstr "初級頁首"
 
-#: NVDAObjects\window\winword.py:94
+#: NVDAObjects\window\winword.py:149
 msgid "Text frame"
 msgstr "文字框架"
 
+#: NVDAObjects\window\winword.py:348
+#, fuzzy
+msgid "unknown author"
+msgstr "未知的顏色"
+
+#: NVDAObjects\window\winword.py:349
+#, fuzzy
+msgid "unknown date"
+msgstr "不明"
+
+#: NVDAObjects\window\winword.py:350
+msgid "{revisionType} by {revisionAuthor} on {revisionDate}"
+msgstr ""
+
 #. Translators: The message reported when a user attempts to use a table movement command
 #. when the cursor is not withnin a table.
-#: NVDAObjects\window\winword.py:430 NVDAObjects\window\winword.py:440
+#: NVDAObjects\window\winword.py:542 NVDAObjects\window\winword.py:552
 msgid "Not in table"
 msgstr "不在表格中"
 
-#: NVDAObjects\window\winword.py:463
+#: NVDAObjects\window\winword.py:575
 msgid "Edge of table"
 msgstr "表格的邊緣了"
 
@@ -6859,9 +6979,6 @@ msgstr "HIMS SyncBraille"
 
 #~ msgid "Enter cell contents"
 #~ msgstr "輸入儲存格內容"
-
-#~ msgid "selection"
-#~ msgstr "選取"
 
 #~ msgid "Raise pitch for capitals"
 #~ msgstr "每當遇到大寫字母時提高音調(&R)"

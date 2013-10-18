@@ -23,7 +23,7 @@ En dikkat çeken özelliklere şunlar dahildir:
 - Braille klavyesi bulunanlardan bilgisayar braille girişi yapılmasını da kapsayan Birçok Braille (kabartma) ekran için destek
 - Kuruluma ihtiyaç duyulmaksızın bütün olarak USB bellek veya başka bir taşınabilir aygıttan çalışabilme yeteneği
 - Kullanımı kolay konuşan kurulum aracı
-- 43 dile çevrilmiş oluşu
+- 44 dile çevrilmiş oluşu
 - 32 ve 64 bit dahil modern Windows işletim sistemlerinin desteklenmesi
 - Windows Logon ve diğer güvenlik ekranlarında çalışabilme yeteneği
 - Microsoft Active Accessibility, Java Access Bridge, IAccessible2 and UI Automation, UI Automation sadece windows 7 ve sonraki işletim sistemlerinde desteklenir, gibi yaygın erişilebilirlik arayüzlerinin desteklenmesi
@@ -32,7 +32,7 @@ En dikkat çeken özelliklere şunlar dahildir:
 
 ++ Yerel Dil Desteği ++
 Dünyada nerede yaşıyor olurlarsa olsunlar ve hangi dili konuşurlarsa konuşsunlar, İnsanların teknolojiye eşit biçimde erişebilmeleri önemlidir.
-İngilizcenin yanısıra, NVDA aşağıda belirtilen 43 dile de çevrilmiştir. Afrikaca, Almanca, Amharca, Aragonca, Arapça, Arnavutça, Brezilya Portekizcesi, Bulgarca, Çekce, Danimarka dili, Dutch, Fince, Fransızca, Galiçyaca, Geleneksel ve basitleştirilmiş Çince, Gürcüce, Hırvatça, Hint dili, İbranice, İspanyolca, İsveç dili, İrlanda Dili, İtalyanca, İzlanda dili, Japonca, Korece, Lehçe, Macarca, Nepal dili, Norveççe, Portekizce, Rumence, Rusca, Slovence, Sırpça, Slovakca, Tamil dili, Tayca, Türkçe, Ukraynaca, Yunanca, ve Viyetnamca.
+İngilizcenin yanısıra, NVDA aşağıda belirtilen 44 dile de çevrilmiştir. Afrikaca, Almanca, Amharca, Aragonca, Arapça, Arnavutça, Brezilya Portekizcesi, Bulgarca, Çekce, Danimarka dili, Dutch, Farsça, Fince, Fransızca, Galiçyaca, Geleneksel ve basitleştirilmiş Çince, Gürcüce, Hırvatça, Hint dili, İbranice, İspanyolca, İsveç dili, İrlanda Dili, İtalyanca, İzlanda dili, Japonca, Korece, Lehçe, Macarca, Nepal dili, Norveççe, Portekizce, Rumence, Rusca, Slovence, Sırpça, Slovakca, Tamil dili, Tayca, Türkçe, Ukraynaca, Yunanca, ve Viyetnamca.
 
 ++ Konuşma Sentezleyici Desteği ++
 Kendi mesajları ve arayüzünü birçok dilde sağlamanın yanında, NVDA Kullanıcıların bir içeriği konuşma sentezleyiciler aracılığıyla istedikleri dilde okuyabilmelerine olanak tanır.
@@ -149,8 +149,8 @@ ikincisi, NVDA'nın Windows başladıktan sonra otomatik olarak devreye girmesiy
 ++ NVDA Klavye Komutları Hakkında ++
 
 +++ NVDA Tuşu +++
-Birçok NVDA'ya özel klavye komutu NVDA değişken tuşu adı verilen özel bir tuş ile klavyedeki başka bir tuşa basılarak meydana gelen kombinasyonlardan oluşmaktadır.
-bunun istisnaları numaratördeki tuşları kullanan metin inceleme komutlarıdır.
+Birçok NVDA'ya özel klavye komutu NVDA değişken tuşu adı verilen özel bir tuş ile klavyedeki başka tuşlara basılarak meydana gelen kombinasyonlardan oluşmaktadır.
+Masaüstü klavye düzeninde sadece numaratördeki tuşları kullanan metin inceleme komutları istisnai durumlardandır ve elbette başka istisnalar da olabilir.
 
 Numaratördeki insert, diğer insert, veya büyük harf kilidi tuşlarından birisi NVDA değişken tuşu olarak ayarlanabilir.
 
@@ -800,6 +800,9 @@ Açıksa,, bu seçenek bir karaktere basıldığında konuşmanın durmasına ne
 ==== Enter tuşuna basıldığında konuşmayı durdur ====
 Açıksa, bu seçenek enter tuşuna basıldığında konuşmanın durmasına neden olur. Varsayılan olarak açıktır.
 
+==== Tümünü okurken atlamaya izin ver ====
+Açıksa, tümünü okuma komutu verildiğinde belli dolaşma komutları kullanıldığı zaman (örneğin  tarama kipinde hızlı dolaşım tuşları  ya da  paragraf   veya satır değiştirme komutları) konuşma durdurulmaz, yerine   okuma atlanılan konumdan itibaren  devam eder.
+
 ==== Büyük Harf Kilidi Açıkken, şifte basılarak küçük harf Yazılırsa Bip Sesi Çıkar ====
 Etkinleştirildiğinde, büyük harf kilidi açıkken şift tuşuyla birlikte bir harfe basıldığında uyarı bipi duyulacaktır.
 Genellikle, büyük harf kilidi açıkken şiftle birlikte bir harf yazmak istem dışıdır ve çoğunlukla büyük harf kilidinin açık olduğunun farkında olunmamasından kaynaklanır.
@@ -847,7 +850,7 @@ içinde aşağıdaki seçenekler mevcuttur:
 ==== Sistem Odağını Takip et ====
 Kısayol tuşu: NVDA+7 |
 
-Etkinleştirildiğinde, nesne sunucusu sistem (klavye) odağını takip eder.
+Etkinleştirildiği zaman, odak değiştiğinde inceleme imleci de sistem  odağının bulunduğu nesne üzerinde konumlanır.
 
 %kc:setting
 ==== Sistem Düzenleme İmlecini takip et ====
@@ -996,6 +999,7 @@ Buradaki birçok onay kutusu belge içinde imleci hareket ettirirken hangi tür 
 - Yazı tipi özellikleri
 - Metin hizzalaması
 - Renkler
+- editör değişiklikleri
 - Metin sitilleri
 - Yazım hataları
 - Sayfa numaraları
@@ -1056,6 +1060,25 @@ Düzey alanı ise, işaretin seslendirilmesini istediğiniz en düşük imla ses
 
 Bu ayarlamaları yaptıktan sonra tamam düğmesine basarak değişiklikleri kaydedebilir; iptal düğmesiyle de değişiklik öncesi ayarlara geri dönebilirsiniz.
 
++++ Girdi Hareketleri +++
+Bu iletişim kutusunda, NVDA komutları için kullanılan hareketleri (klavyedeki tuşlar, braille ekrandaki düğmeler , vs.) özelleştirebilirsiniz.
+
+Sadece, iletişim kutusu açılmadan önce kullanılabilen  komutlar gösterilir.
+Örneğin, tarama kipiyle ilgili hareketleri özelleştirmek istiyorsanız, girdi hareketleri iletişim kutusunu tarama kipindeyken açmalısınız.
+
+BU diyalogdaki ağaç, kullanılabilen NVDA komutlarını kategoriler altında gruplanmış olarak listeler.
+Bir komutla ilişkili hareketler o komutun altında listelenir.
+
+Bir komuta girdi hareketi eklemek için, komutun üzerindeyken ekle düğmesine basın.
+Daha sonra, eklemek istediğiniz girdi hareketini yapın; örneğin klavyede tuş ya da tuş kombinasyonuna ya da braille ekranda düğmeye basın.
+Çoğu kez, bir hareket birden fazla şekilde değerlendirilebilir .
+Örneğin, klavyede bir tuşa bastıysanız, onun sadece mevcut klavye düzeni için geçerli olmasını isteyebilirsiniz (masaüstü ya da dizüstü düzenleri) ya da tüm düzenler için kaydedebilirsiniz.
+Bu durumda,, seçim yapmanız  için bir menü belirir.
+
+Bir komutla ilgili hareketi silmek için, hareket  seçiliyken  kaldır tuşuna basın.
+
+Değişiklikleri yaptıktan sonra, kaydetmek için tamam, vazgeçmek için iptal tuşuna basın .
+
 ++ Konfigürasyonu Kaydetme ve Yeniden Yükleme ++
 Varsayılan olarak, NVDA kapatılırken, konfigürasyonda yaptığınız değişiklikler kalıcı olarak kaydedilir.
 Ancak, bu seçenek tercihler menüsündeki genel ayarlar altından değiştirilebilir.
@@ -1080,7 +1103,7 @@ Kurulu bir NVDA sürümünde kendi ayarlarınızın olduğu dizine gitmek için,
 
 Logon ve Kullanıcı hesapları (UAC) gibi NVDA çalışırken kullanılan noktalardaki ayarlar, NVDA'nın kurulum dizinindeki systemConfig dizininde saklanmaktadır.
 Genellikle bu ayarlara dokunulmamalıdır.
-NVDA'nın logon ve kullanıcı hesapları ekranlarındaki ayarlarını değiştirmek için, önce NVDA ile Windows'da oturum açarken kullanılacak ayarları yapın, ve daha sonra NVDA genel ayarlar iletişim kutusundaki düğmeyi kullanarak NVDA'ya bu mevcut konfigürasyonu logon ekranına kopyalamasını söyleyin.
+NVDA'nın logon ve kullanıcı hesapları ekranlarındaki ayarlarını değiştirmek için, önce NVDA ile Windows'da oturum açarken kullanılacak ayarları yapın, AYARLARI KAYDEDİP daha sonra NVDA genel ayarlar iletişim kutusundaki düğmeyi kullanarak NVDA'ya bu mevcut konfigürasyonu logon ekranına kopyalamasını söyleyin.
 
 + Ekstra Araçlar +
 
@@ -1764,79 +1787,6 @@ Lütfen [BRLTTY tuş tabloları yardımına  http://mielke.cc/brltty/doc/drivers
 %kc:endInclude
 
 + İleri Düzey Konular +
-
-++ Tuş kombinasyonlarını Değiştirme ve Diğer Girdi Hareketleri ++
-Kullanıcılar scriptlerdeki tuş komutlarını NVDA kullanıcı dizinindeki özel bir dosyadan değiştirebilir veya yeni tuşlar sağlayabilirler.
-Bu dosyaya gestures.ini denmektedir.
-
-Bu dosya standart ini sözdizimini kullanmaktadır.
-Dosya birden fazla bölüm içerebilir ve  her bir bölümde bir ya da birden fazla girdi olabilir.
-
-Her bölüm, NVDA içindeki belirli bir Pithon modül ve sınıfındaki scriptler için tuşları belirtir.
-- Bölüm adı nokta (.) ile ayrılmış Pithon adı ve Sınıfı olmalıdır.
-- Her girdinin anahtarı , mevcut kısayol tuşuyla  etkinleştirilen scriptin adıdır.
-Alternatif olarak, bir kısayol tuşunu daha önce bağlı olduğu scriptten ayırmak için none kullanabilirsiniz.
-Lütfen, None anahtarını bir dosya içerisinde yalnızca bir kez kullanabileceğinizi not edin. Birden fazla kısayol tuşunu etkisiz kılmak için script adlarını virgül (,) ile ayırarak listeleyip None anahtarına atayabilirsiniz.
-- Script için kullanılacak kısayol tuşlarının  listelenmesinde  ayraç olarak kullanılan girdi değeri (,) virgüldür.
-liste ayracı olarak kullanılan virgülden farklı bir amaçla kullanıldığının anlaşılması için, Virgülün (,) kullanıldığı kısayol belirtenleri tek tırnak (apostrof) içine alınabilir.
--
-
-Tuş göstergeleri ya da hareketler 2 harften oluşan araç kodu (Klavye için, kb, braille için, br ve dokunma hareketi için ts), parantez içinde bir alt araç veya klavye düzeni, bir iki nokta işareti ve artı (+) işaretiyle ayrılmış tuş değerlerinden oluşmaktadır.
-- Klavye girdileri için araç kodu  kb harfleridir.
-Klavye tuş göstergeleri için [] köşeli parantez içindeki değer klavye düzenini belirtir ve isteğe bağlıdır.
-Bir değer belirtilmezse, düzenleme tüm klavye düzenleri için geçerli olur.
-İki nokta üstüste işaretinden sonraki ifade artı işareti (+) ile ayrılmış bir ya da birden fazla tuş adıdır
-- Braille ekran girdileri için  araç kodu br harfleridir.
-Braille tuş göstergeleri içinse köşeli parantez içindeki değer braille ekranı belirtir ve değer belirtilmesi zorunludur.
-İki nokta üstüste işaretinden sonraki ifade artı işareti (+) ile ayrılmış bir ya da birden fazla tuş adıdır
-- Dokunma hareketleri için , araç kodu ts harfleridir.
-Dokunma hareketleri için, parantez içindeki kısım dokunma kipini belirtir ve isteğe bağlıdır.
-İki nokta üstüste işaretinden sonraki ifade de double_tap, 2fingerflickUp ya da  3finger_tap gibi bir dokunma hareketidir.
--
-
-Girdi göstergelerini, script adlarını, ve içinde bulundukları class ve modülleri keşfetmek için şunları yapın:
-+ Girdi Yardımını açın.
-+ Girdi hareketini etkinleştirin (istediğiniz tuşa veya tuş kombinasyonuna basın ya da bir dokunma hareketi yapın).
-+ Girdi Yardımını kapatın.
-+ NVDA araçlar menüsünden kayıt görüntüleyi (log görüntüle) açın.
-+ Son girilen kayıtları inceleyin.
-Bu kayıtlardan birisinde, bastığınız tuş kombinasyonu, ve eğer varsa bağlı olduğu script, modül ve sınıf bilgisi yer alacaktır.
-+
-
-Aşağıda NVDA+Şift+T tuşlarını DateTime (tarih saat) scriptine nasıl bağlayabileceğinizin örneği bulunmaktadır.
-
-Tarih Saat için doğru script adı, modül ve sınıfı bulmak için, önce girdi yardım kipini açıp, Tarih saatin tuş kombinasyonu olan NVDA+f12'ye basın.
-Daha sonra girdi yardım kipini kapatın ve log (kayıt) görüntüleyicisini inceleyin.
-
-Sonlara doğru şunu göreceksiniz:
-
-```
-INFO - inputCore.InputManager._handleInputHelp (13:17:22):
-Input help: gesture kb(desktop):NVDA+f12, bound to script dateTime on globalCommands.GlobalCommands
-```
-
-Buradan, script adının dateTime olduğunu, Modül.sınıfın ise globalCommands.GlobalCommands olduğunu anlayabilirsiniz.
-
-Eğer dosya henüz yoksa, NVDA User Configuration Directory içersinde gestures.ini adında bir metin dosyası oluşturabilir ve içine şunu ekleyebilirsiniz:
-
-```
-[globalCommands.GlobalCommands]
-	dateTime = kb:NVDA+shift+t
-```
-
-Bu, tüm klavye düzenlerinde NVDA+Şift+t tuşlarını tarih saati söylemek üzere ayarlayacak ve bu tuşları DateTime scriptine bağlayacaktır.
-
-Halen Özgün NVDA+F12 bağlantısının çalıştığını aklınızda tutun.
-Eğer bu bağlantıyı kaldırmak istiyorsanız, şu satırı ekleyebilirsiniz:
-
-```
-	None = kb:NVDA+f12
-```
-
-Scriptleri mevcut tüm tuşlara bağlamakta özgür olmanıza karşın, klavyedeki alt tuşunu kullanmak sorunlu olabilir.
-NVDA bir scripte bağlanmış olsalar bile, Şift, Alt Kontrol gibi değişken tuşları halen işletim sistemine göndermektedir.
-Bu nedenle, Alt tuşunu bir girdi hareketinde kullanırsanız, bu tuşa basmak scriptinizi etkinleştirmenin yanında menü çubuğunu da açabilir.
-Yani, Kontrol, Şift veya NVDA tuşlarını scriptlerde değişken tuş olarak kullanmak daha faydalı olacaktır.
 
 ++ Noktalama/imla Seslendirmesiyle İlgili İleri Düzey Ayarlamalar ++
 Noktalama ya da başka işaretlerin nasıl seslendirileceğiyle ilgili [Noktalama/imla sözlüğü #SymbolPronunciation] iletişim kutusunu kullanarak değiştirebileceğinizden daha fazla ayarlama da yapmanız mümkündür.
