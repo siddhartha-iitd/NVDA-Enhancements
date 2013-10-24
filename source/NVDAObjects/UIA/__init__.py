@@ -725,7 +725,12 @@ class ComboBoxWithoutValuePattern(UIA):
 
 	def _get_value(self):
 		try:
-			return self.UIASelectionPattern.GetCurrentSelection().GetElement(0).CurrentName
+			currentItem=self.UIASelectionPattern.GetCurrentSelection().getElement(0)
+			selectedObj=UIA(UIAElement=currentItem.buildUpdatedCache(UIAHandler.handler.baseCacheRequest))
+			if selectedObj:
+				return selectedObj.name
+			else:
+				return currentItem.currentName
 		except COMError:
 			return None
 
@@ -740,6 +745,15 @@ class ListItem(UIA):
 				parent.event_valueChange()
 		super(ListItem, self).event_stateChange()
 
+	def _get_name(self):
+		name=super(ListItem,self).name				
+		# This is an item in a combo box without the Value pattern or in a list box.
+		#if this is rendered using a data template, pick the name from the child.
+		child=self.simpleFirstChild
+		if child:
+			name=child.name
+		return name
+				
 class Dialog(Dialog):
 	role=controlTypes.ROLE_DIALOG
 
