@@ -544,6 +544,11 @@ class WordDocument(EditableTextWithoutAutoSelectDetection, Window):
 	def script_tab(self,gesture):
 		gesture.send()
 		info=self.makeTextInfo(textInfos.POSITION_SELECTION)
+		paragraphs=info._rangeObj.Paragraphs
+		for paragraph in paragraphs:
+			if paragraph.Range.ListFormat.ListString:
+				text=str(paragraph.Range.ListFormat.ListString)+str(paragraph.Range.text)
+				speech.speakText(_(text))
 		if not info.isCollapsed or info._rangeObj.tables.count>0:
 			speech.speakTextInfo(info,reason=controlTypes.REASON_FOCUS)
 		braille.handler.handleCaretMove(info)
