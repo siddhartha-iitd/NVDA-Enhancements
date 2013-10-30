@@ -115,6 +115,10 @@ wdRevisionCellInsertion=16
 wdRevisionCellDeletion=17
 wdRevisionCellMerge=18
 
+#constants to identify the list formatting used(bullets)
+wdListBullet=2
+wdListPictureBullet=6
+
 wdRevisionTypeLabels={
 	# Translators: a Microsoft Word revision type (inserted content) 
 	wdRevisionInsert:_("insertion"),
@@ -547,7 +551,10 @@ class WordDocument(EditableTextWithoutAutoSelectDetection, Window):
 		paragraphs=info._rangeObj.Paragraphs
 		for paragraph in paragraphs:
 			if paragraph.Range.ListFormat.ListString:
-				text=str(paragraph.Range.ListFormat.ListString)+str(paragraph.Range.text)
+				if paragraph.Range.ListFormat.ListType in (wdListBullet,wdListPictureBullet) :
+					text=" bullet "+str(paragraph.Range.text)
+				else :
+					text=str(paragraph.Range.ListFormat.ListString)+str(paragraph.Range.text)
 				speech.speakText(_(text))
 		if not info.isCollapsed or info._rangeObj.tables.count>0:
 			speech.speakTextInfo(info,reason=controlTypes.REASON_FOCUS)
