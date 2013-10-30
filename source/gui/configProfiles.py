@@ -122,7 +122,7 @@ class ProfilesDialog(wx.Dialog):
 				# in the Configuration Profiles dialog.
 				states.append(_("manual"))
 			if profile.triggered:
-				# Translators: Reported for a profile which has been triggered
+				# Translators: Reported for a profile which is currently triggered
 				# in the Configuration Profiles dialog.
 				states.append(_("triggered"))
 		if states:
@@ -193,7 +193,7 @@ class ProfilesDialog(wx.Dialog):
 		else:
 			# Translators: The label of the button to manually activate the selected profile
 			# in the Configuration Profiles dialog.
-			label = _("Manual activate/edit")
+			label = _("Manual activate")
 		self.changeStateButton.Label = label
 		self.changeStateButton.Enabled = enable
 		if globalVars.appArgs.secure:
