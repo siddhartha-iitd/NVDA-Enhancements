@@ -115,6 +115,10 @@ wdRevisionCellInsertion=16
 wdRevisionCellDeletion=17
 wdRevisionCellMerge=18
 
+#Constants to identify the type of list formatting used(bulleted lists)
+wdListBullet=2
+wdListPictureBullet=6
+
 wdRevisionTypeLabels={
 	# Translators: a Microsoft Word revision type (inserted content) 
 	wdRevisionInsert:_("insertion"),
@@ -446,9 +450,25 @@ class WordDocumentTextInfo(textInfos.TextInfo):
 		return WordDocumentTextInfo(self.obj,None,_rangeObj=self._rangeObj)
 
 	def _get_text(self):
-		text=self._rangeObj.text
-		if not text:
-			text=""
+		text=""
+		start=self._rangeObj.Start
+		end=self._rangeObj.End
+		if self._rangeObj.ListFormat.ListString:
+			for para in self._rangeObj.Paragraphs:
+				Range=para.Range
+				if Range.Start < start:
+					Range.Start=start
+				if Range.End > end:
+					Range.End=end
+				if Range.ListFormat.ListString:
+					if Range.ListFormat.ListType in (wdListPictureBullet,wdListBullet) :
+						text=text+" bullet "+str(Range.text)
+					else :
+						text=text+str(Range.ListFormat.ListString)+" "+str(Range.text)
+				else :
+					text=text+str(Range.text)
+		else :
+			text=self._rangeObj.text
 		return text
 
 	def move(self,unit,direction,endPoint=None):
