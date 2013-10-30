@@ -554,7 +554,7 @@ class WordDocument(EditableTextWithoutAutoSelectDetection, Window):
 				if paragraph.Range.ListFormat.ListType in (wdListBullet,wdListPictureBullet) :
 					text=" bullet "+str(paragraph.Range.text)
 				else :
-					text=str(paragraph.Range.ListFormat.ListString)+str(paragraph.Range.text)
+					text=" bullet "+str(paragraph.Range.ListFormat.ListString)+str(paragraph.Range.text)
 				speech.speakText(_(text))
 		if not info.isCollapsed or info._rangeObj.tables.count>0:
 			speech.speakTextInfo(info,reason=controlTypes.REASON_FOCUS)
