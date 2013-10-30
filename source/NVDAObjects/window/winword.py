@@ -464,7 +464,7 @@ class WordDocumentTextInfo(textInfos.TextInfo):
 					if Range.ListFormat.ListType in (wdListPictureBullet,wdListBullet) :
 						text=text+" bullet "+str(Range.text)
 					else :
-						text=text+str(Range.ListFormat.ListString)+" "+str(Range.text)
+						text=text+" bullet "+str(Range.ListFormat.ListString)+" "+str(Range.text)
 				else :
 					text=text+str(Range.text)
 		else :
