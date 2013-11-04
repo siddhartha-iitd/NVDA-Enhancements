@@ -7,6 +7,7 @@
 from comtypes import COMError
 import comtypes.automation
 import wx
+import time
 import re
 import oleacc
 import ui
@@ -14,6 +15,8 @@ import config
 import textInfos
 import colors
 import eventHandler
+import api
+from logHandler import log
 import gui
 import winUser
 from displayModel import DisplayModelTextInfo
@@ -21,9 +24,6 @@ import controlTypes
 from . import Window
 from .. import NVDAObjectTextInfo
 import scriptHandler
-import speech
-import characterProcessing
-import controlTypes
 
 xlA1 = 1
 xlRC = 2
@@ -46,7 +46,8 @@ class ExcelBase(Window):
 		text=cell.Address(False, False, format, external)
 		textList=text.split(':')
 		if len(textList)==2:
-			text=_("%s through %s")%(textList[0],textList[1])
+			# Translators: Used to express an address range in excel.
+			text=_("{start} through {end}").format(start=textList[0], end=textList[1])
 		return text
 
 	def fireFocusOnSelection(self):
@@ -183,21 +184,42 @@ class ExcelCell(ExcelBase):
 		if rowHeaderColumn and columnNumber>rowHeaderColumn:
 			return self.excelCellObject.parent.cells(rowNumber,rowHeaderColumn).text
 
-	def _get_dropdown(self):
+	def _getDropdown(self):
 		w=winUser.getAncestor(self.windowHandle,winUser.GA_ROOT)
-		if not w: return
+		if not w:
+			log.debugWarning("Could not get ancestor window (GA_ROOT)")
+			return
 		obj=Window(windowHandle=w,chooseBestAPI=False)
-		if not obj: return
-		prev=obj.previous
-		if not prev or prev.windowClassName!='EXCEL:': return
-		return prev
+		if not obj:
+			log.debugWarning("Could not instnaciate NVDAObject for ancestor window")
+			return
+		threadID=obj.windowThreadID
+		while not eventHandler.isPendingEvents("gainFocus"):
+			obj=obj.previous
+			if not obj or not isinstance(obj,Window) or obj.windowThreadID!=threadID:
+				log.debugWarning("Could not locate dropdown list in previous objects")
+				return
+			if obj.windowClassName=='EXCEL:':
+				break
+		return obj
 
 	def script_openDropdown(self,gesture):
 		gesture.send()
-		d=self.dropdown
-		if d:
-			d.parent=self
-			eventHandler.queueEvent("gainFocus",d)
+		count=0
+		d=None
+		while count<5:
+			d=self._getDropdown()
+			if d:
+				break
+			count+=1
+			log.debugWarning("get dropdown fail %d"%count)
+			api.processPendingEvents(processEventQueue=False)
+			time.sleep(0.1)
+		if not d:
+			log.debugWarning("Failed to get dropDown, giving up")
+			return
+		d.parent=self
+		eventHandler.queueEvent("gainFocus",d)
 
 	def script_setColumnHeaderRow(self,gesture):
 		scriptCount=scriptHandler.getLastScriptRepeatCount()
@@ -254,7 +276,14 @@ class ExcelCell(ExcelBase):
 		self.excelCellObject=excelCellObject
 		super(ExcelCell,self).__init__(windowHandle=windowHandle)
 
-	role=controlTypes.ROLE_TABLECELL
+	def _get_role(self):
+		try:
+			linkCount=self.excelCellObject.hyperlinks.count
+		except (COMError,NameError,AttributeError):
+			linkCount=None
+		if linkCount:
+			return controlTypes.ROLE_LINK
+		return controlTypes.ROLE_TABLECELL
 
 	TextInfo=ExcelCellTextInfo
 
@@ -269,10 +298,8 @@ class ExcelCell(ExcelBase):
 			return False
 		return thisAddr==otherAddr
 
-	name=None
-
 	def _get_cellCoordsText(self):
-		return self.getCellAddress(self.excelCellObject) 
+		return self.getCellAddress(self.excelCellObject)
 
 	def _get__rowAndColumnNumber(self):
 		rc=self.excelCellObject.address(False,False,xlRC,False)
@@ -290,23 +317,26 @@ class ExcelCell(ExcelBase):
 		ID="%s %s"%(ID,self.windowHandle)
 		return ID
 
-		
-	def _get_value(self):
+	def _get_name(self):
 		return self.excelCellObject.Text
 
-	def _get_description(self):
-		hasFormula = self.excelCellObject.HasFormula 
-		hasComment = self.excelCellObject.Comment != None
-		hasLink = self.excelCellObject.HyperLinks.Count >= 1
-		# Translators: This is presented in Excel when the current cell contains a formula or comment or link
-		say = [ _("has") ]
-		if hasFormula:
-			say.append(_("formula"))
-		if hasComment:
-			say.append(_("comment"))
-		if hasLink:
-			say.append(_("link"))
-		return " ".join(say) if len(say) > 1 else ""
+	def _get_states(self):
+		states=super(ExcelCell,self).states
+		if self.excelCellObject.HasFormula:
+			states.add(controlTypes.STATE_HASFORMULA)
+		try:
+			validationType=self.excelCellObject.validation.type
+		except (COMError,NameError,AttributeError):
+			validationType=None
+		if validationType==3:
+			states.add(controlTypes.STATE_HASPOPUP)
+		try:
+			comment=self.excelCellObject.comment
+		except (COMError,NameError,AttributeError):
+			comment=None
+		if comment:
+			states.add(controlTypes.STATE_HASCOMMENT)
+		return states
 
 	def _get_parent(self):
 		worksheet=self.excelCellObject.Worksheet
@@ -328,57 +358,10 @@ class ExcelCell(ExcelBase):
 		if previous:
 			return ExcelCell(windowHandle=self.windowHandle,excelWindowObject=self.excelWindowObject,excelCellObject=previous)
 
-	lastCell = ""
-	script_states = { }
-
-	def resetStatesIfCellChanged(self):
-		""" resets all states if user has moved to a different cell """
-		if self.lastCell != self.excelCellObject.Address(False,False,1,False):
-			self.lastCell = self.excelCellObject.Address(False,False,1,False)
-			self.script_states = { }
-
-	def nextState(self, script_name, highest_value):
-		""" Usage: st = self.nextState('foo',2), goes 0/1/2/0/1/2.. on succesive calls """
-		try:
-			val = self.script_states[script_name]
-			val = val + 1 if val < highest_value else 0
-		except:
-			val = 0
-		self.script_states[script_name] = val
-		return val
-
-	
-
-	def script_moreInfo(self, gesture):
-		self.resetStatesIfCellChanged()
-		state = self.nextState('moreInfo',2)
-		
-		if state  == 0:
-			if self.excelCellObject.HasFormula:
-				speech.speakText( _("formula is {formula}").format(formula=self.excelCellObject.Formula),reason=controlTypes.REASON_MESSAGE,symbolLevel=characterProcessing.SYMLVL_ALL)
-			else:
-				speech.speakMessage( _("no formula"))
-		if state  == 1:
-			cmt = self.excelCellObject.Comment
-			if cmt:
-				speech.speakMessage( _("comment is {comment}").format(comment=cmt.Text()))
-			else:
-				speech.speakMessage( _("no comment"))
-		if state  == 2:
-			links = self.excelCellObject.Hyperlinks
-			## For now, speak only the first link. FIXME
-			if self.excelCellObject.HyperLinks.Count >= 1:
-				speech.speakMessage( _("link to {link}").format(link=self.excelCellObject.HyperLinks.Item(1).Address))
-			else:
-				speech.speakMessage( _("no link"))
-	script_moreInfo.__doc__=_("Press multiple times to know cell formula, comment and link")
-
-
 	__gestures = {
 		"kb:NVDA+shift+c": "setColumnHeaderRow",
 		"kb:NVDA+shift+r": "setRowHeaderColumn",
 		"kb:alt+downArrow":"openDropdown",
-		"kb:NVDA+shift+m": "moreInfo",
 	}
 
 class ExcelSelection(ExcelBase):
@@ -457,12 +440,12 @@ class ExcelDropdown(Window):
 		children=[]
 		index=0
 		states=set()
-		for item in DisplayModelTextInfo(self,textInfos.POSITION_ALL).getTextWithFields(): 
+		for item in DisplayModelTextInfo(self,textInfos.POSITION_ALL).getTextWithFields():
 			if isinstance(item,textInfos.FieldCommand) and item.command=="formatChange":
 				states=set([controlTypes.STATE_SELECTABLE])
 				foreground=item.field.get('color',None)
 				background=item.field.get('background-color',None)
-				if (background,foreground)==self._highlightColors: 
+				if (background,foreground)==self._highlightColors:
 					states.add(controlTypes.STATE_SELECTED)
 			if isinstance(item,basestring):
 				obj=ExcelDropdownItem(parent=self,name=item,states=states,index=index)
@@ -517,4 +500,4 @@ class ExcelDropdown(Window):
 class ExcelMergedCell(ExcelCell):
 
 	def _get_cellCoordsText(self):
-		return self.getCellAddress(self.excelCellObject.mergeArea) 
+		return self.getCellAddress(self.excelCellObject.mergeArea)
