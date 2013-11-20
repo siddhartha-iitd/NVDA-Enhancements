@@ -3,6 +3,15 @@ To run as admin, right click on the install-cert.bat file or in windows explorer
 Alternatively, open a command prompt as an administrator. cd to the folder containing this file and run install-cert.bat. Doing this will help you see any errors generated while running the bat file.
 
 This document will contain a running list of the fixes included in the cumulative build. the cumulative build is based on the "next" nvda branch with all the bug fixes done by the India team so far even if they haven't yet been accepted by the NVDA developers.
+
+Nov 19, 2013 
+- REPATCH: #2920 : Excel: Reading and editing of comments currently not possible
+
+
+Oct 2013
+  Redoing to base all the feature branches and in_next branch on master.
+  All features will have to repatched now
+
 sep 21, 2013
 - #3538: Office 2010, NVDA now reads the selected symbols in the insert|symbols dialog box in word and excel 2010
 - #2921: Excel , NVDA will say 'has comment' if cell has comment on it
