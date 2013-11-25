@@ -827,7 +827,7 @@ class SlideShowWindow(PaneClassDC):
 				bulletText=getBulletText(p.paragraphFormat.bullet)
 				# Translators: This is spoken along with the indent level for a bullet item.
 				levelText=_("level")
-				indentText = ' '.join([levelText,str(p.indentLevel)]) if not bulletText == None else ''
+				indentText = ' '.join([levelText,str(p.indentLevel)]) if bulletText is not None else ''
 				text=p.text.replace('\x0b','\n')
 				text=text.replace('\r','\n')
 				text=text.rstrip()
