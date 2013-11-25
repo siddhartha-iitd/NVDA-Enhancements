@@ -645,6 +645,11 @@ class TextFrameTextInfo(textInfos.offsets.OffsetsTextInfo):
 			bulletText=getBulletText(b)
 			if bulletText:
 				formatField['line-prefix']=bulletText
+		indentLevel=str(curRun.indentLevel)
+		if formatConfig['reportLineIndentation']:
+			# Translators: This is spoken along with the indent level when report line indentation is turned on.
+			levelText=_("level")
+			formatField['line-prefix']=' '.join([levelText,indentLevel,formatField['line-prefix']]) if 'line-prefix' in formatField.keys() else ''
 		font=curRun.font
 		if formatConfig['reportFontName']:
 			formatField['font-name']=font.name
@@ -820,10 +825,13 @@ class SlideShowWindow(PaneClassDC):
 		if shape.hasTextFrame:
 			for p in shape.textFrame.textRange.paragraphs(): 
 				bulletText=getBulletText(p.paragraphFormat.bullet)
+				# Translators: This is spoken along with the indent level for a bullet item.
+				levelText=_("level")
+				indentText = ' '.join([levelText,str(p.indentLevel)]) if not bulletText == None else ''
 				text=p.text.replace('\x0b','\n')
 				text=text.replace('\r','\n')
 				text=text.rstrip()
-				text=" ".join([t for t in (bulletText,text) if t])
+				text=" ".join([t for t in (indentText,bulletText,text) if t])
 				if text and not text.isspace():
 					yield text
 			return
