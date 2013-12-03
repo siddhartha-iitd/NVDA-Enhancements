@@ -598,20 +598,32 @@ class CellsListDialog(wx.Dialog):
                 try:
                         wholerange = self.cells.SpecialCells(type)
                         areacount = wholerange.Areas.Count
-                        thisarea = 0
                         for range in wholerange.Areas:
-                                thisarea += 1
                                 ## Make Node for Range
                                 first=range.Item(1).Address(False,False,1,False)
                                 last=range.Cells.Item(range.Cells.Count).Address(False,False,1,False)
                                 text ="Area from {first} to {last}".format(first=first,last=last)
-                                this = self.tree.AppendItem(self.treeRoot,text)
+                                this = self.tree.AppendItem(self.treeRoot,text,data=wx.TreeItemData(range))
                                 for cell in range.Cells:
-                                        text= cell.address(False,False,1,False) + " " + fn(cell)
-                                        self.tree.AppendItem(this,text)
+                                        addr = cell.address(False,False,1,False)
+                                        text= addr + " " + fn(cell)
+                                        self.tree.AppendItem(this,text,data=wx.TreeItemData(cell))
                 except (COMError):
                         self.tree.AppendItem(self.treeRoot,_("No matching cells"))
                 
+        def onTreeChar(self,evt):
+                if evt.GetKeyCode() == wx.WXK_RETURN:
+                        range = self.tree.GetPyData(self.tree.GetSelection())
+                        range.Select()
+                        self.Close()
+                        #first=range.Item(1).Address(False,False,1,False)
+                        #last=range.Cells.Item(range.Cells.Count).Address(False,False,1,False)
+                        #text ="Area from {first} to {last}".format(first=first,last=last)
+                        #self.tree.AppendItem(self.treeRoot,text)
+                        
+                        pass
+                evt.Skip()
+
 	def __init__(self, cells):
 
 		# Translators: The title of the browse mode Elements List dialog.
@@ -644,19 +656,19 @@ class CellsListDialog(wx.Dialog):
 		self.tree = wx.TreeCtrl(self, wx.ID_ANY, style=wx.TR_HAS_BUTTONS | wx.TR_HIDE_ROOT | wx.TR_SINGLE)
 		#self.tree.Bind(wx.EVT_SET_FOCUS, self.onTreeSetFocus)
 		#self.tree.Bind(wx.EVT_CHAR, self.onTreeChar)
+		self.tree.Bind(wx.EVT_CHAR, self.onTreeChar)
 		self.treeRoot = self.tree.AddRoot("root")
 		mainSizer.Add(self.tree,proportion=7,flag=wx.EXPAND)
 
 		sizer = wx.BoxSizer(wx.HORIZONTAL)
 		sizer.Add(wx.Button(self, wx.ID_CANCEL))
+		#sizer.Add(wx.Button(self, wx.ID_OK))
 		mainSizer.Add(sizer,proportion=1)
 
 		mainSizer.Fit(self)
 		self.SetSizer(mainSizer)
 
 		self.treeRoot = self.tree.AddRoot("Root")
-		
-		#self.range = range
-		#self.tree.ExpandAll()
-		#self.tree.SetFocus()
+		self.populate(None)
+		self.tree.SetFocus()
 
