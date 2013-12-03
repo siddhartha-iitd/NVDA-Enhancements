@@ -27,8 +27,10 @@ import scriptHandler
 import speech
 
 
+from msoffice_constants import  xlCellType
 xlA1 = 1
 xlRC = 2
+xlUnderlineStyleNone=-4142
 
 re_RC=re.compile(r'R(?:\[(\d+)\])?C(?:\[(\d+)\])?')
 
@@ -149,6 +151,18 @@ class ExcelWorksheet(ExcelBase):
 			eventHandler.executeEvent('gainFocus',newSelection)
 	script_changeSelection.canPropagate=True
 
+        def script_cellSelectionPopup(self, gesture):
+		# We need this to be a modal dialog, but it mustn't block this script.
+                def run():
+                        gui.mainFrame.prePopup()
+                        d = CellsListDialog(self.excelWorksheetObject.Cells)
+                        d.ShowModal()
+                        d.Destroy()
+                        gui.mainFrame.postPopup()
+                wx.CallAfter(run)
+                
+	script_cellSelectionPopup.canPropagate=True
+
 	__changeSelectionGestures = (
 		"kb:tab",
 		"kb:shift+tab",
@@ -183,7 +197,10 @@ class ExcelWorksheet(ExcelBase):
 		"kb:control+a",
 		"kb:control+v",
 	)
-
+	__gestures={
+		"kb:NVDA+f7":"cellSelectionPopup",
+        }
+                
 class ExcelCellTextInfo(NVDAObjectTextInfo):
 
 	def _getFormatFieldAndOffsets(self,offset,formatConfig,calculateOffsets=True):
@@ -196,7 +213,8 @@ class ExcelCellTextInfo(NVDAObjectTextInfo):
 		if formatConfig['reportFontAttributes']:
 			formatField['bold']=fontObj.bold
 			formatField['italic']=fontObj.italic
-			formatField['underline']=fontObj.underline
+			underline=fontObj.underline
+			formatField['underline']=False if underline is None or underline==xlUnderlineStyleNone else True
 		if formatConfig['reportColor']:
 			try:
 				formatField['color']=colors.RGB.fromCOLORREF(int(fontObj.color))
@@ -542,3 +560,109 @@ class ExcelMergedCell(ExcelCell):
 
 	def _get_cellCoordsText(self):
 		return self.getCellAddress(self.excelCellObject.mergeArea)
+
+class CellsListDialog(wx.Dialog):
+        
+        ## View modes, flat, tree etc.
+        modeRegionColCell = 0
+        modeRegionRowCell = 1
+        modeRegionCell = 2
+        modeCell = 3
+        modes = { #modeCell : _("Cells (Flat)"),
+                  modeRegionCell : _("Area / Cell"),
+                  #modeRegionRowCell : _("Area / Row / Cell"),
+                  #modeRegionColCell : _("Area / Col / Cell"),
+        }
+        types = { 
+                xlCellType.xlCellTypeComments : xlCellType.get(xlCellType.xlCellTypeComments),
+                xlCellType.xlCellTypeFormulas : xlCellType.get(  xlCellType.xlCellTypeFormulas  ),
+        }
+        
+
+        def populate(self,evt):
+                type = self.typeCombo.GetClientData(self.typeCombo.GetSelection())
+                mode = self.viewCombo.GetClientData(self.viewCombo.GetSelection())
+                self.tree.DeleteChildren(self.treeRoot)
+                if type == xlCellType.xlCellTypeComments :
+                        fn = lambda x: x.Comment.Text()
+                elif type == xlCellType.xlCellTypeFormulas :
+                        fn = lambda x: x.Formula
+                else:
+                        fn = lambda x: x.Text
+                try:
+                        wholerange = self.cells.SpecialCells(type)
+                        areacount = wholerange.Areas.Count
+                        for range in wholerange.Areas:
+                                ## Make Node for Range
+                                first=range.Item(1).Address(False,False,1,False)
+                                last=range.Cells.Item(range.Cells.Count).Address(False,False,1,False)
+                                text ="Area from {first} to {last}".format(first=first,last=last)
+                                this = self.tree.AppendItem(self.treeRoot,text,data=wx.TreeItemData(range))
+                                for cell in range.Cells:
+                                        addr = cell.address(False,False,1,False)
+                                        text= addr + " " + fn(cell)
+                                        self.tree.AppendItem(this,text,data=wx.TreeItemData(cell))
+                except (COMError):
+                        self.tree.AppendItem(self.treeRoot,_("No matching cells"))
+                
+        def onTreeChar(self,evt):
+                if evt.GetKeyCode() == wx.WXK_RETURN:
+                        range = self.tree.GetPyData(self.tree.GetSelection())
+                        range.Select()
+                        self.Close()
+                        #first=range.Item(1).Address(False,False,1,False)
+                        #last=range.Cells.Item(range.Cells.Count).Address(False,False,1,False)
+                        #text ="Area from {first} to {last}".format(first=first,last=last)
+                        #self.tree.AppendItem(self.treeRoot,text)
+                        
+                        pass
+                evt.Skip()
+
+	def __init__(self, cells):
+
+		# Translators: The title of the browse mode Elements List dialog.
+                self.cells = cells
+		super(CellsListDialog, self).__init__(gui.mainFrame, wx.ID_ANY, _("Cell List"))
+		mainSizer = wx.BoxSizer(wx.VERTICAL)
+                
+		typeSizer=wx.BoxSizer(wx.HORIZONTAL)                
+		typeLabel=wx.StaticText(self,-1,label=_("Cells to &show:"))
+                self.typeCombo = wx.Choice(self,wx.ID_ANY)
+                for x in self.types.keys():
+                        self.typeCombo.Append(self.types[x],x)
+                self.typeCombo.SetSelection(0)
+                self.typeCombo.Bind(wx.EVT_CHOICE,self.populate)
+                typeSizer.Add(typeLabel)
+                typeSizer.Add(self.typeCombo)
+                mainSizer.Add(typeSizer)
+
+		viewSizer=wx.BoxSizer(wx.HORIZONTAL)                
+		viewLabel=wx.StaticText(self,-1,label=_("Viewing &mode"))
+                self.viewCombo = wx.Choice(self,wx.ID_ANY)
+                for x in self.modes.keys():
+                        self.viewCombo.Append(self.modes[x],x)
+                self.viewCombo.SetSelection(0)
+                self.viewCombo.Bind(wx.EVT_CHOICE,self.populate)
+                viewSizer.Add(viewLabel)
+                viewSizer.Add(self.viewCombo)
+                mainSizer.Add(viewSizer)
+
+		self.tree = wx.TreeCtrl(self, wx.ID_ANY, style=wx.TR_HAS_BUTTONS | wx.TR_HIDE_ROOT | wx.TR_SINGLE)
+		#self.tree.Bind(wx.EVT_SET_FOCUS, self.onTreeSetFocus)
+		#self.tree.Bind(wx.EVT_CHAR, self.onTreeChar)
+		self.tree.Bind(wx.EVT_CHAR, self.onTreeChar)
+		self.treeRoot = self.tree.AddRoot("root")
+		mainSizer.Add(self.tree,proportion=7,flag=wx.EXPAND)
+
+		sizer = wx.BoxSizer(wx.HORIZONTAL)
+		sizer.Add(wx.Button(self, wx.ID_CANCEL))
+		#sizer.Add(wx.Button(self, wx.ID_OK))
+		mainSizer.Add(sizer,proportion=1)
+
+		mainSizer.Fit(self)
+		self.SetSizer(mainSizer)
+
+		self.treeRoot = self.tree.AddRoot("Root")
+		self.populate(None)
+		self.tree.SetFocus()
+

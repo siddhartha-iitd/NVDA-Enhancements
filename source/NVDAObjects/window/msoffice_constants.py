@@ -103,3 +103,27 @@ class xlLineStyle(xlConstant):
 		xlSlantDashDot                :_("slant dash dot"),
 	}
 	
+class xlCellType(xlConstant):
+	xlCellTypeAllFormatConditions =-4172      # from enum XlCellType
+	xlCellTypeAllValidation       =-4174      # from enum XlCellType
+	xlCellTypeBlanks              =4          # from enum XlCellType
+	xlCellTypeComments            =-4144      # from enum XlCellType
+	xlCellTypeConstants           =2          # from enum XlCellType
+	xlCellTypeFormulas            =-4123      # from enum XlCellType
+	xlCellTypeLastCell            =11         # from enum XlCellType
+	xlCellTypeSameFormatConditions=-4173      # from enum XlCellType
+	xlCellTypeSameValidation      =-4175      # from enum XlCellType
+	xlCellTypeVisible             =12         # from enum XlCellType
+
+	_map = { 
+		xlCellTypeAllFormatConditions :_("any format"),
+		xlCellTypeAllValidation       :_("validatio"),
+		xlCellTypeBlanks              :_("empty cell"),
+		xlCellTypeComments            :_("comment"),
+		xlCellTypeConstants           :_("constant"),
+		xlCellTypeFormulas            :_("formula"),
+		xlCellTypeLastCell            :_("last cell"),
+		xlCellTypeSameFormatConditions:_("same format conditions"),
+		xlCellTypeSameValidation      :_("same validation"),
+		xlCellTypeVisible             :_("visible"),
+	}
