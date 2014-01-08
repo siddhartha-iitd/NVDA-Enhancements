@@ -3,6 +3,39 @@ Que hai de Novo no NVDA
 
 %!includeconf: ../changes.t2tconf
 
+= 2014.1 =
+
+== Novas Características ==
+- Soporte para o Microsoft PowerPoint 2013. Ten en conta que a Vista protexida non está soportada. (#3578)
+- No Microsoft word e Excel, NVDA agora pode ler o símbolo selecionado cando se escollan símbolos utilizando o diálogo Insertar Símbolos. (#3538)
+- Agora é posible escoller se o contido nos documentos debería identificarse  como cliqueable, a través dunha nova opción no diálogo Formateado de Documentos. Esta opción está activada por defecto (comportamento anterior). (#3556)
+- Soporte para as pantallas braille conectadas a través do Bluetooth nun computador executando o  Software de Widcomm Bluetooth. (#2418)
+- Cando se edita texto no PowerPoint, agora anúncianse os hipervínculos. (#3416)
+
+
+== Cambios ==
+- Para as pantallas braille Papenmeier, eliminouse a orde mover a revisión plana/foco. Os usuarios poden asignar as súas proprias teclas usando o diálogo de Xestos de entrada. (#3652)
+- NVDA agora baséase na versión 11 do Microsoft VC runtime, o que significa que xa non se pode executar en sistemas operativos anteriores ó Windows XP Service Pack 2 ou Windows Server 2003 Service Pack 1.
+
+
+== Corrección de Fallos ==
+- Cando te movas ou seleciones  celdas no Microsoft Excel, NVDA xa non debería  anunciar inapropriadamente a antiga celda en lugar da nova celda cando Microsoft Excel estea lento ó mover a seleción. (#3558)
+- NVDA manella adecuadamente a apertura dunha lista despregable nunha celda no Microsoft Excel mediante o menú contextual. (#3586)
+- Agora amósase apropriadamente o Novo contido da páxina nas páxinas da tenda en iTunes 11 en modo navegación cando se siga unha liga na tenda ou ó abrir a tenda inicialmente. (#3625)
+- Os botóns para a vista previa das cancións na tenda de iTunes 11 agora amosan a súa etiqueta en modo navegación. (#3638)
+- No modo navegación en Google Chrome, as etiquetas das casiñas de verificación e dos botóns de opción agora procésanse correctamente. (#1562)
+- En Instantbird, NVDA xa non anuncia información inútil cada vez que te movas a un contacto da lista de contactos. (#2667)
+- En modo navegación no Adobe Reader, agora procésase o texto correcto para os botóns, etc. Onde a etiqueta reemplazouse polo uso dun tooltip ou outro recurso. (#3640)
+- En modo navegación no Adobe Reader, os gráficos extranos que conteñen o texto "mc-ref" xa non se procesan. (#3645)
+- NVDA xa non anuncia todas as celdas no Microsoft Excel como subliñadas na súa información de formato. (#3669)
+- Xa non se amosan caracteres sen sentido en documentos de modo navegación como os que se atopan no rango de uso privado do Unicode. Nalgúns casos estos detiñan o amosado de etiquetas máis útiis. (#2963).
+- A composición de entrada para a introducción de caracteres do este asiático xa non falla en PuTTY (#3432)
+
+
+== Cambios para Desenvolvedores ==
+- Os AppModules agora conteñen as propriedades productName e productVersion. Esta información tamén se inclúe agora na Información do desenvolvedor (NVDA+f1). (#1625)
+
+
 = 2013.3 =
 
 == Novas Características ==
@@ -35,6 +68,9 @@ Que hai de Novo no NVDA
 - No Microsoft Excel, NVDA agora anuncia celdas fusionadas de xeito diferente ás múltiples celdas seleccionadas. (#3567)
 - El cursor de modo navegación  ya no se coloca incorrectamente cuando se abandona un diálogo o aplicación dentro del documento. (#3145)
 - Solucionouse un problema polo que o controlador das pantallas braille series da HumanWare Brailliant BI / B non se presenta como unha opción no cadro de diálogo Opcións de Braille nalgúns sistemas, a pesares de que dita pantalla se conecte a través do USB.
+- NVDA xa non falla  ó cambiar a revisión de pantalla cando o navegador de obxectos non teña ningunha ubicación real na pantalla. Neste caso o cursor de revisión agora colócase na parte superior da pantalla. (#3454)
+- Solucionouse un problema polo que o controlador da pantalla braille de Freedom Scientific falla cando o porto establécese en USB, nalgunhas circunstancias. (#3509, #3662)
+- Solucionouse un problema polo que non se detectaron teclas en braille de Freedom Scientific nalgunhas circunstancias. (#3401, #3662)
 
 
 == Cambios para Desenvolvedores ==

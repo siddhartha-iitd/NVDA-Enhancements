@@ -3,6 +3,41 @@ Quoi de Neuf dans NVDA
 
 %!includeconf: ../changes.t2tconf
 
+= 2014.1 =
+
+== Nouyvelles fonctionnalités ==
+- Support de Microsoft PowerPoint 2013. Notez que le mode protégé n'est pas supporté. (#3578)
+- Dans Microsoft Word et Excel, NVDA peut maintenant lire le symbole sélectionné en choisissant un symbole dans la boîte de dialogue d'insertion de symbole. (#3538)
+- Il est maintenant possible de définir si du contenu dans des documents peut être identifié comme clicable, via une nouvelle option dans la boîte de dialogue Mise en Forme des Documents. Cette option est activée par défaut (comportement précédant). (#3556)
+- Support des afficheurs braille connectés via Bluetooth sur des ordinateurs utilisant Widcomm Bluetooth Software. (#2418)
+- Lors de l'édition de texte dans Powerpoint, les liens sont maintenant rapportés. (#3416)
+
+
+== Changements ==
+- Pour les afficheurs braille Papenmeier, la commande passer en mode revue/focus a été supprimée. Les utilisateurs peuvent assigner leur propre combinaisons en utilisant la boîte de dialogue Geste d'entrée. (#3652)
+- NVDA dépend maintenant des runtimes Microsoft VC version 11, ce qui signifi qu'il ne peut plus être exécuté sur les systèmes d'exploitations plus vieux que Windows XP SP2 ou ou Windows Server 2003 SP1.
+
+
+== Corrections de bogues ==
+- Lorsque l'on se déplace ou que l'on sélectione des cellules dans Microsoft Excel, NVDA ne devrait plus annoncer l'ancienne cellule plutôt que la nouvelle cellule lorsque Microsoft Excel est lent à déplacer la sélection. (#3558)
+- NVDA gère correctement l'ouverture d'une liste déroulante pour une cellule dans Microsoft Excel via le menu contextuel. (#3586)
+- Le nouveau contenu des pages du magasin iTunes 11 est correctement affiché en mode navigation lorsqu'on suit un lien dans le magasin ou en ouvrant le magasin. (#3625)
+- Les boutons pour la prévisualisation des chansons dans la boutique iTunes 11 montrent maintenant leur label en mode navigation. (#3638)
+- En mode navigation dans Google Chrome, les étiquettes des cases à cocher et des boutons radio sont maintenant affichées correctement. (#1562)
+- Dans Instantbird, NVDA ne signale plus d'informations inutiles chaque fois que vous vous déplacez à un contact dans la liste des contacts. (#2667)
+- En mode navigation dans Adobe Reader, le texte correct est maintenant rendu pour les boutons, etc où l'étiquette a été remplacé à l'aide d'une info-bulle ou d'autres moyens. (#3640)
+- En mode navigation dans Adobe Reader, les graphiques étrangers contenant le texte "mc-ref" ne seront plus rendus. (#3645)
+- NVDA ne signale plus toutes les cellules dans Microsoft Excel comme souligné dans leurs informations de formatage. (#3669)
+- NVDA n'affiche plus de caractères illisibles dans les documents en mode de navigation tels que ceux trouvés dans la gamme de l'usage privé Unicode. Dans certains cas, cela empêchait l'affichage de certains intitulés de champs. (#2963).
+- Les langues d'entrée est-asiatiques n'échouent plus dans PuTTY. (#3432)
+
+
+== Changements pour les développeurs ==
+- AppModule contient maintenant les propriétés productName et productVersion. Ces informations sont maintenant également affichées dans les informations pour les développeurs (NVDA+F1). (#1625)
+- Dans la console Python, on peut maintenant appuyer sur Tab pour avoir une auto-complétion. (#433)
+ - S'il y a plusieurs possibilités, on peut appuyer une deuxième fois sur Tab à fin de choisir dans une liste.
+
+
 = 2013.3 =
 
 == Nouvelles Fonctionnalités ==
@@ -28,13 +63,16 @@ Quoi de Neuf dans NVDA
 - NVDA peut maintenant lire des documents protégés dans Microsoft Word 2010, ne causant plus aucun plentage de Microsoft Word. (#1686)
 - Passer un paramètre de ligne de commande inconnue au package de distribution de NVDA ne provoque plus une boucle sans fin de boîtes de dialogue de message d'erreur. (#3463)
 - NVDA n'échoue plus lors de l'annonce du texte alt des graphiques et des objets dans Microsoft Word si le texte alt contient des guillemets ou d'autres caractères non-standards. (#3579)
-			- Le nombre d'éléments pour certaines listes horizontales en mode Navigation est maintenant correct. Auparavant, il pouvait être le double de la quantité réelle. (#2151)
+- Le nombre d'éléments pour certaines listes horizontales en mode Navigation est maintenant correct. Auparavant, il pouvait être le double de la quantité réelle. (#2151)
 - Lorsque vous appuyez sur Ctrl + A dans une feuille de calcul Microsoft Excel, la sélection mise à jour sera maintenant signalée. (#3043)
 - NVDA peut maintenant lire correctement les documents XHTML dans Microsoft Internet Explorer et autres contrôles MSHTML. (#3542)
 - dialogue des paramètres du clavier : si aucune touche n'a été choisie pour être utilisée comme touche NVDA, une erreur est présentée à l'utilisateur lorsqu'il a fermé la boîte de dialogue. Au moins une touche doit être choisie pour utiliser correctement NVDA. (#2871)
 - Dans Microsoft Excel, NVDA annonce maintenant  les cellules fusionnées de manière différente que plusieurs cellules sélectionnées. (#3567)
 - Le curseur du mode navigation n'est plus incorrectement positionné en quittant une boîte de dialogue ou une application du document. (#3145)
 - Correction d'un problème où le pilote Braille des afficheures braille HumanWare de séries Brailliant BI/B n'était pas affiché comme choix possible dans la boîte de dialogue des paramètres braille sur certains systèmes, même si un tel afficheur est connecté via USB.
+- NVDA n'échoue plus pour passer en revue de l'écran lorsque l'objet du navigateur n'a pas d'emplacement réel sur l'écran. Dans ce cas, le curseur de revue est maintenant placé en haut de l'écran. (#3454)
+- Correction d'un problème qui causait l'échec du pilote de l'afficheur braille Freedom Scientific dans certaines circonstances lorsque le port a été réglé sur USB. (#3509, #3662)
+- Correction d'un problème où les touches des afficheurs braille Freedom Scientific n'étaient pas détectés dans certaines circonstances. (#3401, #3662)
 
 
 == Changements pour les développeurs ==

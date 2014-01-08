@@ -4,15 +4,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: NVDA bzr main:5884\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-10-31 21:12+1000\n"
-"PO-Revision-Date: 2013-11-11 20:34+0100\n"
+"POT-Creation-Date: 2013-12-13 09:22+1000\n"
+"PO-Revision-Date: 2013-12-16 10:36+0100\n"
 "Last-Translator: Bernd Dorer <bernd_dorer@yahoo.de>\n"
 "Language-Team: René Linke <rene.linke@blindzeln.de>\n"
 "Language: de_DE\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 1.5.7\n"
+"X-Generator: Poedit 1.6.2\n"
 "X-Poedit-Basepath: .\n"
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Poedit-SearchPath-0: D:\\rechner\\nvda_quellen\\nvda\n"
@@ -23,27 +23,27 @@ msgstr "Geschützter Desktop"
 
 #. Translators: A mode  that allows typing in the actual 'native' characters for an east-Asian input method language currently selected, rather than alpha numeric (Roman/English) characters.
 msgid "Native input"
-msgstr "native Eingabemethode"
+msgstr "Landesspezifische Eingabemethode"
 
 #. Translators: a mode that lets you type in alpha numeric (roman/english) characters, rather than 'native' characters for the east-Asian input method  language currently selected.
 msgid "Alpha numeric input"
-msgstr "alphanumerische Eingabe"
+msgstr "Alphanumerische Eingabe"
 
 #. Translators: for East-Asian input methods, a mode that allows typing in full-shaped (full double-byte) characters, rather than the smaller half-shaped ones.
 msgid "Full shaped mode"
-msgstr ""
+msgstr "Vollschattierter Modus"
 
 #. Translators: for East-Asian input methods, a mode that allows typing in half-shaped (single-byte) characters, rather than the larger full-shaped (double-byte) ones.
 msgid "Half shaped mode"
-msgstr ""
+msgstr "Halbschattierter Modus"
 
 #. Translators: For Japanese character input: half-shaped (single-byte) alpha numeric (roman/english) mode.
 msgid "half alphanumeric"
-msgstr "halb-Alphanumerisch"
+msgstr "halbalphanumerisch"
 
 #. Translators: For Japanese character input: half-shaped (single-byte) Katacana input mode.
 msgid "half katakana"
-msgstr ""
+msgstr "Japanische Zeichen (Katakana; einzelnd)"
 
 #. Translators: For Japanese character input: alpha numeric (roman/english) mode.
 msgid "alphanumeric"
@@ -51,23 +51,23 @@ msgstr "alphanumerisch"
 
 #. Translators: For Japanese character input: Hiragana input mode.
 msgid "hiragana"
-msgstr ""
+msgstr "Japanische Zeichen (Hiragana)"
 
 #. Translators: For Japanese character input: Katacana input mode.
 msgid "katakana"
-msgstr ""
+msgstr "Japanische Zeichen (Katakana; doppelt)"
 
 #. Translators: For Japanese character input: half katakana roman input mode.
 msgid "half katakana roman"
-msgstr ""
+msgstr "Japanische Zeichen (Katakana Roman; einzelnd)"
 
 #. Translators: For Japanese character input: Hiragana Roman input mode.
 msgid "hiragana roman"
-msgstr ""
+msgstr "Japanische Zeichen (Hiragana Roman)"
 
 #. Translators: For Japanese character input: Katacana Roman input mode.
 msgid "katakana roman"
-msgstr ""
+msgstr "japanische Zeichen (Katakana Roman; doppelt)"
 
 #. Translators: a message when the IME open status changes to opened
 msgid "IME opened"
@@ -1439,6 +1439,15 @@ msgstr "enthält ausführliche Beschreibung"
 msgid "pinned"
 msgstr "angeheftet"
 
+#. Translators: a state that denotes the existance of a formula on a spreadsheet cell
+msgid "has formula"
+msgstr "hat Formel"
+
+#. Translators: a state that denotes the existance of a comment.
+#. Translators: Reported when text contains a comment.
+msgid "has comment"
+msgstr "hat Kommentar"
+
 #. Translators: This is presented when a selectable object (e.g. a list item) is not selected.
 msgid "not selected"
 msgstr "nicht ausgewählt"
@@ -2292,7 +2301,7 @@ msgstr "Zeigt die allgemeinen NVDA-Einstellungen an."
 
 #. Translators: Input help mode message for go to synthesizer dialog command.
 msgid "Shows the NVDA synthesizer dialog"
-msgstr "Zeigt die Einstellungen der Sprachausgabe an."
+msgstr "Zeigt die Sprachausgaben-Einstellungen von NVDA an."
 
 #. Translators: Input help mode message for go to voice settings dialog command.
 msgid "Shows the NVDA voice settings dialog"
@@ -2304,7 +2313,7 @@ msgstr "Zeigt die Tastatureinstellungen von NVDA an."
 
 #. Translators: Input help mode message for go to mouse settings dialog command.
 msgid "Shows the NVDA mouse settings dialog"
-msgstr "Zeigt die Mauseinstellungen an."
+msgstr "Zeigt die Mauseinstellungen von NVDA an."
 
 #. Translators: Input help mode message for go to object presentation dialog command.
 msgid "Shows the NVDA object presentation settings dialog"
@@ -2312,7 +2321,7 @@ msgstr "Zeigt die Einstellungen der Objektdarstellungen von NVDA an."
 
 #. Translators: Input help mode message for go to browse mode dialog command.
 msgid "Shows the NVDA browse mode settings dialog"
-msgstr "Zeigt die Einstellungen vom Lesemodus in NVDA an."
+msgstr "Zeigt die Einstellungen des Lesemodus von NVDA an."
 
 #. Translators: Input help mode message for go to document formatting dialog command.
 msgid "Shows the NVDA document formatting settings dialog"
@@ -2486,9 +2495,7 @@ msgstr ""
 
 #. Translators: Describes the command to open the Configuration Profiles dialog.
 msgid "Shows the NVDA Configuration Profiles dialog"
-msgstr ""
-"Zeigt den Dialog für Konfigurationsprofile an.Zeigt die allgemeinen NVDA-"
-"Einstellungen an."
+msgstr "Zeigt den Dialog für Konfigurationsprofile an."
 
 #. Translators: The name of a category of NVDA commands.
 msgid "Emulated system keyboard keys"
@@ -3085,10 +3092,6 @@ msgstr "Blocksatz"
 msgid "align default"
 msgstr "Standardausrichtung"
 
-#. Translators: Reported when text contains a comment.
-msgid "has comment"
-msgstr "hat Kommentar"
-
 #. Translators: Reported when text contains a spelling error.
 msgid "spelling error"
 msgstr "Rechtschreibfehler"
@@ -3591,10 +3594,6 @@ msgstr "Miniaturansichten"
 msgid "Master Thumbnails"
 msgstr "Hauptminiaturansichten"
 
-#. Translators: A title for a dialog shown while Microsoft PowerPoint initializes
-msgid "Waiting for Powerpoint..."
-msgstr "auf Powerpoint wird gewartet..."
-
 #. Translators: the label for a slide in Microsoft PowerPoint.
 msgid "Slide {slideNumber}"
 msgstr "Folie {slideNumber}"
@@ -3628,6 +3627,10 @@ msgstr "Keine Fußnoten"
 #. Translators: The message for an empty slide in a slide show
 msgid "Empty slide"
 msgstr "Leere Folie"
+
+#. Translators: A title for a dialog shown while Microsoft PowerPoint initializes
+msgid "Waiting for Powerpoint..."
+msgstr "auf Powerpoint wird gewartet..."
 
 # Deutsche Sprachdatei für NVDA
 # Copyright (C) 2006-2007 Michael Curran <mick@kulgan.net>
@@ -4353,7 +4356,7 @@ msgstr ""
 
 #. Translators: The title of the configuration profile triggers dialog.
 msgid "Profile Triggers"
-msgstr "Pfofilauslöser"
+msgstr "Profilauslöser"
 
 #. Translators: Displayed for a configuration profile trigger for an application.
 #. %s is replaced by the application executable name.
@@ -4537,7 +4540,7 @@ msgid ""
 "and then press Continue"
 msgstr ""
 "Um eine portable Version von NVDA zu erstellen, geben Sie den Zielpfad und "
-"weitere Optionen an und betätigen Sie den Schalter \"Weiter\"."
+"weitere Optionen an und betätigen Sie den Schalter \"fortsetzen\"."
 
 #. Translators: The label of a grouping containing controls to select the destination directory
 #. in the Create Portable NVDA dialog.
@@ -4651,7 +4654,7 @@ msgstr "Einstellungen beim &Beenden speichern"
 
 #. Translators: The label for a setting in general settings to ask before quitting NVDA (if not checked, NVDA will exit without asking the user for confirmation).
 msgid "&Warn before exiting NVDA"
-msgstr "Beim Beenden best&ätigen"
+msgstr "Wa&rnung anzeigen, bevor NVDA beendet wird"
 
 #. Translators: The label for a setting in general settings to select logging level of NVDA as it runs (available options and what they are logged are found under comments for the logging level messages themselves).
 msgid "L&ogging level:"
@@ -4960,12 +4963,12 @@ msgstr ""
 #. Translators: This is the label for a checkbox in the
 #. Input composition settings dialog.
 msgid "Report changes to the &reading string"
-msgstr ""
+msgstr "Änderungen zu den Leseketten ansagen"
 
 #. Translators: This is the label for a checkbox in the
 #. Input composition settings dialog.
 msgid "Report changes to the &composition string"
-msgstr ""
+msgstr "Änderungen zu den Zusammenfassungsketten ansagen"
 
 #. Translators: This is the label for the object presentation dialog.
 msgid "Object Presentation"
@@ -5195,6 +5198,11 @@ msgstr "S&prungmarken ansagen"
 #. document formatting settings dialog.
 msgid "Report fra&mes"
 msgstr "Rah&men ansagen"
+
+#. Translators: This is the label for a checkbox in the
+#. document formatting settings dialog.
+msgid "Report if &clickable"
+msgstr "anklickbare Elemente ansagen"
 
 #. Translators: This is the label for the edit dictionary entry dialog.
 msgid "Edit Dictionary Entry"
@@ -6005,7 +6013,7 @@ msgstr "Spalte für Reihenbeschriftungen setzen"
 
 #. Translators: a message reported in the SetRowHeaderColumn script for Excel.
 msgid "Cleared row header column"
-msgstr "Die Kennzeichnung als Spalte für Reihenüberschriften wurde gelöscht."
+msgstr "Die Kennzeichnung als Spalte für Reihenüberschriften wurde entfernt."
 
 msgid ""
 "Pressing once will set the current column as the column where row headers "
@@ -6013,11 +6021,7 @@ msgid ""
 msgstr ""
 "Bei einmaligem Drücken wird die aktuelle Spalte als Spalte festgelegt, in "
 "der sich die Reihenbeschriftungen befinden. Bei zweimaligem Drücken wird die "
-"Zuweisung wieder gelöscht."
-
-#. Translators: This is presented in Excel when the current cell contains a formula.
-msgid "has formula"
-msgstr "hat Formel"
+"Zuweisung wieder entfernt."
 
 #. Translators: This is presented in Excel to show the current selection, for example 'a1 c3 through a10 c10'
 msgid "{firstAddress} {firstContent} through {lastAddress} {lastContent}"
@@ -6025,11 +6029,11 @@ msgstr "{firstAddress} {firstContent} bis {lastAddress} {lastContent}"
 
 #. Translators: a Microsoft Word revision type (inserted content)
 msgid "insertion"
-msgstr "Einfügung"
+msgstr "Einfügen"
 
 #. Translators: a Microsoft Word revision type (deleted content)
 msgid "deletion"
-msgstr "Löschung"
+msgstr "Löschen"
 
 #. Translators: a Microsoft Word revision type (changed content property, e.g. font, color)
 msgid "property"
@@ -6044,9 +6048,8 @@ msgid "display field"
 msgstr "Feld anzeigen"
 
 #. Translators: a Microsoft Word revision type (reconcile)
-#, fuzzy
 msgid "reconcile"
-msgstr "beilegen"
+msgstr "abgleichen"
 
 #. Translators: a Microsoft Word revision type (conflicting revision)
 msgid "conflict"
@@ -6090,7 +6093,7 @@ msgstr "Zelle gelöscht"
 
 #. Translators: a Microsoft Word revision type (merged table cells)
 msgid "cell merge"
-msgstr "Zusammengeführte Zellen"
+msgstr "Verbundene Zellen"
 
 msgid "Comments"
 msgstr "Kommentare"

@@ -174,6 +174,7 @@ confspec = ConfigObj(StringIO(
 	reportBlockQuotes = boolean(default=true)
 	reportLandmarks = boolean(default=true)
 	reportFrames = boolean(default=true)
+	reportClickable = boolean(default=true)
 
 [reviewCursor]
 	simpleReviewMode = boolean(default=True)
@@ -723,7 +724,11 @@ class ConfigManager(object):
 			self._suspendedTriggers[trigger] = "enter"
 			return
 
-		profile = trigger._profile = self._getProfile(trigger.profileName)
+		try:
+			profile = trigger._profile = self._getProfile(trigger.profileName)
+		except:
+			trigger._profile = None
+			raise
 		profile.triggered = True
 		if len(self.profiles) > 1 and self.profiles[-1].manual:
 			# There's a manually activated profile.
@@ -748,7 +753,7 @@ class ConfigManager(object):
 			return
 
 		profile = trigger._profile
-		if not profile:
+		if profile is None:
 			return
 		profile.triggered = False
 		try:
@@ -1086,7 +1091,7 @@ class ProfileTrigger(object):
 			conf._triggerProfileEnter(self)
 		except:
 			log.error("Error entering trigger %s, profile %s"
-				% (self.spec, self.profile), exc_info=True)
+				% (self.spec, self.profileName), exc_info=True)
 	__enter__ = enter
 
 	def exit(self):

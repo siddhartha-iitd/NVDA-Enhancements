@@ -57,13 +57,15 @@ Voit [tarkastella koko lisenssiä http://www.gnu.org/licenses/old-licenses/gpl-2
 
 + Järjestelmävaatimukset +
 - Käyttöjärjestelmät: kaikki 32- ja 64-bittiset Windows XP:n, Windows Vistan, Windows 7:n ja Windows 8:n versiot (palvelinversiot mukaan lukien).
+ - 32-bittisessä Windows XP:ssä on oltava Service Pack 2 tai sitä uudempi.
+ - Windows Server 2003:ssa on oltava Service Pack 1 tai sitä uudempi.
 - Muistia (RAM): 256 Mt tai enemmän
-- Prosessori: 1 GHz tai nopeampi
-- Noin 50 Mt levytilaa.
+- Suoritin: 1 GHz tai nopeampi
+- Levytilaa n. 50 Mt.
 -
 
 + NVDA:n hankkiminen ja asentaminen +
-NVDA on ladattavissa osoitteesta [www.nvda-project.org NVDA_URL].
+NVDA on ladattavissa osoitteesta [www.nvaccess.org NVDA_URL].
 
 Viimeisimmän version latauslinkki löytyy Download-osiosta.
 
@@ -624,8 +626,8 @@ Tästä voi olla hyötyä jollekulle, joka haluaa käyttää NVDA:ta pelkästä�
 ==== Äänilaite ====
 Tästä voidaan valita, mitä äänikorttia NVDA:ssa valittuna olevan puhesyntetisaattorin tulisi käyttää.
 
-+++ Ääniasetukset (NVDA+Control+V) +++[VoiceSettings]
-Ääniasetukset-valintaikkuna, joka löytyy Asetukset-valikosta, sisältää asetuksia, joilla voidaan vaikuttaa siihen, miltä puhe kuulostaa.
++++ Puheäänen asetukset (NVDA+Control+V) +++[VoiceSettings]
+Puheäänen asetukset -valintaikkuna, joka löytyy Asetukset-valikosta, sisältää asetuksia, joilla voidaan vaikuttaa siihen, miltä puhe kuulostaa.
 Saadaksesi tietoja nopeammasta vaihtoehtoisesta tavasta puheparametrien säätämiseen mistä tahansa, katso [Syntetisaattorin asetusrengas #SynthSettingsRing] -kappaletta.
 
 Valintaikkuna sisältää seuraavat asetukset:
@@ -695,7 +697,7 @@ Jotkin SAPI-syntetisaattorit toimivat kuitenkin kummallisesti tämän ollessa k�
 Asetus kannattaa poistaa käytöstä, jos yksittäisten kirjainten lausumisessa on ongelmia.
 
 +++ Syntetisaattorin asetusrengas +++[SynthSettingsRing]
-NVDA:ssa on joitakin näppäinkomentoja, joiden avulla voidaan siirtyä missä tahansa yleisimpien puheasetusten välillä, jos niitä halutaan muuttaa nopeasti menemättä Ääniasetukset-valintaikkunaan:
+NVDA:ssa on joitakin näppäinkomentoja, joiden avulla voit siirtyä missä tahansa yleisimpien puheasetusten välillä, jos haluat muuttaa niitä nopeasti menemättä Puheäänen asetukset -valintaikkunaan:
 %kc:beginInclude
 || Nimi | Näppäinkomento pöytäkoneissa | Näppäinkomento kannettavissa | Kuvaus |
 | Siirrä seuraavaan syntetisaattorin asetukseen | NVDA+Control+oikea nuoli | NVDA+Shift+Control+oikea nuoli | Siirtää nykyisen puheasetuksen jälkeen seuraavana käytettävissä olevaan asetukseen, siirtyen viimeisen jälkeen takaisin ensimmäiseen. |
@@ -1234,7 +1236,7 @@ Nämä tiedostot on parasta poistaa ja asentaa tilalle asianmukainen lisäosa, m
 
 ++ Python-konsoli ++
 NVDA:n Python-konsoli, joka löytyy NVDA-valikon Työkalut-alavalikosta, on kehitystyökalu, joka on hyödyllinen virheiden etsinnässä, yleisessä NVDA:n sisäisen toiminnan tai sovelluksen esteettömyyshierarkian tutkimisessa.
-Katso lisätietoja kehittäjän oppaasta [NVDA:n verkkosivuston Development-osiosta NVDA_URLwiki/Development].
+Katso lisätietoja kehittäjän oppaasta [NVDA:n verkkosivuston Development-osiosta http://community.nvda-project.org/wiki/Development].
 
 ++ Lataa liitännäiset uudelleen ++
 Tällä voidaan ladata uudelleen sovellusmoduulit ja yleisliitännäiset ilman NVDA:n uudelleenkäynnistystä, mistä voi olla hyötyä kehittäjille.
@@ -1305,9 +1307,9 @@ Tässä kappaleessa on tietoja NVDA:n tukemista pistenäytöistä.
 ++ Freedom Scientific Focus/PAC Mate ++
 Kaikkia [Freedom Scientificin http://www.freedomscientific.com/] Focus- ja PAC Mate -pistenäyttöjä tuetaan sekä USB-liitännällä että bluetooth-yhteydellä.
 Niiden käyttämiseksi on asennettava ajurit.
-Ne ovat ladattavissa osoitteesta http://www.freedomscientific.com/downloads/focus-40-blue/focus-40-blue-downloads.asp.
-Ajuri tukee kaikkia Freedom Scientificin pistenäyttöjä, vaikka sivulla mainitaankin vain Focus 40 Blue.
-Jos käytössä on 64-bittinen Windows ja ajurit on jo asennettu jonkin toisen ruudunlukuohjelman mukana, niin edellä mainitun linkin takaa löytyvät ajurit on silti asennettava, sillä muissa ohjelmistoissa ei välttämättä ole kaikkia NVDA:n tarvitsemia tiedostoja.
+Mikäli sinulla ei vielä ole niitä, voit hakea ne osoitteesta http://www.freedomscientific.com/downloads/focus-40-blue/focus-40-14-blue-downloads.asp.
+Ajuri tukee kaikkia Freedom Scientificin Focus- ja Pacmate-pistenäyttöjä, vaikka sivulla mainitaankin vain Focus 40 Blue.
+Mikäli käytät 64-bittistä Windowsia ja ajurit on jo asennettu jonkin toisen ruudunlukuohjelman mukana, niin edellä mainitun linkin takaa löytyvät ajurit on silti asennettava, sillä muissa ohjelmistoissa ei välttämättä ole kaikkia NVDA:n tarvitsemia tiedostoja.
 
 NVDA tunnistaa oletusarvoisesti nämä pistenäytöt automaattisesti ja voi yhdistää niihin joko USB:n tai bluetoothin kautta.
 Yhteystyypin rajoittamiseksi voidaan kuitenkin myös itse valita USB- tai bluetooth-portti näytön asetuksia määritettäessä.
@@ -1537,8 +1539,11 @@ Katso näytön käyttöohjeesta kuvaukset näppäinten paikoista.
 %kc:endInclude
 
 ++ HIMS Braille Sense/Braille EDGE ++
-NVDA tukee [HIMS:in http://www.hims-inc.com/] Braille Sense- ja Braille EDGE -pistenäyttöjä USB-liitäntää tai Bluetooth-yhteyttä käytettäessä.
-Mikäli käytetään USB-liitäntää, on tietokoneelle asennettava HIMS:in ajurit.
+NVDA tukee [HIMSin http://www.hims-inc.com/] Braille Sense- ja Braille EDGE -pistenäyttöjä USB-liitäntää tai Bluetooth-yhteyttä käytettäessä.
+Mikäli käytetään USB-liitäntää, on tietokoneelle asennettava HIMSin ajurit.
+Voit ladata ne HIMSin resurssikeskuksesta: http://www.hims-inc.com/resource-center/
+Valitse tältä sivulta laitteesi ja lataa ajuri Window-Eyes-osiosta.
+Se on USB-yleisajuri, joka toimii myös NVDA:n kanssa, vaikka osiossa mainitaankin vain Window-Eyes.
 
 Seuraavassa on näiden pistenäyttöjen näppäinkomennot NVDA:ta käytettäessä.
 Katso näytön käyttöohjeesta kuvaukset näppäinten paikoista.
@@ -1676,7 +1681,6 @@ Seuraavassa on Papenmeierin näppäinmääritykset NVDA:lle:
 | Siirrä pistesoluun | kosketuskohdistinnäppäimet |
 | Lue nykyinen merkki | l1 |
 | Aktivoi nykyinen navigointiobjekti | l2 |
-| Siirrä kokonaistarkasteluun/kohdistukseen | r1 |
 | Lue ikkunan nimi | l1+up |
 | Lue tilarivi | l2+down |
 | Siirrä säilöobjektiin | up2 |
@@ -1753,7 +1757,6 @@ Laitteet, joissa on ohjaustankonäppäin (EAB):
 | Siirrä pistesoluun | kosketuskohdistinnäppäimet |
 | Lue nykyinen merkki | l1 |
 | Aktivoi nykyinen navigointiobjekti | l2 |
-| Siirrä kokonaistarkasteluun / kohdistukseen | r1 |
 | Lue ikkunan nimi | l1up |
 | Lue tilarivi | l2down |
 | Siirrä säilöobjektiin | up2 |
@@ -1771,7 +1774,6 @@ BRAILLEX Tiny:
 | Siirrä pistenäyttö edelliselle riville | up |
 | Siirrä pistenäyttö seuraavalle riville | dn |
 | Vaihda Pistenäyttö seuraa -asetusta | r2 |
-| Siirrä kokonaistarkasteluun / kohdistukseen | r1 |
 | Siirrä säilöobjektiin | r1+up |
 | Siirrä ensimmäiseen sisältöobjektiin | r1+dn |
 | Siirrä edelliseen objektiin | r1+left |
@@ -1786,7 +1788,6 @@ BRAILLEX 2D Screen:
 | Lue tekstin muotoilutiedot | reportf |
 | Siirrä pistenäyttö edelliselle riville | up |
 | Vieritä pistenäyttöä taaksepäin | left |
-| Siirrä kokonaistarkasteluun / kohdistukseen | r1 |
 | Vieritä pistenäyttöä eteenpäin | right |
 | Siirrä pistenäyttö seuraavalle riville | dn |
 | Siirrä seuraavaan objektiin | left2 |
@@ -1871,7 +1872,7 @@ Voidaan esimerkiksi määrittää, lähetetäänkö symboli syntetisaattorille s
 
 Tämä tehdään muokkaamalla NVDA:n käyttäjän asetushakemistossa olevaa symbolitiedostoa.
 Tiedosto on nimeltään symbols-xx.dic, jossa xx on kielikoodi.
-Tiedoston muoto on dokumentoitu Symbol pronunciation -kappaleessa kehittäjän oppaassa, joka on luettavissa [NVDA:n verkkosivuston Development-osiossa NVDA_URLwiki/Development].
+Tiedoston muoto on dokumentoitu Symbol pronunciation -kappaleessa kehittäjän oppaassa, joka on luettavissa [NVDA:n verkkosivuston Development-osiossa http://community.nvda-project.org/wiki/Development].
 Monimutkaisten symboleiden määrittäminen ei ole kuitenkaan mahdollista.
 
 + Lisätietoja +
