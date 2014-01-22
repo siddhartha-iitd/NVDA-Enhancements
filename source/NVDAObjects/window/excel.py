@@ -604,27 +604,24 @@ class CellsListDialog(wx.Dialog):
 
 	def populate_cell(self, fnText, fnNext, refCells, treeBranch):
 		for cell in refCells.Cells:
-			text = cell.Address(False, False, 1, False) + " - " + fnText(cell)
+			text = cell.Address(False, False, 1, False) + ":" + fnText(cell)
 			entry = self.tree.AppendItem(treeBranch, text,data=wx.TreeItemData(cell))
 
 
-
 	def populate(self,evt):
-		type = self.typeCombo.GetClientData(self.typeCombo.GetSelection())
-		fns = self.viewCombo.GetClientData(self.viewCombo.GetSelection())
+		fnlist = self.viewCombo.GetClientData(self.viewCombo.GetSelection())
+		typefns = self.typeCombo.GetClientData(self.typeCombo.GetSelection())
+                get_func = typefns[0]
+                text_func = typefns[1]
+                self.tree.Freeze()
 		self.tree.DeleteChildren(self.treeRoot)
-		if type == xlCellType.xlCellTypeComments :
-			fn = lambda x: x.Comment.Text()
-		elif type == xlCellType.xlCellTypeFormulas :
-			fn = lambda x: x.Formula
-		else:
-			fn = lambda x: x.Text
 		try:
-			wholerange = self.cells.SpecialCells(type)
-                        fns[0](fn, fns[1:],wholerange,self.treeRoot)
+			wholerange = get_func(self.cells)                        
+                        fnlist[0](text_func, fnlist[1:],wholerange,self.treeRoot)
 		except (COMError):
 			self.tree.AppendItem(self.treeRoot,_("No matching cells"))
-
+                self.tree.Thaw()
+                
 	def onTreeChar(self,evt):
 		if evt.GetKeyCode() == wx.WXK_RETURN:
 			range = self.tree.GetPyData(self.tree.GetSelection())
@@ -637,11 +634,20 @@ class CellsListDialog(wx.Dialog):
 		super(CellsListDialog, self).__init__(gui.mainFrame, wx.ID_ANY, _("Cell List"))
 		mainSizer = wx.BoxSizer(wx.VERTICAL)
 		# Cell Types to show
+                types = [
+                        (  _("With comments"),
+                           [ (lambda x: x.SpecialCells(xlCellType.xlCellTypeComments)),
+                             (lambda x: x.Comment.Text() ) ] ),
+                        ( _("With formula"),
+                          [ (lambda x: x.SpecialCells(xlCellType.xlCellTypeFormulas)),
+                            (lambda x: x.Formula ) ] ),
+                ]
+                
 		typeSizer=wx.BoxSizer(wx.HORIZONTAL)                
 		typeLabel=wx.StaticText(self,-1,label=_("Cells to &show:"))
 		self.typeCombo = wx.Choice(self,wx.ID_ANY)
-		for x in self.types.keys():
-			self.typeCombo.Append(self.types[x],x)
+		for x in types:
+			self.typeCombo.Append(x[0],x[1])
 		self.typeCombo.SetSelection(0)
 		self.typeCombo.Bind(wx.EVT_CHOICE,self.populate)
 		typeSizer.Add(typeLabel)
@@ -653,7 +659,7 @@ class CellsListDialog(wx.Dialog):
 		self.viewCombo = wx.Choice(self,wx.ID_ANY)
 
 		modes = [
-			(_("Cells (Flat)"), [ self.populate_cell ] ),
+                        (_("Cells (Flat)"), [ self.populate_cell ] ),
 			(_("Row/Cells"), [ self.populate_row, self.populate_cell ] ),
 			(_("Col/Cells"), [ self.populate_col, self.populate_cell ] ),
 			(_("Area/Cells"), [ self.populate_area, self.populate_cell ] ),
@@ -669,13 +675,13 @@ class CellsListDialog(wx.Dialog):
 		viewSizer.Add(self.viewCombo)
 		mainSizer.Add(viewSizer)
 		# Filter By
-		viewSizer=wx.BoxSizer(wx.HORIZONTAL)                
-		viewLabel=wx.StaticText(self,-1,label=_("Filter &text"))
-		self.filterText = wx.TextCtrl(self,wx.ID_ANY)
+		#viewSizer=wx.BoxSizer(wx.HORIZONTAL)                
+		#viewLabel=wx.StaticText(self,-1,label=_("Filter &text"))
+		#self.filterText = wx.TextCtrl(self,wx.ID_ANY)
 		#self.viewCombo.Bind(wx.EVT_CHOICE,self.populate)
-		viewSizer.Add(viewLabel)
-		viewSizer.Add(self.filterText)
-		mainSizer.Add(viewSizer)
+		#viewSizer.Add(viewLabel)
+		#viewSizer.Add(self.filterText)
+		#mainSizer.Add(viewSizer)
 		# Tree
 		self.tree = wx.TreeCtrl(self, wx.ID_ANY, style=wx.TR_HAS_BUTTONS | wx.TR_HIDE_ROOT | wx.TR_LINES_AT_ROOT| wx.TR_SINGLE)
 		self.tree.Bind(wx.EVT_CHAR, self.onTreeChar)
