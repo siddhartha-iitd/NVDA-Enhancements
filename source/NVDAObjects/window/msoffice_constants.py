@@ -115,6 +115,12 @@ class xlCellType(xlConstant):
 	xlCellTypeSameValidation      =-4175      # from enum XlCellType
 	xlCellTypeVisible             =12         # from enum XlCellType
 
+        ## These are actually from xlSpecialCellsValue
+	xlErrors                      = 16
+	xlLogical                     = 4
+	xlNumbers                     = 1
+	xlTextValues                  = 2
+
 	_map = { 
 		xlCellTypeAllFormatConditions :_("any format"),
 		xlCellTypeAllValidation       :_("validatio"),
