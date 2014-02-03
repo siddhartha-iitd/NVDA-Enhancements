@@ -1201,8 +1201,15 @@ def getFormatFieldSpeech(attrs,attrsCache=None,formatConfig=None,unit=None,extra
 		link=attrs.get("link")
 		oldLink=attrsCache.get("link") if attrsCache is not None else None
 		if (link or oldLink is not None) and link!=oldLink:
-			text=_("link") if link else _("out of %s")%_("link")
-			textList.append(text)
+			# 1475 changed functionality to omit 'out of link' when extraDetail is off. It also takes care of not speaking dot after a link in pronunciation level 'some'.
+			if link:
+				text=_("link")
+			elif extraDetail:
+				text=_("out of %s")%_("link")
+			else:
+				text = ""
+			if text:
+				textList.append(text)
 	if  formatConfig["reportComments"]:
 		comment=attrs.get("comment")
 		oldComment=attrsCache.get("comment") if attrsCache is not None else None
