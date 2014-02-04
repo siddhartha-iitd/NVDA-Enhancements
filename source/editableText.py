@@ -106,9 +106,7 @@ class EditableText(ScriptableObject):
 			info=self.makeTextInfo(textInfos.POSITION_CARET)
 			info.move(textInfos.UNIT_SENTENCE, direction)
 			info.expand(textInfos.UNIT_SENTENCE)
-		except Exception, e:
-			#from logHandler import log
-			#log.error(str(e))
+		except:
 			gesture.send()
 			return
 		if info:
