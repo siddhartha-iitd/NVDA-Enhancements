@@ -4,7 +4,7 @@ Alternatively, open a command prompt as an administrator. cd to the folder conta
 
 This document will contain a running list of the fixes included in the cumulative build. the cumulative build is based on the "next" nvda branch with all the bug fixes done by the India team so far even if they haven't yet been accepted by the NVDA developers.
 
-Feb 21, 2013
+Feb 11, 2013
 - 3288 : Word 2010-sentence reading commands ALT+UP/DOWN ARROW are not avialable.
   -- Improved fix, which should work on other rich text based editors also.
 
