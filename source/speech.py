@@ -717,6 +717,7 @@ def speakTextInfo(info,useCache=True,formatConfig=None,unit=None,reason=controlT
 	#Also make sure that LangChangeCommand objects are added before any controlField or formatField speech
 	relativeSpeechSequence=[]
 	inTextChunk=False
+	inLink = False
 	allIndentation=""
 	indentationDone=False
 	for command in textWithFields:
@@ -740,10 +741,19 @@ def speakTextInfo(info,useCache=True,formatConfig=None,unit=None,reason=controlT
 				# Control fields always start a new chunk, even if they have no field text.
 				inTextChunk=False
 				fieldText=info.getControlFieldSpeech(command.field,newControlFieldStack,"start_relative",formatConfig,extraDetail,reason=reason)
+				# 1475 If it indiates start of a link
+				if fieldText:
+					if 'link' in fieldText.encode('ascii','ignore'):
+						inLink = True
 				newControlFieldStack.append(command.field)
 			elif command.command=="controlEnd":
 				# Control fields always start a new chunk, even if they have no field text.
-				inTextChunk=False
+				# 1475 With one exception - if it is control end for a link
+				if inLink:
+					inTextChunk=True
+					inLink = False
+				else:
+					inTextChunk=False
 				fieldText=info.getControlFieldSpeech(newControlFieldStack[-1],newControlFieldStack[0:-1],"end_relative",formatConfig,extraDetail,reason=reason)
 				del newControlFieldStack[-1]
 				if commonFieldCount>len(newControlFieldStack):
@@ -1191,8 +1201,15 @@ def getFormatFieldSpeech(attrs,attrsCache=None,formatConfig=None,unit=None,extra
 		link=attrs.get("link")
 		oldLink=attrsCache.get("link") if attrsCache is not None else None
 		if (link or oldLink is not None) and link!=oldLink:
-			text=_("link") if link else _("out of %s")%_("link")
-			textList.append(text)
+			# 1475 changed functionality to omit 'out of link' when extraDetail is off. It also takes care of not speaking dot after a link in pronunciation level 'some'.
+			if link:
+				text=_("link")
+			elif extraDetail:
+				text=_("out of %s")%_("link")
+			else:
+				text = ""
+			if text:
+				textList.append(text)
 	if  formatConfig["reportComments"]:
 		comment=attrs.get("comment")
 		oldComment=attrsCache.get("comment") if attrsCache is not None else None
