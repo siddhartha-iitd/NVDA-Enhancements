@@ -99,6 +99,21 @@ class EditableText(ScriptableObject):
 			eventHandler.executeEvent("caretMovementFailed", self, gesture=gesture)
 		self._caretScriptPostMovedHelper(unit,gesture,newInfo)
 
+	def _caretMoveBySentenceHelper(self, gesture, direction):
+		if isScriptWaiting():
+			return
+		try:
+			info=self.makeTextInfo(textInfos.POSITION_CARET)
+			info.move(textInfos.UNIT_SENTENCE, direction)
+			info.expand(textInfos.UNIT_SENTENCE)
+		except:
+			gesture.send()
+			return
+		if info:
+			speech.speakTextInfo(info,reason=controlTypes.REASON_CARET)
+			info.collapse()
+			info.updateCaret()
+
 	def script_caret_moveByLine(self,gesture):
 		self._caretMovementScriptHelper(gesture, textInfos.UNIT_LINE)
 	script_caret_moveByLine.resumeSayAllMode=sayAllHandler.CURSOR_CARET
@@ -113,6 +128,11 @@ class EditableText(ScriptableObject):
 		self._caretMovementScriptHelper(gesture, textInfos.UNIT_PARAGRAPH)
 	script_caret_moveByParagraph.resumeSayAllMode=sayAllHandler.CURSOR_CARET
 
+	def script_caret_previousSentence(self,gesture):
+		self._caretMoveBySentenceHelper(gesture, -1)
+
+	def script_caret_nextSentence(self,gesture):
+		self._caretMoveBySentenceHelper(gesture, 1)
 
 	def _backspaceScriptHelper(self,unit,gesture):
 		try:
@@ -168,6 +188,8 @@ class EditableText(ScriptableObject):
 		"kb:control+rightArrow": "caret_moveByWord",
 		"kb:control+upArrow": "caret_moveByParagraph",
 		"kb:control+downArrow": "caret_moveByParagraph",
+		"kb:alt+upArrow": "caret_previousSentence",
+		"kb:alt+downArrow": "caret_nextSentence",
 		"kb:home": "caret_moveByCharacter",
 		"kb:end": "caret_moveByCharacter",
 		"kb:control+home": "caret_moveByLine",
