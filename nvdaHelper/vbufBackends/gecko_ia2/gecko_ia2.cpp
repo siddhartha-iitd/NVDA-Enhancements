@@ -281,6 +281,9 @@ bool isLabelVisible(IAccessible2* acc) {
 	return true;
 }
 
+const vector<wstring>ATTRLIST_ROLES(1, L"IAccessible2::attribute_xml-roles");
+const wregex REGEX_PRESENTATION_ROLE(L"IAccessible2\\\\:\\\\:attribute_xml-roles:.*\\bpresentation\\b.*;");
+
 VBufStorage_fieldNode_t* GeckoVBufBackend_t::fillVBuf(IAccessible2* pacc,
 	VBufStorage_buffer_t* buffer, VBufStorage_controlFieldNode_t* parentNode, VBufStorage_fieldNode_t* previousNode,
 	IAccessibleTable* paccTable, IAccessibleTable2* paccTable2, long tableID,
@@ -428,7 +431,7 @@ VBufStorage_fieldNode_t* GeckoVBufBackend_t::fillVBuf(IAccessible2* pacc,
 	parentNode->isBlock=isBlockElement;
 
 	// force   isHidden to True if this has an ARIA role of presentation but its focusble -- Gecko does not hide this itself.
-	if((states&STATE_SYSTEM_FOCUSABLE)&&parentNode->matchAttributes(L"IAccessible2\\:\\:attribute_xml-roles:~wpresentation;")) {
+	if((states&STATE_SYSTEM_FOCUSABLE)&&parentNode->matchAttributes(ATTRLIST_ROLES, REGEX_PRESENTATION_ROLE)) {
 		parentNode->isHidden=true;
 	}
 	BSTR name=NULL;
@@ -534,15 +537,13 @@ VBufStorage_fieldNode_t* GeckoVBufBackend_t::fillVBuf(IAccessible2* pacc,
 			|| (nameIsContent && (IA2AttribsMapIt = IA2AttribsMap.find(L"explicit-name")) != IA2AttribsMap.end() && IA2AttribsMapIt->second == L"true")
 		)
 			renderChildren = false;
-		else {
-			if(pacc->get_accChildCount(&childCount)==S_OK) {
-				if (childCount > 0) {
-					// If a node has children, it's visible.
-					isVisible = true;
-				}
-			} else
-				childCount=0;
-		}
+		if(pacc->get_accChildCount(&childCount)==S_OK) {
+			if (childCount > 0) {
+				// If a node has children, it's visible.
+				isVisible = true;
+			}
+		} else
+			childCount=0;
 	}
 
 	//Expose all available actions
