@@ -9,11 +9,18 @@
 - Announcement of text selection is now possible in some custom edit fields where display information is used. (#770)
 - In accessible Java applications, position information is now announced for radio buttons and other controls that expose group information. (#3754)
 - In accessible Java applications, keyboard shortcuts are now announced for controls that have them. (#3881)
+- In browse mode, labels on landmarks are now reported. They are also included in the Elements List dialog. (#1195)
+- In browse mode, labelled regions are now treated as landmarks. (#3741)
 
 
 == Bug Fixes ==
 - The standard Windows System menu is no longer accidentally silenced in Java applications (#3882)
-
+- When copying text from screen review, line breaks are no longer ignored. (#3900)
+- Pointless whitespace objects are no longer reported in some applications when the focus changes or when using object navigation with simple review enabled. (#3839)
+- Message boxes and other dialogs produced by NVDA again cause previous speech to be canceled before announcing the dialog.
+- In browse mode, the labels of controls such as links and buttons are now rendered correctly where the label has been overridden by the author for accessibility purposes (specifically, using aria-label or aria-labelledby). (#1354)
+- In Browse mode in Internet Explorer, text contained within an element marked as presentational (aria-presentation) is no longer inappropriately ignored. (#4031)
+- It is now again possible to type Vietnamese text using the Unikey software. To do this, uncheck the Handle keys from other applications checkbox, added to NVDA's Keyboard settings dialog. (#4043) 
 
 
 = 2014.1 =
@@ -33,7 +40,7 @@
 - For Papenmeier braille displays, the move to flat review/focus command has been removed. Users can assign their own keys using the Input Gestures dialog. (#3652)
 - NVDA now relies  on the Microsoft VC runtime version 11, which means it can no longer be run on Operating systems older than Windows XP Service Pack 2 or Windows Server 2003 Service Pack 1.
 - Punctuation level Some will now speak star (*) and plus (+) characters. (#3614)
-- Upgraded eSpeak to version 1.48.03 which includes many language fixes and fixes several crashes. (#3842, #3739)
+- Upgraded eSpeak to version 1.48.04 which includes many language fixes and fixes several crashes. (#3842, #3739, #3860)
 
 
 == Bug Fixes ==
