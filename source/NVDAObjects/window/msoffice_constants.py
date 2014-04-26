@@ -1,10 +1,11 @@
-# office_constants.py
+# msoffice_constants.py
+# an enumreation of MS Office constants, with the speakable string.
 # Usage : from office_constants import *
 # xlFooBar.get( an_integer )
-# returns text to be spoken
-# Translators: full of small phrases. 
+# Translators: full of small phrases, not all are spoken out currently.
 
 
+# Base class, returns official string
 class xlConstant(object):
 	@classmethod
 	def get(cls,x):
@@ -123,7 +124,7 @@ class xlCellType(xlConstant):
 
 	_map = { 
 		xlCellTypeAllFormatConditions :_("any format"),
-		xlCellTypeAllValidation       :_("validatio"),
+		xlCellTypeAllValidation       :_("validation"),
 		xlCellTypeBlanks              :_("empty cell"),
 		xlCellTypeComments            :_("comment"),
 		xlCellTypeConstants           :_("constant"),
