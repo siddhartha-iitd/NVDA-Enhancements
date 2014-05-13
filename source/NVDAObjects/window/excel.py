@@ -295,7 +295,7 @@ class ExcelWorksheet(ExcelBase):
 	def _get_firstChild(self):
 		cell=self.excelWorksheetObject.cells(1,1)
 		return ExcelCell(windowHandle=self.windowHandle,excelWindowObject=self.excelWindowObject,excelCellObject=cell)
-	
+
 	def script_changeSelection(self,gesture):
 		oldSelection=self._getSelection()
 		gesture.send()
@@ -353,9 +353,7 @@ class ExcelWorksheet(ExcelBase):
 		"kb:control+pageDown",
 		"kb:control+a",
 		"kb:control+v",
-		"kb:nvda+alt+s"
 	)
-
 
 class ExcelCellTextInfo(NVDAObjectTextInfo):
 
@@ -582,8 +580,6 @@ class ExcelCell(ExcelBase):
 		"kb:alt+downArrow":"openDropdown",
 		"kb:NVDA+shift+s": "switchToChart",
 	}
-
-
 
 class ExcelChart(ExcelBase):
 	def __init__(self,windowHandle=None,excelWindowObject=None,excelChartObject=None):
