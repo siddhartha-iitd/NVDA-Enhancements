@@ -24,6 +24,168 @@ import controlTypes
 from . import Window
 from .. import NVDAObjectTextInfo
 import scriptHandler
+import speech
+
+# Chart types in Microsft Excel.
+xl3DArea = -4098
+xl3DAreaStacked	= 78
+xl3DAreaStacked100 = 79
+xl3DBarClustered = 60
+xl3DBarStacked = 61
+xl3DBarStacked100 = 62
+xl3DColumn = -4100
+xl3DColumnClustered = 54
+xl3DColumnStacked = 55
+xl3DColumnStacked100 = 56
+xl3DLine = -4101
+xl3DPie = -4102
+xl3DPieExploded = 70
+xlArea = 1
+xlAreaStacked = 76
+xlAreaStacked100 = 77
+xlBarClustered = 57
+xlBarOfPie = 71
+xlBarStacked = 58
+xlBarStacked100 = 59
+xlBubble = 15
+xlBubble3DEffect = 87
+xlColumnClustered = 51
+xlColumnStacked = 52
+xlColumnStacked100 = 53
+xlConeBarClustered = 102
+xlConeBarStacked = 103
+xlConeBarStacked100 = 104
+xlConeCol = 105
+xlConeColClustered = 99
+xlConeColStacked = 100
+xlConeColStacked100 = 101
+xlCylinderBarClustered = 95
+xlCylinderBarStacked = 96
+xlCylinderBarStacked100 = 97
+xlCylinderCol = 98
+xlCylinderColClustered = 92
+xlCylinderColStacked = 93
+xlCylinderColStacked100 = 94
+xlDoughnut = -4120
+xlDoughnutExploded = 80
+xlLine = 4
+xlLineMarkers = 65
+xlLineMarkersStacked = 66
+xlLineMarkersStacked100 = 67
+xlLineStacked = 63
+xlLineStacked100 = 64
+xlPie = 5
+xlPieExploded = 69
+xlPieOfPie = 68
+xlPyramidBarClustered = 109
+xlPyramidBarStacked = 110
+xlPyramidBarStacked100 = 111
+xlPyramidCol = 112
+xlPyramidColClustered = 106
+xlPyramidColStacked = 107
+xlPyramidColStacked100 = 108
+xlRadar = -4151
+xlRadarFilled = 82
+xlRadarMarkers = 81
+xlStockHLC = 88
+xlStockOHLC = 89
+xlStockVHLC = 90
+xlStockVOHLC = 91
+xlSurface = 83
+xlSurfaceTopView = 85
+xlSurfaceTopViewWireframe = 86
+xlSurfaceWireframe = 84
+xlXYScatter = -4169
+xlXYScatterLines = 74
+xlXYScatterLinesNoMarkers = 75
+xlXYScatterSmooth = 72
+xlXYScatterSmoothNoMarkers = 73
+
+# Dictionary for the Description of chart types.
+chartTypeDict = {
+	xl3DArea : "3D Area",
+	xl3DAreaStacked : "3D Stacked Area",
+	xl3DAreaStacked100 : "100 percent Stacked Area",
+	xl3DBarClustered : "3D Clustered Bar",
+	xl3DBarStacked : "3D Stacked Bar",
+	xl3DBarStacked100 : "3D 100 percent Stacked Bar",
+	xl3DColumn : "3D Column",
+	xl3DColumnClustered : "3D Clustered Column",
+	xl3DColumnStacked : "3D Stacked Column",
+	xl3DColumnStacked100 : "3D 100 percent Stacked Column",
+	xl3DLine : "3D Line",
+	xl3DPie : "3D Pie",
+	xl3DPieExploded : "Exploded 3D Pie",
+	xlArea : "Area",
+	xlAreaStacked : "Stacked Area",
+	xlAreaStacked100 : "100 percent Stacked Area",
+	xlBarClustered : "Clustered Bar",
+	xlBarOfPie : "Bar of Pie",
+	xlBarStacked : "Stacked Bar",
+	xlBarStacked100 : "100 percent Stacked Bar",
+	xlBubble : "Bubble",
+	xlBubble3DEffect : "Bubble with 3D effects",
+	xlColumnClustered : "Clustered Column",
+	xlColumnStacked : "Stacked Column",
+	xlColumnStacked100 : "100 percent Stacked Column",
+	xlConeBarClustered : "Clustered Cone Bar",
+	xlConeBarStacked : "Stacked Cone Bar",
+	xlConeBarStacked100 : "100 percent Stacked Cone Bar",
+	xlConeCol : "3D Cone Column",
+	xlConeColClustered : "Clustered Cone Column",
+	xlConeColStacked : "Stacked Cone Column",
+	xlConeColStacked100 : "100 percent Stacked Cone Column",
+	xlCylinderBarClustered : "Clustered Cylinder Bar",
+	xlCylinderBarStacked : "Stacked Cylinder Bar",
+	xlCylinderBarStacked100 : "100 percent Stacked Cylinder Bar",
+	xlCylinderCol : "3D Cylinder Column",
+	xlCylinderColClustered : "Clustered Cone Column",
+	xlCylinderColStacked : "Stacked Cone Column",
+	xlCylinderColStacked100 : "100 percent Stacked Cylinder Column",
+	xlDoughnut : "Doughnut",
+	xlDoughnutExploded : "Exploded Doughnut",
+	xlLine : "Line",
+	xlLineMarkers : "Line with Markers",
+	xlLineMarkersStacked : "Stacked Line with Markers",
+	xlLineMarkersStacked100 : "100 percent Stacked Line with Markers",
+	xlLineStacked : "Stacked Line",
+	xlLineStacked100 : "100 percent Stacked Line",
+	xlPie : "Pie",
+	xlPieExploded : "Exploded Pie",
+	xlPieOfPie : "Pie of Pie",
+	xlPyramidBarClustered : "Clustered Pyramid Bar",
+	xlPyramidBarStacked : "Stacked Pyramid Bar",
+	xlPyramidBarStacked100 : "100 percent Stacked Pyramid Bar",
+	xlPyramidCol : "3D Pyramid Column",
+	xlPyramidColClustered : "Clustered Pyramid Column",
+	xlPyramidColStacked : "Stacked Pyramid Column",
+	xlPyramidColStacked100 : "100 percent Stacked Pyramid Column",
+	xlRadar : "Radar",
+	xlRadarFilled : "Filled Radar",
+	xlRadarMarkers : "Radar with Data Markers",
+	xlStockHLC : "High-Low-Close",
+	xlStockOHLC : "Open-High-Low-Close",
+	xlStockVHLC : "Volume-High-Low-Close",
+	xlStockVOHLC : "Volume-Open-High-Low-Close",
+	xlSurface : "3D Surface",
+	xlSurfaceTopView : "Surface (Top View)",
+	xlSurfaceTopViewWireframe : "Surface (Top View wireframe)",
+	xlSurfaceWireframe : "3D Surface (wireframe)",
+	xlXYScatter : "Scatter",
+	xlXYScatterLines : "Scatter with Lines",
+	xlXYScatterLinesNoMarkers : "Scatter with Lines and No Data Markers",
+	xlXYScatterSmooth : "Scatter with Smoothed Lines",
+	xlXYScatterSmoothNoMarkers : "Scatter with Smoothed Lines and No Data Markers"
+}
+
+# Axis types in chart
+xlCategory = 1
+xlValue = 2
+xlSeriesAxis = 3 # Valid only for 3-D charts
+
+# Axis Groups in chart
+xlPrimary = 1
+xlSecondary = 2
 
 xlA1 = 1
 xlRC = 2
@@ -76,17 +238,27 @@ class ExcelBase(Window):
 			isMerged=selection.mergeCells
 		except (COMError,NameError):
 			isMerged=False
+
+		try:
+			numCells=selection.count
+		except (COMError,NameError):
+			numCells=0
+
+		isChartActive = True if self.excelWindowObject.ActiveChart else False
 		if isMerged:
 			obj=ExcelMergedCell(windowHandle=self.windowHandle,excelWindowObject=self.excelWindowObject,excelCellObject=selection.item(1))
-		elif selection.Count>1:
+		elif numCells>1:
 			obj=ExcelSelection(windowHandle=self.windowHandle,excelWindowObject=self.excelWindowObject,excelRangeObject=selection)
-		else:
+		elif numCells==1:
 			obj=ExcelCell(windowHandle=self.windowHandle,excelWindowObject=self.excelWindowObject,excelCellObject=selection)
+		elif isChartActive:
+			selection = self.excelWindowObject.ActiveChart
+			obj=ExcelChart(windowHandle=self.windowHandle,excelWindowObject=self.excelWindowObject,excelChartObject=selection)
+	
 		return obj
 
 class Excel7Window(ExcelBase):
 	"""An overlay class for Window for the EXCEL7 window class, which simply bounces focus to the active excel cell."""
-
 	def _get_excelWindowObject(self):
 		return self.excelWindowObjectFromWindow(self.windowHandle)
 
@@ -123,7 +295,7 @@ class ExcelWorksheet(ExcelBase):
 	def _get_firstChild(self):
 		cell=self.excelWorksheetObject.cells(1,1)
 		return ExcelCell(windowHandle=self.windowHandle,excelWindowObject=self.excelWindowObject,excelCellObject=cell)
-
+	
 	def script_changeSelection(self,gesture):
 		oldSelection=self._getSelection()
 		gesture.send()
@@ -181,7 +353,9 @@ class ExcelWorksheet(ExcelBase):
 		"kb:control+pageDown",
 		"kb:control+a",
 		"kb:control+v",
+		"kb:nvda+alt+s"
 	)
+
 
 class ExcelCellTextInfo(NVDAObjectTextInfo):
 
@@ -284,6 +458,20 @@ class ExcelCell(ExcelBase):
 			# Translators: a message reported in the SetRowHeaderColumn script for Excel.
 			ui.message(_("Cleared row header column"))
 	script_setRowHeaderColumn.__doc__=_("Pressing once will set the current column as the column where row headers should be found. Pressing twice clears the setting.")
+
+	def script_switchToChart(self,gesture):
+		try:
+			chart = self.excelCellObject.parent.ChartObjects(1)
+		except (COMError,NameError,AttributeError):
+			chart = None
+		if chart:
+			chart.Activate()
+			chart.Index
+			chartObj = self._getSelection()
+			eventHandler.queueEvent("gainFocus", chartObj)
+		else:
+			text = _("No chart present.")
+			speech.speak([text])
 
 	@classmethod
 	def kwargsFromSuper(cls,kwargs,relation=None):
@@ -392,6 +580,149 @@ class ExcelCell(ExcelBase):
 		"kb:NVDA+shift+c": "setColumnHeaderRow",
 		"kb:NVDA+shift+r": "setRowHeaderColumn",
 		"kb:alt+downArrow":"openDropdown",
+		"kb:NVDA+shift+s": "switchToChart",
+	}
+
+
+
+class ExcelChart(ExcelBase):
+	def __init__(self,windowHandle=None,excelWindowObject=None,excelChartObject=None):
+		self.excelWindowObject=excelWindowObject
+		self.excelChartObject=excelChartObject
+		super(ExcelChart,self).__init__(windowHandle=windowHandle)
+
+	def _isEqual(self, other):
+		if not super(ExcelChart, self)._isEqual(other):
+			return False
+		return self.excelChartObject == other.excelChartObject
+
+	def _get_name(self):
+		return self.excelChartObject.Name
+
+	def _get_title(self):
+		try:
+			title=self.excelChartObject.ChartTitle	
+		except COMError:
+			title=None
+		return title
+
+	def script_switchToCell(self,gesture):
+		cell=self.excelWindowObject.ActiveCell
+		cell.Activate()
+		cellObj=self._getSelection()
+		eventHandler.queueEvent("gainFocus",cellObj)
+
+	def script_switchBetweenCharts(self,gesture):
+		gesture.send()
+		chartObj=self._getSelection()
+		eventHandler.queueEvent("gainFocus", chartObj)
+
+	def script_speakType(self,gesture):
+		chartType = self.excelChartObject.ChartType
+		if chartType in chartTypeDict.keys():
+			text=_("%s chart type" %(chartTypeDict[chartType]))
+		else:
+			text=_("Chart type unknown")
+		speech.speak([text])
+
+	def script_speakTitle(self,gesture):
+		title = self._get_title()
+		text=_("Chart title is %s" %(title.text)) if title else _("No chart title defined")
+		speech.speak([text])
+
+	def script_speakName(self,gesture):
+		name=self._get_name()
+		text=_("Chart name is %s" %(name))
+		speech.speak([text])
+
+	def speakAxisTitle(self, axisType):
+		axis=None
+		if self.excelChartObject.HasAxis(axisType, xlPrimary):
+			axis = self.excelChartObject.Axes(axisType, xlPrimary)
+		else:
+			pass
+		axisTitle = axis.AxisTitle.Text if axis and axis.HasTitle else "Not defined"
+		axisName = "Category" if axisType==xlCategory else "Value" if axisType==xlValue else "Series"
+		text=_("%s Axis is %s" %(axisName, axisTitle))
+		speech.speak([text])
+
+	def script_speakCategoryAxis(self, gesture):
+		self.speakAxisTitle(xlCategory)
+
+	def script_speakValueAxis(self, gesture):
+		self.speakAxisTitle(xlValue)
+
+	def script_speakSeriesAxis(self, gesture):
+		self.speakAxisTitle(xlSeriesAxis)
+
+	def script_speakSeries(self, gesture):
+		count = self.excelChartObject.SeriesCollection().count
+		if count>0:
+			seriesValueString="%d series in this chart" %(count)
+			for i in xrange(1, count+1):
+				seriesValueString += ", Series %d %s" %(i, self.excelChartObject.SeriesCollection(i).Name)
+			text=_(seriesValueString)	
+		else:
+			text=_("No Series defined.")
+		speech.speak([text])
+
+	def speakDataLabels(self, index):
+		count = self.excelChartObject.SeriesCollection().count
+		dataLabels=None
+		if index > count:
+			pass
+		else:
+			xVal = self.excelChartObject.SeriesCollection(index).XValues
+			val = self.excelChartObject.SeriesCollection(index).Values
+			dataLabels=zip(xVal, val)
+		if dataLabels:
+			text="Series name %s, %d pairs" %(self.excelChartObject.SeriesCollection(index).Name, len(dataLabels))
+			for label in dataLabels:
+				text+=",(%s,%s) " %(label[0], label[1])
+		else:
+			text=_("Only %d series in this chart." %(count))
+		speech.speak([text])
+
+	# seriesIndex is index of series desired
+	def script_speakSeriesOne(self, gesture):
+		seriesIndex=1
+		self.speakDataLabels(seriesIndex)
+	
+	def script_speakSeriesTwo(self, gesture):
+		seriesIndex=2
+		self.speakDataLabels(seriesIndex)
+	
+	def script_speakSeriesThree(self, gesture):
+		seriesIndex=3
+		self.speakDataLabels(seriesIndex)
+	
+	def script_speakSeriesFour(self, gesture):
+		seriesIndex=4
+		self.speakDataLabels(seriesIndex)
+	
+	def script_speakSeriesFive(self, gesture):
+		seriesIndex=5
+		self.speakDataLabels(seriesIndex)
+
+	__gestures = {
+		"kb:NVDA+shift+s": "switchToCell",
+		"kb:escape": "switchToCell",
+		"kb:tab" : "switchBetweenCharts",
+		"kb:shift+tab" : "switchBetweenCharts",
+
+		"kb:NVDA+shift+1" : "speakType",
+		"kb:NVDA+shift+2" : "speakTitle",
+		"kb:NVDA+shift+3" : "speakName",
+		"kb:NVDA+shift+4" : "speakCategoryAxis",
+		"kb:NVDA+shift+5" : "speakValueAxis",
+		"kb:NVDA+shift+6" : "speakSeriesAxis",
+		"kb:NVDA+shift+7" : "speakSeries",
+
+		"kb:control+alt+1":"speakSeriesOne",
+		"kb:control+alt+2":"speakSeriesTwo",
+		"kb:control+alt+3":"speakSeriesThree",
+		"kb:control+alt+4":"speakSeriesFour",
+		"kb:control+alt+5":"speakSeriesFive",
 	}
 
 class ExcelSelection(ExcelBase):
