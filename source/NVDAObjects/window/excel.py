@@ -245,6 +245,7 @@ class ExcelBase(Window):
 			numCells=0
 
 		isChartActive = True if self.excelWindowObject.ActiveChart else False
+		obj=None
 		if isMerged:
 			obj=ExcelMergedCell(windowHandle=self.windowHandle,excelWindowObject=self.excelWindowObject,excelCellObject=selection.item(1))
 		elif numCells>1:
@@ -254,7 +255,7 @@ class ExcelBase(Window):
 		elif isChartActive:
 			selection = self.excelWindowObject.ActiveChart
 			obj=ExcelChart(windowHandle=self.windowHandle,excelWindowObject=self.excelWindowObject,excelChartObject=selection)
-	
+
 		return obj
 
 class Excel7Window(ExcelBase):
@@ -578,7 +579,7 @@ class ExcelCell(ExcelBase):
 		"kb:NVDA+shift+c": "setColumnHeaderRow",
 		"kb:NVDA+shift+r": "setRowHeaderColumn",
 		"kb:alt+downArrow":"openDropdown",
-		"kb:NVDA+shift+s": "switchToChart",
+		"kb:NVDA+space": "switchToChart",
 	}
 
 class ExcelChart(ExcelBase):
@@ -586,14 +587,17 @@ class ExcelChart(ExcelBase):
 		self.excelWindowObject=excelWindowObject
 		self.excelChartObject=excelChartObject
 		super(ExcelChart,self).__init__(windowHandle=windowHandle)
+		for gesture in self.__changeSelectionGestures:
+			self.bindGesture(gesture, "changeSelection")
 
 	def _isEqual(self, other):
 		if not super(ExcelChart, self)._isEqual(other):
 			return False
-		return self.excelChartObject == other.excelChartObject
+		return self.excelChartObject.Parent.Index == other.excelChartObject.Parent.Index
 
 	def _get_name(self):
-		return self.excelChartObject.Name
+		name=self.excelChartObject.Name
+		return _("%s chart" %(name))
 
 	def _get_title(self):
 		try:
@@ -601,17 +605,15 @@ class ExcelChart(ExcelBase):
 		except COMError:
 			title=None
 		return title
-
+	
+	def _get_role(self):
+		return controlTypes.ROLE_UNKNOWN
+	
 	def script_switchToCell(self,gesture):
 		cell=self.excelWindowObject.ActiveCell
 		cell.Activate()
 		cellObj=self._getSelection()
 		eventHandler.queueEvent("gainFocus",cellObj)
-
-	def script_switchBetweenCharts(self,gesture):
-		gesture.send()
-		chartObj=self._getSelection()
-		eventHandler.queueEvent("gainFocus", chartObj)
 
 	def script_speakType(self,gesture):
 		chartType = self.excelChartObject.ChartType
@@ -651,7 +653,7 @@ class ExcelChart(ExcelBase):
 	def script_speakSeriesAxis(self, gesture):
 		self.speakAxisTitle(xlSeriesAxis)
 
-	def script_speakSeries(self, gesture):
+	def script_speakSeriesInfo(self, gesture):
 		count = self.excelChartObject.SeriesCollection().count
 		if count>0:
 			seriesValueString="%d series in this chart" %(count)
@@ -662,63 +664,42 @@ class ExcelChart(ExcelBase):
 			text=_("No Series defined.")
 		speech.speak([text])
 
-	def speakDataLabels(self, index):
-		count = self.excelChartObject.SeriesCollection().count
-		dataLabels=None
-		if index > count:
-			pass
-		else:
-			xVal = self.excelChartObject.SeriesCollection(index).XValues
-			val = self.excelChartObject.SeriesCollection(index).Values
-			dataLabels=zip(xVal, val)
-		if dataLabels:
-			text="Series name %s, %d pairs" %(self.excelChartObject.SeriesCollection(index).Name, len(dataLabels))
-			for label in dataLabels:
-				text+=",(%s,%s) " %(label[0], label[1])
-		else:
-			text=_("Only %d series in this chart." %(count))
-		speech.speak([text])
-
-	# seriesIndex is index of series desired
-	def script_speakSeriesOne(self, gesture):
-		seriesIndex=1
-		self.speakDataLabels(seriesIndex)
-	
-	def script_speakSeriesTwo(self, gesture):
-		seriesIndex=2
-		self.speakDataLabels(seriesIndex)
-	
-	def script_speakSeriesThree(self, gesture):
-		seriesIndex=3
-		self.speakDataLabels(seriesIndex)
-	
-	def script_speakSeriesFour(self, gesture):
-		seriesIndex=4
-		self.speakDataLabels(seriesIndex)
-	
-	def script_speakSeriesFive(self, gesture):
-		seriesIndex=5
-		self.speakDataLabels(seriesIndex)
-
 	__gestures = {
-		"kb:NVDA+shift+s": "switchToCell",
 		"kb:escape": "switchToCell",
-		"kb:tab" : "switchBetweenCharts",
-		"kb:shift+tab" : "switchBetweenCharts",
+		"kb:NVDA+t" : "speakTitle",
+		"kb:NVDA+shift+1" : "speakType",		
+		"kb:NVDA+shift+2" : "speakName",
+		"kb:NVDA+shift+3" : "speakCategoryAxis",
+		"kb:NVDA+shift+4" : "speakValueAxis",
+		"kb:NVDA+shift+5" : "speakSeriesAxis",
+		"kb:NVDA+shift+6" : "speakSeriesInfo",
+	}
 
-		"kb:NVDA+shift+1" : "speakType",
-		"kb:NVDA+shift+2" : "speakTitle",
-		"kb:NVDA+shift+3" : "speakName",
-		"kb:NVDA+shift+4" : "speakCategoryAxis",
-		"kb:NVDA+shift+5" : "speakValueAxis",
-		"kb:NVDA+shift+6" : "speakSeriesAxis",
-		"kb:NVDA+shift+7" : "speakSeries",
-
-		"kb:control+alt+1":"speakSeriesOne",
-		"kb:control+alt+2":"speakSeriesTwo",
-		"kb:control+alt+3":"speakSeriesThree",
-		"kb:control+alt+4":"speakSeriesFour",
-		"kb:control+alt+5":"speakSeriesFive",
+	def script_changeSelection(self,gesture):
+		oldSelection=self._getSelection()
+		gesture.send()
+		newSelection=None
+		curTime=startTime=time.time()
+		while (curTime-startTime)<=0.15:
+			if scriptHandler.isScriptWaiting():
+				# Prevent lag if keys are pressed rapidly
+				return
+			if eventHandler.isPendingEvents('gainFocus'):
+				return
+			newSelection=self._getSelection()
+			if newSelection and newSelection!=oldSelection:
+				break
+			api.processPendingEvents(processEventQueue=False)
+			time.sleep(0.015)
+			curTime=time.time()
+		if newSelection:
+			eventHandler.executeEvent('gainFocus',newSelection)
+			
+	__changeSelectionGestures = {
+		"kb:control+pageUp",
+		"kb:control+pageDown",
+		"kb:tab",
+		"kb:shift+tab",
 	}
 
 class ExcelSelection(ExcelBase):
