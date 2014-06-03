@@ -57,13 +57,15 @@ Per maggiori informazioni è possibile [Leggere l'intera licenza. http://www.gnu
 
 + Requisiti di sistema +
 - Sistemi operativi: tutte le versioni a 32 e 64 bit dei Sistemi Windows XP, Windows Vista e Windows 7 (Incluse le edizioni Server).
+ - Per Windows XP 32-bit, NVDA richiede Service Pack 2 o superiore.
+ - Per Windows Server 2003, NVDA richiede Service Pack 1 o superiore.
 - Memoria: 256 mb di Ram o superiore
 - Velocità processore: 1.0 ghz o superiore.
 - Circa 50 Megabytes di spazio disco.
 -
 
-+ Ottenere NVDA +
-Se non si possiede ancora una copia di NVDA, è possibile scaricarla dal sito originale all'indirizzo [http://www.nvda-project.org NVDA_URL].
++ Scaricare e configurare NVDA +
+Se non si possiede ancora una copia di NVDA, è possibile scaricarla dal sito originale all'indirizzo [www.nvaccess.org NVDA_URL].
 
 Accedere alla sezione download e si troverà l'apposito link per scaricarlo. In alternativa è anche possibile prelevare il software dal [sito della comunità italiana: http://www.nvda.it]
 
@@ -797,17 +799,17 @@ Una casella di controllo che, se attivata, fa in modo che NVDA pronunci tutti i 
 Tasto: NVDA+3
 
 Una casella di controllo che, se attivata, fa in modo che NVDA pronunci tutte le parole che vengono digitate sulla tastiera.
- 
+
 ==== I caratteri digitati interrompono la voce ====
 Questa opzione, se attiva, interrompe la lettura della sintesi vocale non appena viene premuto un tasto. L'opzione è attivata di default.
 
 ==== Il tasto invio interrompe la voce ====
 Questa opzione, se attiva, interrompe la lettura della sintesi vocale non appena viene premuto il tasto invio. L'opzione è attivata di default.
- 
+
 ==== Consentire navigazione rapida in modalità dire tutto ====
  Se attivata, alcuni tasti di navigazione (ad esempio i comandi di navigazione rapida nei browser, oppure lo spostarsi per righe o paragrafi) non fermeranno più la lettura, che continuerà dalla nuova posizione raggiunta.
- 
- ==== Emetti un beep alla scrittura di lettere minuscole quando il tasto blocca maiuscole è attivo ====
+
+==== Emetti un beep alla scrittura di lettere minuscole quando il tasto blocca maiuscole è attivo ====
 Quando abilitato, si udirà un segnale acustico ogni qualvolta verrà digitata una lettera assieme al tasto Shift (maiuscolo) quando il blocca maiuscole è attivo.
 In genere, scrivere le lettere con il tasto Shift mentre la funzione di Blocca Maiuscole è attivata non è prassi comune e si presume sia non intenzionale, magari perché ci si è scordati di averla abilitata in precedenza.
 In ogni caso, può essere d'aiuto saperlo.
@@ -817,8 +819,12 @@ In ogni caso, può essere d'aiuto saperlo.
 Tasto: NVDA+4
 
 Una casella di controllo che, se attivata, fa in modo che NVDA pronunci tutte le combinazioni di tasti che non siano singoli caratteri che vengono digitati, ad esempio premendo il tasto control seguito da una lettera.
- 
-+++ Impostazioni Mouse (NVDA+control+m) +++
+
+==== Gestisci tasti da altre applicazioni ====
+	Quest'opzione permette all'utente di controllare se le pressioni di tasti, generate da programmi che si basano sul riconoscimento vocale o sulle tastiere a schermo, debbano essere processate da NVDA.
+L'opzione risulta attiva di default, sebbene alcuni utenti che utilizzano la lingua di immissione Vietnamita dovrebbero disattivare questa funzione.
+
++++[ Impostazioni Mouse (NVDA+control+m) +++
 Questa finestra di dialogo si trova all'interno del menu preferenze, alla voce impostazioni mouse... 
 Contiene le seguenti opzioni:
 
@@ -1234,9 +1240,9 @@ Si consiglia di rimuovere questi file dalla propria configurazione e installare 
 
 ++ Console Python ++
 La Console Python di NVDA, situata nel menu strumenti, è uno strumento per sviluppatori che risulta utile in fase di debug, di diagnosi delle funzioni interne di NVDA o di analisi della gerarchia degli oggetti accessibili presenti in un'applicazione.
-Per ulteriori informazioni, si veda [l'articolo relativo alla Console di Python, in lingua inglese, nel sito web di NVDA NVDA_URLwiki/PythonConsole].
+Per ulteriori informazioni, si veda [l'articolo relativo alla Console di Python, in lingua inglese, nel sito web di NVDA http://community.nvda-project.org/wiki/Development].
 
-++ Ricarica plugins ++
+++ Ricarica componenti aggiuntivi ++
 Questa voce, una volta attivata, ricarica tutti i plugin e i moduli specifici per le applicazioni senza riavviare NVDA. Risulta utile per gli sviluppatori.
 
 + Sintesi vocali supportate +[SupportedSpeechSynths]
@@ -1305,8 +1311,8 @@ Questa sezione contiene informazioni sulle barre braille supportate da NVDA.
 ++ Freedom Scientific Serie Focus/PAC Mate ++
 Sono supportati Tutti i Display Braille Focus e Pac Mate prodotti da [Freedom Scientific http://www.freedomscientific.com/], sia USB che Bluetooth.
 per un corretto funzionamento è necessario avere installati nel proprio sistema i drivers per display Braille Freedom Scientific.
-Nel caso non si sia in possesso di tali drivers, è possibile scaricarli dall'indirizzo http://www.freedomscientific.com/downloads/focus-40-blue/focus-40-blue-downloads.asp.
-Sebbene nella pagina sia nominata solo la barra Focus 40, il driver funzionerà per tutti i modelli Freedom.
+Nel caso non si sia in possesso di tali drivers, è possibile scaricarli dall'indirizzo http://www.freedomscientific.com/downloads/focus-40-blue/focus-40-14-blue-downloads.asp.
+Sebbene nella pagina sia nominata solo la barra Focus Blue, il driver funzionerà per tutti i modelli Freedom.
 Da notare che se nel proprio sistema si sta utilizzando una versione di Windows a 64 bit e i driver sono già stati installati da un altro screen reader, è probabile che sia necessario installare comunque il pacchetto, in quanto difficilmente quello screen reader avrà installato tutti i file utilizzati da NVDA.
 
 Per impostazioni predefinite, NVDA è in grado di individuare e connettersi automaticamente a questi display via USB o Bluetooth.
@@ -1539,6 +1545,9 @@ Si legga la documentazione della propria barra Braille per ottenere informazioni
 ++ HIMS serie Braille Sense/Braille EDGE ++
 NVDA supporta i modelli Braille Sense e Braille EDGE prodotti dalla [Hims http://www.hims-inc.com/] quando connessi tramite USB o bluetooth.
 In caso di connessione tramite USB, è necessario prima installare i driver sviluppati dal produttore.
+Si possono scaricare dal centro risorse Hims all'indirizzo: http://www.hims-inc.com/resource-center/
+In questa pagina, selezionare il proprio dispositivo e scaricare il driver dalla sezione Window-Eyes.
+Sebbene venga citato soltanto Window-Eyes, si tratta di un driver USB generico che funziona perfettamente anche con NVDA.
 
 Di seguito, ecco l'elenco dell'assegnazione dei tasti  per questa riga braille con NVDA.
 Si legga la documentazione della propria barra Braille per ottenere informazioni su dove sono situati i vari tasti.
@@ -1676,7 +1685,6 @@ Seguono i comandi per i Display Papenmeier associati con NVDA:
 | Route to braille cell | routing |
 | Annuncia il carattere attuale sul cursore di controllo | l1 |
 | Attiva l'oggetto corrente | l2 |
-| Attiva navigazione in linea/focus | r1 |
 | Annuncia Titolo | l1+up |
 | Annuncia barra di stato | l2+down |
 | Spostarsi all'oggetto contenitore | up2 |
@@ -1753,7 +1761,6 @@ Dispositivi con EAB
 | Route to braille cell | routing |
 | Annuncia il carattere attuale sul cursore di controllo | l1 |
 | Attiva l'oggetto corrente | l2 |
-| Attiva navigazione in linea | r1 |
 | Annuncia Titolo | l1+up |
 | Annuncia barra di stato | l2+down |
 | Spostarsi all'oggetto contenitore | up2 |
@@ -1771,7 +1778,6 @@ BRAILLEX Tiny:
 | Sposta display braille alla riga precedente | up |
 | Sposta display braille alla riga successiva | dn |
 | Commuta inseguimento braille | r2 |
-| Navigazione in linea / focus | r1 |
 | Spostarsi all'oggetto contenitore | r1+up |
 | Spostarsi al primo oggetto contenuto | r1+dn |
 | Spostarsi all'oggetto precedente | r1+left |
@@ -1786,7 +1792,6 @@ BRAILLEX 2D Screen:
 | Annuncia formattazione testo | reportf |
 | Sposta display braille alla riga precedente | up |
 | Sposta display braille indietro | left |
-| Commuta modalità in linea / focus | r1 |
 | Sposta display braille avanti | right |
 | Sposta display braille alla riga successiva | dn |
 | Spostarsi all'oggetto successivo | left2 |
@@ -1871,7 +1876,7 @@ Per esempio, è possibile specificare se inviare o meno un simbolo non processat
 
 Per far ciò, è necessario modificare il file contenente le informazioni sulla pronuncia dei simboli che si trova nella propria cartella di configurazione utente di NVDA 
 Il file si chiama symbols-xx.dic, dove xx costituisce il codice della lingua.
-Il formato di tale file è documentato nella guida per gli sviluppatori, sezione pronuncia/simboli, che si può leggere sul [sito internazionale di NVDA NVDA_URLwiki/Development].
+Il formato di tale file è documentato nella guida per gli sviluppatori, sezione pronuncia/simboli, che si può leggere sul sito internazionale di NVDA http://community.nvda-project.org/wiki/Development].
 Comunque, non è possibile per gli utenti definire simboli troppo complessi.
  
 + Ulteriori Informazioni +

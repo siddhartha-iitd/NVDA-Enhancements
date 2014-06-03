@@ -5,8 +5,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: NVDA bzr main:5884\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-01-21 19:10+1000\n"
-"PO-Revision-Date: 2014-01-24 22:07+0100\n"
+"POT-Creation-Date: 2014-04-22 19:10+1000\n"
+"PO-Revision-Date: 2014-05-09 23:32+0100\n"
 "Last-Translator: Martina Letochová <letochova@seznam.cz>\n"
 "Language-Team: CS <http://cz.nvda-community.org/>\n"
 "Language: cs_CZ\n"
@@ -121,6 +121,10 @@ msgstr "hledat"
 #. Translators: Identifies a form (controls such as edit boxes, combo boxes and so on).
 msgid "form"
 msgstr "formulář"
+
+#. Translators: Reported for a significant region, normally found on web pages.
+msgid "region"
+msgstr "oblast"
 
 #. Translators: The name of a braille table displayed in the
 #. braille settings dialog.
@@ -3412,6 +3416,14 @@ msgstr "Zatím žádná zpráva"
 msgid "Displays one of the recent messages"
 msgstr "Přečte jednu z posledních zpráv"
 
+#. Translators: This Outlook Express message has an attachment
+msgid "has attachment"
+msgstr "příloha"
+
+#. Translators: this Outlook Express message is flagged
+msgid "flagged"
+msgstr "označeno"
+
 #. Translators: This is presented in outlook or live mail to indicate email attachments.
 msgid "Attachments"
 msgstr "Přílohy"
@@ -4877,6 +4889,11 @@ msgstr "Pípat při psaní malých písmen, je-li zapnutý caps lock"
 #. keyboard settings dialog.
 msgid "Speak command &keys"
 msgstr "Hlásit &příkazové klávesy"
+
+#. Translators: This is the label for a checkbox in the
+#. keyboard settings dialog.
+msgid "Handle keys from other &applications"
+msgstr "Zpracovávat klávesy z jiných aplikací"
 
 #. Translators: Message to report wrong configuration of the NVDA key
 msgid "At least one key must be used as the NVDA key."
