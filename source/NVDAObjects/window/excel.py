@@ -24,10 +24,7 @@ import controlTypes
 from . import Window
 from .. import NVDAObjectTextInfo
 import scriptHandler
-import speech
 
-
-from msoffice_constants import  xlCellType
 xlA1 = 1
 xlRC = 2
 xlUnderlineStyleNone=-4142
@@ -151,18 +148,6 @@ class ExcelWorksheet(ExcelBase):
 			eventHandler.executeEvent('gainFocus',newSelection)
 	script_changeSelection.canPropagate=True
 
-	def script_cellSelectionPopup(self, gesture):
-		# We need this to be a modal dialog, but it mustn't block this script.
-		def run():
-			gui.mainFrame.prePopup()
-			d = CellsListDialog(self.excelWorksheetObject.Cells)
-			d.ShowModal()
-			d.Destroy()
-			gui.mainFrame.postPopup()
-		wx.CallAfter(run)
-
-	script_cellSelectionPopup.canPropagate=True
-
 	__changeSelectionGestures = (
 		"kb:tab",
 		"kb:shift+tab",
@@ -197,9 +182,6 @@ class ExcelWorksheet(ExcelBase):
 		"kb:control+a",
 		"kb:control+v",
 	)
-	__gestures={
-		"kb:NVDA+f7":"cellSelectionPopup",
-	}
 
 class ExcelCellTextInfo(NVDAObjectTextInfo):
 
@@ -302,16 +284,6 @@ class ExcelCell(ExcelBase):
 			# Translators: a message reported in the SetRowHeaderColumn script for Excel.
 			ui.message(_("Cleared row header column"))
 	script_setRowHeaderColumn.__doc__=_("Pressing once will set the current column as the column where row headers should be found. Pressing twice clears the setting.")
-
-	def script_openComment(self, gesture):
-		cmt = self.excelCellObject.Comment
-		if cmt :
-			speech.speakMessage(_("Editing comment"))
-			speech.speakText(cmt.Text(),reason=controlTypes.REASON_FOCUS)
-		else:
-			speech.speakMessage(_("Creating new comment"))			
-		gesture.send()
-	script_openComment.__doc__=_("Create or edit cell comment")
 
 	@classmethod
 	def kwargsFromSuper(cls,kwargs,relation=None):
@@ -420,7 +392,6 @@ class ExcelCell(ExcelBase):
 		"kb:NVDA+shift+c": "setColumnHeaderRow",
 		"kb:NVDA+shift+r": "setRowHeaderColumn",
 		"kb:alt+downArrow":"openDropdown",
-		"kb:shift+f2":"openComment",
 	}
 
 class ExcelSelection(ExcelBase):
@@ -560,137 +531,3 @@ class ExcelMergedCell(ExcelCell):
 
 	def _get_cellCoordsText(self):
 		return self.getCellAddress(self.excelCellObject.mergeArea)
-
-class CellsListDialog(wx.Dialog):
-
-	types = { 
-		xlCellType.xlCellTypeComments : xlCellType.get(xlCellType.xlCellTypeComments),
-		xlCellType.xlCellTypeFormulas : xlCellType.get(  xlCellType.xlCellTypeFormulas  ),
-	}
-
-
-	def populate_area(self, fnText, fnNext, refCells, treeBranch):
-		for area in refCells.Areas:
-			first= area.Cells.Item(1).Address(False, False, 1, False)
-			last = area.Cells.Item( area.Cells.Count).Address( False, False, 1,False)
-			text ="Area: {first} to {last}".format(first=first,last=last)
-			entry = self.tree.AppendItem(treeBranch, text,data=wx.TreeItemData(area))
-			if len(fnNext) > 0 :
-				fnNext[0](fnText, fnNext[1:], area, entry)
-
-	def populate_col(self, fnText, fnNext, refCells, treeBranch):
-		for area in refCells.Columns:
-			first= area.Cells.Item(1).Address(False, False, 1, False)
-			last = area.Cells.Item( area.Cells.Count).Address( False, False, 1,False)
-			text ="Column: {first} to {last}".format(first=first,last=last)
-			entry = self.tree.AppendItem(treeBranch, text,data=wx.TreeItemData(area))
-			if len(fnNext) > 0:
-				fnNext[0](fnText, fnNext[1:], area, entry)
-
-	def populate_row(self, fnText, fnNext, refCells, treeBranch):
-		for area in refCells.Rows:
-			first= area.Cells.Item(1).Address(False, False, 1, False)
-			last = area.Cells.Item( area.Cells.Count).Address( False, False, 1,False)
-			text ="Row: {first} to {last}".format(first=first,last=last)
-			entry = self.tree.AppendItem(treeBranch, text,data=wx.TreeItemData(area))
-			if len(fnNext) > 0:
-				fnNext[0](fnText, fnNext[1:], area, entry)
-
-	def populate_cell(self, fnText, fnNext, refCells, treeBranch):
-		for cell in refCells.Cells:
-			text = cell.Address(False, False, 1, False) + ":" + fnText(cell)
-			entry = self.tree.AppendItem(treeBranch, text,data=wx.TreeItemData(cell))
-
-
-	def populate(self,evt):
-		fnlist = self.viewCombo.GetClientData(self.viewCombo.GetSelection())
-		typefns = self.typeCombo.GetClientData(self.typeCombo.GetSelection())
-                get_func = typefns[0]
-                text_func = typefns[1]
-                self.tree.Freeze()
-		self.tree.DeleteChildren(self.treeRoot)
-		try:
-			wholerange = get_func(self.cells)                        
-                        fnlist[0](text_func, fnlist[1:],wholerange,self.treeRoot)
-		except (COMError):
-			self.tree.AppendItem(self.treeRoot,_("No matching cells"))
-                self.tree.Thaw()
-                
-	def onTreeChar(self,evt):
-		if evt.GetKeyCode() == wx.WXK_RETURN:
-			range = self.tree.GetPyData(self.tree.GetSelection())
-			range.Select()
-			self.Close()
-		evt.Skip()
-
-	def __init__(self, cells):
-		self.cells = cells
-		super(CellsListDialog, self).__init__(gui.mainFrame, wx.ID_ANY, _("Cell List"))
-		mainSizer = wx.BoxSizer(wx.VERTICAL)
-		# Cell Types to show
-                types = [
-                        (  _("With comments"),
-                           [ (lambda x: x.SpecialCells(xlCellType.xlCellTypeComments)),
-                             (lambda x: x.Comment.Text() ) ] ),
-                        ( _("With formula"),
-                          [ (lambda x: x.SpecialCells(xlCellType.xlCellTypeFormulas)),
-                            (lambda x: x.Formula ) ] ),
-                ]
-                
-		typeSizer=wx.BoxSizer(wx.HORIZONTAL)                
-		typeLabel=wx.StaticText(self,-1,label=_("Cells to &show:"))
-		self.typeCombo = wx.Choice(self,wx.ID_ANY)
-		for x in types:
-			self.typeCombo.Append(x[0],x[1])
-		self.typeCombo.SetSelection(0)
-		self.typeCombo.Bind(wx.EVT_CHOICE,self.populate)
-		typeSizer.Add(typeLabel)
-		typeSizer.Add(self.typeCombo)
-		mainSizer.Add(typeSizer)
-		# Viewing Mode
-		viewSizer=wx.BoxSizer(wx.HORIZONTAL)                
-		viewLabel=wx.StaticText(self,-1,label=_("Viewing &mode"))
-		self.viewCombo = wx.Choice(self,wx.ID_ANY)
-
-		modes = [
-                        (_("Cells (Flat)"), [ self.populate_cell ] ),
-			(_("Row/Cells"), [ self.populate_row, self.populate_cell ] ),
-			(_("Col/Cells"), [ self.populate_col, self.populate_cell ] ),
-			(_("Area/Cells"), [ self.populate_area, self.populate_cell ] ),
-			(_("Area/Rows"), [ self.populate_area, self.populate_row, self.populate_cell ] ),
-			(_("Area/Cols"), [ self.populate_area, self.populate_col, self.populate_cell ] ),
-		]
-
-		for x in modes:
-			self.viewCombo.Append(x[0],x[1])
-		self.viewCombo.SetSelection(0)
-		self.viewCombo.Bind(wx.EVT_CHOICE,self.populate)
-		viewSizer.Add(viewLabel)
-		viewSizer.Add(self.viewCombo)
-		mainSizer.Add(viewSizer)
-		# Filter By
-		#viewSizer=wx.BoxSizer(wx.HORIZONTAL)                
-		#viewLabel=wx.StaticText(self,-1,label=_("Filter &text"))
-		#self.filterText = wx.TextCtrl(self,wx.ID_ANY)
-		#self.viewCombo.Bind(wx.EVT_CHOICE,self.populate)
-		#viewSizer.Add(viewLabel)
-		#viewSizer.Add(self.filterText)
-		#mainSizer.Add(viewSizer)
-		# Tree
-		self.tree = wx.TreeCtrl(self, wx.ID_ANY, style=wx.TR_HAS_BUTTONS | wx.TR_HIDE_ROOT | wx.TR_LINES_AT_ROOT| wx.TR_SINGLE)
-		self.tree.Bind(wx.EVT_CHAR, self.onTreeChar)
-
-		mainSizer.Add(self.tree,proportion=7,flag=wx.EXPAND)
-		# Buttons
-		sizer = wx.BoxSizer(wx.HORIZONTAL)
-		sizer.Add(wx.Button(self, wx.ID_CANCEL))
-		#sizer.Add(wx.Button(self, wx.ID_OK))
-		mainSizer.Add(sizer,proportion=1)
-
-		mainSizer.Fit(self)
-		self.SetSizer(mainSizer)
-
-		self.treeRoot = self.tree.AddRoot("Root")
-		self.populate(None)
-		#self.tree.SetFocus()
-
