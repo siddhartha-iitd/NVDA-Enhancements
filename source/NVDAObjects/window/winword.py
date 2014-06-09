@@ -704,9 +704,7 @@ class WordDocument(EditableTextWithoutAutoSelectDetection, Window):
 		"kb:control+alt+rightArrow": "nextColumn",
 		"kb:control+pageUp": "caret_moveByLine",
 		"kb:control+pageDown": "caret_moveByLine",
-		"kb:control+upArrow": "previousParagraph",
-		"kb:control+downArrow": "nextParagraph",
-		"kb:NVDA+control+upArrow": "previousSentence",
-		"kb:NVDA+control+downArrow": "nextSentence",
+		"kb:alt+upArrow": "previousSentence",
+		"kb:alt+downArrow": "nextSentence",
 	}
 
