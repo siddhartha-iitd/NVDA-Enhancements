@@ -4,6 +4,18 @@ Alternatively, open a command prompt as an administrator. cd to the folder conta
 
 This document will contain a running list of the fixes included in the cumulative build. the cumulative build is based on the "next" nvda branch with all the bug fixes done by the India team so far even if they haven't yet been accepted by the NVDA developers.
 
+May 06, 2013
+ -- Following Tickets are fixed
+   - 4126 outlook calendar - location field in new or existing appointment not read properly with arrow keys
+
+ -- Followint Tickets have behaviour changed
+   - 3288 Word 2010-sentence reading commands ALT+UP/DOWN ARROW are not avialable.
+
+ -- Following fixes are updated to the Official NVDA changes
+    - 3680 : read all formula in excel sheet
+    - 3681 : read all comments in excel sheet
+    - 2920 : Excel: Reading and editing of comments currently not possible
+  
 Feb 11, 2013
 - 3288 : Word 2010-sentence reading commands ALT+UP/DOWN ARROW are not avialable.
   -- Improved fix, which should work on other rich text based editors also.
