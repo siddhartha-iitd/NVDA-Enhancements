@@ -149,6 +149,9 @@ class AppModule(appModuleHandler.AppModule):
 				clsList.insert(0,SuperGridClient2010)
 		if (windowClassName == "AfxWndW" and controlID==109) or (windowClassName in ("WeekViewWnd","DayViewWnd")):
 			clsList.insert(0,CalendarView)
+		if windowClassName=="REComboBox20W":
+			from NVDAObjects.window.edit import RichEdit 
+			clsList.insert(0,RichEdit)
 
 class REListBox20W_CheckBox(IAccessible):
 
