@@ -1069,5 +1069,7 @@ class WordDocument(EditableTextWithoutAutoSelectDetection, Window):
 		"kb:control+pageUp": "caret_moveByLine",
 		"kb:control+pageDown": "caret_moveByLine",
 		"kb:NVDA+alt+c":"reportCurrentComment",
+		"kb:alt+upArrow": "previousSentence",
+		"kb:alt+downArrow": "nextSentence",
 	}
 

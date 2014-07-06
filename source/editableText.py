@@ -130,6 +130,21 @@ class EditableText(ScriptableObject):
 			onlyInitial=False
 		speech.speakTextInfo(lineInfo,unit=textInfos.UNIT_LINE,reason=controlTypes.REASON_CARET,onlyInitialFields=onlyInitial,suppressBlanks=True)
 
+	def _caretMoveBySentenceHelper(self, gesture, direction):
+		if isScriptWaiting():
+			return
+		try:
+			info=self.makeTextInfo(textInfos.POSITION_CARET)
+			info.move(textInfos.UNIT_SENTENCE, direction)
+			info.expand(textInfos.UNIT_SENTENCE)
+		except:
+			gesture.send()
+			return
+		if info:
+			speech.speakTextInfo(info,reason=controlTypes.REASON_CARET)
+			info.collapse()
+			info.updateCaret()
+
 	def script_caret_moveByLine(self,gesture):
 		self._caretMovementScriptHelper(gesture, textInfos.UNIT_LINE)
 	script_caret_moveByLine.resumeSayAllMode=sayAllHandler.CURSOR_CARET
