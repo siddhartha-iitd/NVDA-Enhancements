@@ -212,9 +212,9 @@ chartSegmentDict = {
 	xl3DColumnClustered : "Column",
 	xl3DColumnStacked : "Column",
 	xl3DColumnStacked100 : "Column",
-	xl3DLine : "3D Line",
-	xl3DPie : "3D Slice",
-	xl3DPieExploded : "Exploded 3D Slice",
+	xl3DLine : "Line",
+	xl3DPie : "Slice",
+	xl3DPieExploded : "Slice",
 	xlArea : "Area",
 	xlAreaStacked : "Stacked Area",
 	xlAreaStacked100 : "100 percent Stacked Area",
@@ -244,11 +244,11 @@ chartSegmentDict = {
 	xlDoughnut : "Doughnut",
 	xlDoughnutExploded : "Exploded Doughnut",
 	xlLine : "Line",
-	xlLineMarkers : "Line with Markers",
-	xlLineMarkersStacked : "Stacked Line with Markers",
-	xlLineMarkersStacked100 : "100 percent Stacked Line with Markers",
-	xlLineStacked : "Stacked Line",
-	xlLineStacked100 : "100 percent Stacked Line",
+	xlLineMarkers : "Line",
+	xlLineMarkersStacked : "Line",
+	xlLineMarkersStacked100 : "Line",
+	xlLineStacked : "Line",
+	xlLineStacked100 : "Line",
 	xlPie : "slice",
 	xlPieExploded : "Exploded Pie",
 	xlPieOfPie : "Pie of Pie",
@@ -680,7 +680,7 @@ class ExcelCell(ExcelBase):
 		"kb:NVDA+shift+c": "setColumnHeaderRow",
 		"kb:NVDA+shift+r": "setRowHeaderColumn",
 		"kb:alt+downArrow":"openDropdown",
-		"kb:NVDA+f7": "switchToChart",
+		"kb:NVDA+f6": "switchToChart",
 	}
 
 class ExcelChart(ExcelBase):
@@ -1000,9 +1000,9 @@ class ExcelChartEventHandler(Window):
 
 			axisTitle=""
 			if self.excelChartObject.HasAxis( arg2 ) and self.excelChartObject.Axes( arg2 ).HasTitle:
-				axisTitle += "Axis, type equals {}, group equals {}, Title equals {}".format( axisType , axisGroup , self.excelChartObject.Axes( arg2 , arg1 ).AxisTitle.Text ) 
+				axisTitle += "Chart Axis, type equals {}, group equals {}, Title equals {}".format( axisType , axisGroup , self.excelChartObject.Axes( arg2 , arg1 ).AxisTitle.Text ) 
 			elif self.excelChartObject.HasAxis( arg2 ) and not self.excelChartObject.Axes( arg2 ).HasTitle:
-				axisTitle += "Axis, type equals {}, group equals {}, Title equals {}".format( axisType , axisGroup , "none"  ) 
+				axisTitle += "Chart Axis, type equals {}, group equals {}, Title equals {}".format( axisType , axisGroup , "none"  ) 
 
 			ui.message ( axisTitle )
 
@@ -1010,9 +1010,9 @@ class ExcelChartEventHandler(Window):
 
 			axisTitle=""
 			if self.excelChartObject.HasAxis( arg2 ) and self.excelChartObject.Axes( arg2 ).HasTitle:
-				axisTitle += "Axis Title equals {} ".format( self.excelChartObject.Axes( arg2 , arg1 ).AxisTitle.Text  ) 
+				axisTitle += "Chart Axis Title equals {} ".format( self.excelChartObject.Axes( arg2 , arg1 ).AxisTitle.Text  ) 
 			elif self.excelChartObject.HasAxis( arg2 ) and not self.excelChartObject.Axes( arg2 ).HasTitle:
-				axisTitle += "Axis Title equals {} ".format( "none" ) 
+				axisTitle += "Chart Axis Title equals {} ".format( "none" ) 
 
 
 
@@ -1061,7 +1061,7 @@ class ExcelChartEventHandler(Window):
 
 		elif ElementID == Excel.xlChartTitle:
 			if self.excelChartObject.HasTitle:
-				ui.message ( "Chart Title: {}".format ( self.excelChartObject.ChartTitle.Text ) )
+				ui.message ( "Chart Title equals {}".format ( self.excelChartObject.ChartTitle.Text ) )
 			else:
 				ui.message ( "Untitled chart" )
 
@@ -1099,7 +1099,7 @@ class ExcelChartEventHandler(Window):
 			ui.message ( "xlErrorBars" )
 
 		elif ElementID == Excel.xlLegendEntry:
-			ui.message ( "Legend entry for Series {} {} of {}".format( self.excelChartObject.SeriesCollection(arg1).Name , arg1 , self.excelChartObject.SeriesCollection().Count ) )
+			ui.message ( "Legend entry for Series {}, {} of {}".format( self.excelChartObject.SeriesCollection(arg1).Name , arg1 , self.excelChartObject.SeriesCollection().Count ) )
 
 		elif ElementID == Excel.xlLegendKey:
 			ui.message ( "Legend key for Series {} {} of {}".format( self.excelChartObject.SeriesCollection(arg1).Name , arg1 , self.excelChartObject.SeriesCollection().Count ) )
@@ -1133,7 +1133,7 @@ class ExcelChartEventHandler(Window):
 				if self.excelChartObject.HasAxis(Excel.xlValue) and self.excelChartObject.Axes(Excel.xlValue).HasTitle:
 					output +=  "{0} {1}".format( self.excelChartObject.Axes(Excel.xlValue).AxisTitle.Text , self.excelChartObject.SeriesCollection(arg1).Values[arg2-1]) 
 				else:
-					output +=  "value {0} {1}".format( arg1 , self.excelChartObject.SeriesCollection(arg1).Values[arg2-1]) 
+					output +=  "value {0}".format( self.excelChartObject.SeriesCollection(arg1).Values[arg2-1]) 
 
 				if self.excelChartObject.ChartType == xlPie or self.excelChartObject.ChartType == xlPieExploded or self.excelChartObject.ChartType == xlPieOfPie: 
 					total = math.fsum( self.excelChartObject.SeriesCollection(arg1).Values ) 
