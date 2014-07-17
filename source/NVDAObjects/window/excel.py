@@ -39,14 +39,13 @@ regValue= ("\CLSID\%s\LocalServer32" %(excelCLSID))
 
 excelRegHandle = _winreg.OpenKey(_winreg.HKEY_CLASSES_ROOT, regValue)
 if  excelRegHandle:
-	excelPath = _winreg.QueryValue( excelRegHandle , "").split(' ')[0]
-	#print excelPath 
+	excelPath = _winreg.QueryValue( excelRegHandle , "")
+	log.debugWarning("registry path: {}".format( excelPath ) )
+	excelPath = excelPath.rstrip( " /automation" )
+	log.debugWarning("registry path after strip: {}".format( excelPath ) )
 	GetModule(excelPath) 
 	from comtypes.gen import Excel
 	_winreg.CloseKey( excelRegHandle )
-
-
-
 
 # Chart types in Microsoft Excel.
 xl3DArea = -4098
