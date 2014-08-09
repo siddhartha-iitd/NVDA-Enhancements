@@ -372,7 +372,7 @@ class ExcelWorksheet(ExcelBase):
 		# We need this to be a modal dialog, but it mustn't block this script.
 		def run():
 			gui.mainFrame.prePopup()
-			d = CellsListDialog(self.excelWorksheetObject.Cells)
+			d = CellsListDialog(self.excelWorksheetObject)
 			d.ShowModal()
 			d.Destroy()
 			gui.mainFrame.postPopup()
@@ -821,13 +821,11 @@ class CellsListDialog(wx.Dialog):
 		xlCellTypeComments : _("comments"),
 		# Translators: one of the cell types to show in Cell List dialog in Excel.
 		xlCellTypeFormulas : _("Formulas"),
+		# Translators: one of the cell types to show in Cell List dialog in Excel.
+		"chart" : _("Charts"),
 	}
 
-	def populate(self,evt=None):
-		type = self.typeCombo.GetClientData(self.typeCombo.GetSelection())
-		mode = self.viewCombo.GetClientData(self.viewCombo.GetSelection())
-		self.tree.Freeze()
-		self.tree.DeleteChildren(self.treeRoot)
+	def populate_cells(self,type,mode):
 		if type == xlCellTypeComments :
 			fn = lambda x: x.Comment.Text()
 		elif type == xlCellTypeFormulas :
@@ -846,20 +844,42 @@ class CellsListDialog(wx.Dialog):
 					last=range.Cells.Item(range.Cells.Count).Address(False,False,1,False)
 					text ="Area from {first} to {last}".format(first=first,last=last)
 					this = self.tree.AppendItem(self.treeRoot,text)
-					self.tree.SetItemPyData(this, range.cells)
+					self.tree.SetItemPyData(this, ( "range", range.cells))
 				elif mode==self.modeCell:
 					this=self.treeRoot
 				for cell in range.Cells:
 					text= cell.address(False,False,1,False) + " " + fn(cell)
 					item=self.tree.AppendItem(this,text)
-					self.tree.SetItemPyData(item, cell)
+					self.tree.SetItemPyData(item, ("cell", cell) )
 		except (COMError):
 			# Translators: presented when there is no matching cell of cell type in Cell List dialog in Excel.
 			self.tree.AppendItem(self.treeRoot,_("No matching cells"))
+
+	def populate_charts(self,type,mode):
+		chartobjects = self.worksheet.ChartObjects()
+		if chartobjects.Count == 0 :
+		 	self.tree.AppendItem(self.treeRoot,_("Add Charts..."))
+
+		for chartobject in chartobjects:
+			chart = chartobject.Chart
+		 	this = self.tree.AppendItem(self.treeRoot,chart.ChartTitle.Text)
+			self.tree.SetItemPyData(this, ("chartobject", chartobject, chartobjects))
+
+	def populate(self,evt=None):
+		type = self.typeCombo.GetClientData(self.typeCombo.GetSelection())
+		mode = self.viewCombo.GetClientData(self.viewCombo.GetSelection())
+		self.tree.Freeze()
+		self.tree.DeleteChildren(self.treeRoot)
+		if type == "chart" :
+			self.populate_charts(type,mode)
+		else:
+			self.populate_cells(type,mode)
+
 		self.tree.Thaw()
 
-	def __init__(self, cells):
-		self.cells = cells
+	def __init__(self, worksheet):
+		self.worksheet = worksheet
+		self.cells = worksheet.Cells
 		# Translators: the title of a dialog to show list of cells in Excel.
 		super(CellsListDialog, self).__init__(gui.mainFrame, wx.ID_ANY, _("Cell List"))
 		mainSizer = wx.BoxSizer(wx.VERTICAL)
@@ -926,9 +946,19 @@ class CellsListDialog(wx.Dialog):
 			evt.Skip()
 
 	def onOk(self, evt):
-		cell=self.tree.GetItemPyData(self.tree.GetSelection())
-		if cell:
-			cell.select()
+		pair=self.tree.GetItemPyData(self.tree.GetSelection())
 		self.EndModal(wx.ID_OK)
+		try:
+			if pair[0] == "cell" or pair[0] == "range":
+				pair[1].activate()
+			elif pair[0] == "chartobject":
+				pair[1].activate()
+				# After activate(), though the chart object is selected, 
+				# pressing arrow keys moves the object, rather than 
+				# let use go inside for sub-objects. Somehow 
+				# calling an COM function on a different object fixes that !
+				log.debugWarning(pair[2].Count)
+		except(COMError):
+			pass
 
 from excelChart import ExcelChart
