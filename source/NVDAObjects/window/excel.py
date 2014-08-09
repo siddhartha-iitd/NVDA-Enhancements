@@ -28,7 +28,6 @@ from . import Window
 from .. import NVDAObjectTextInfo
 import scriptHandler
 
-
 xlCenter=-4108
 xlJustify=-4130
 xlLeft=-4131
