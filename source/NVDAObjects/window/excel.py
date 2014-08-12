@@ -862,7 +862,11 @@ class CellsListDialog(wx.Dialog):
 
 		for chartobject in chartobjects:
 			chart = chartobject.Chart
-		 	this = self.tree.AppendItem(self.treeRoot,chart.ChartTitle.Text)
+			if chart.HasTitle:
+				display_string = chart.ChartTitle.Text
+			else:
+				display_string = chart.Name
+		 	this = self.tree.AppendItem(self.treeRoot,display_string)
 			self.tree.SetItemPyData(this, ("chartobject", chartobject, chartobjects))
 
 	def populate(self,evt=None):
