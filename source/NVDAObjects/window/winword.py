@@ -12,6 +12,8 @@ import comtypes.automation
 import uuid
 import operator
 import locale
+import sayAllHandler
+import eventHandler
 import braille
 import scriptHandler
 import languageHandler
@@ -239,7 +241,7 @@ class WordDocumentTextInfo(textInfos.TextInfo):
 	def _expandToLineAtCaret(self):
 		lineStart=ctypes.c_int()
 		lineEnd=ctypes.c_int()
-		res=NVDAHelper.localLib.nvdaInProcUtils_winword_expandToLine(self.obj.appModule.helperLocalBindingHandle,self.obj.windowHandle,self._rangeObj.start,ctypes.byref(lineStart),ctypes.byref(lineEnd))
+		res=NVDAHelper.localLib.nvdaInProcUtils_winword_expandToLine(self.obj.appModule.helperLocalBindingHandle,self.obj.documentWindowHandle,self._rangeObj.start,ctypes.byref(lineStart),ctypes.byref(lineEnd))
 		if res!=0 or lineStart.value==lineEnd.value or lineStart.value==-1 or lineEnd.value==-1: 
 			log.debugWarning("winword_expandToLine failed")
 			self._rangeObj.expand(wdParagraph)
@@ -279,6 +281,8 @@ class WordDocumentTextInfo(textInfos.TextInfo):
 
 	def getTextWithFields(self,formatConfig=None):
 		if self.isCollapsed: return []
+		if self.obj.ignoreFormatting:
+			return [self.text]
 		extraDetail=formatConfig.get('extraDetail',False) if formatConfig else False
 		if not formatConfig:
 			formatConfig=config.conf['documentFormatting']
@@ -287,7 +291,7 @@ class WordDocumentTextInfo(textInfos.TextInfo):
 		endOffset=self._rangeObj.end
 		text=BSTR()
 		formatConfigFlags=sum(y for x,y in formatConfigFlagsMap.iteritems() if formatConfig.get(x,False))
-		res=NVDAHelper.localLib.nvdaInProcUtils_winword_getTextInRange(self.obj.appModule.helperLocalBindingHandle,self.obj.windowHandle,startOffset,endOffset,formatConfigFlags,ctypes.byref(text))
+		res=NVDAHelper.localLib.nvdaInProcUtils_winword_getTextInRange(self.obj.appModule.helperLocalBindingHandle,self.obj.documentWindowHandle,startOffset,endOffset,formatConfigFlags,ctypes.byref(text))
 		if res or not text:
 			log.debugWarning("winword_getTextInRange failed with %d"%res)
 			return [self.text]
@@ -528,6 +532,9 @@ class WordDocument(EditableTextWithoutAutoSelectDetection, Window):
 
 	TextInfo=WordDocumentTextInfo
 
+	#: True if formatting should be ignored (text only) such as for spellCheck error field
+	ignoreFormatting=False
+
 	def __init__(self,*args,**kwargs):
 		super(WordDocument,self).__init__(*args,**kwargs)
 
@@ -715,12 +722,15 @@ class WordDocument(EditableTextWithoutAutoSelectDetection, Window):
 			self._WinwordVersion=float(self.WinwordApplicationObject.version)
 		return self._WinwordVersion
 
+	def _get_documentWindowHandle(self):
+		return self.windowHandle
+
 	def _get_WinwordWindowObject(self):
 		if not getattr(self,'_WinwordWindowObject',None): 
 			try:
-				pDispatch=oleacc.AccessibleObjectFromWindow(self.windowHandle,winUser.OBJID_NATIVEOM,interface=comtypes.automation.IDispatch)
+				pDispatch=oleacc.AccessibleObjectFromWindow(self.documentWindowHandle,winUser.OBJID_NATIVEOM,interface=comtypes.automation.IDispatch)
 			except (COMError, WindowsError):
-				log.debugWarning("Could not get MS Word object model",exc_info=True)
+				log.debugWarning("Could not get MS Word object model from window %s with class %s"%(self.documentWindowHandle,winUser.getClassName(self.documentWindowHandle)),exc_info=True)
 				return None
 			self._WinwordWindowObject=comtypes.client.dynamic.Dispatch(pDispatch)
 		return self._WinwordWindowObject
@@ -846,28 +856,29 @@ class WordDocument(EditableTextWithoutAutoSelectDetection, Window):
 		if useCharacterUnit:
 			offset=offset/self.WinwordSelectionObject.font.size
 			# Translators: a measurement in Microsoft Word
-			return _("{offset:.3g} characters".format(offset=offset))
+			return _("{offset:.3g} characters").format(offset=offset)
 		else:
 			unit=options.measurementUnit
 			if unit==wdInches:
 				offset=offset/72.0
 				# Translators: a measurement in Microsoft Word
-				return _("{offset:.3g} inches".format(offset=offset))
+				return _("{offset:.3g} inches").format(offset=offset)
 			elif unit==wdCentimeters:
 				offset=offset/28.35
 				# Translators: a measurement in Microsoft Word
-				return _("{offset:.3g} centimeters".format(offset=offset))
+				return _("{offset:.3g} centimeters").format(offset=offset)
 			elif unit==wdMillimeters:
 				offset=offset/2.835
 				# Translators: a measurement in Microsoft Word
-				return _("{offset:.3g} millimeters".format(offset=offset))
+				return _("{offset:.3g} millimeters").format(offset=offset)
 			elif unit==wdPoints:
 				# Translators: a measurement in Microsoft Word
-				return _("{offset:.3g} points".format(offset=offset))
+				return _("{offset:.3g} points").format(offset=offset)
 			elif unit==wdPicas:
 				offset=offset/12.0
 				# Translators: a measurement in Microsoft Word
-				return _("{offset:.3g} picas".format(offset=offset))
+				# See http://support.microsoft.com/kb/76388 for details.
+				return _("{offset:.3g} picas").format(offset=offset)
 
 	def script_reportCurrentComment(self,gesture):
 		info=self.makeTextInfo(textInfos.POSITION_CARET)
@@ -953,6 +964,20 @@ class WordDocument(EditableTextWithoutAutoSelectDetection, Window):
 	def script_previousColumn(self,gesture):
 		self._moveInTable(row=False,forward=False)
 
+	def script_nextParagraph(self,gesture):
+		info=self.makeTextInfo(textInfos.POSITION_CARET)
+		info.move(textInfos.UNIT_PARAGRAPH,1)
+		info.updateCaret()
+		self._caretScriptPostMovedHelper(textInfos.UNIT_PARAGRAPH,gesture,None)
+	script_nextParagraph.resumeSayAllMode=sayAllHandler.CURSOR_CARET
+
+	def script_previousParagraph(self,gesture):
+		info=self.makeTextInfo(textInfos.POSITION_CARET)
+		info.move(textInfos.UNIT_PARAGRAPH,-1)
+		info.updateCaret()
+		self._caretScriptPostMovedHelper(textInfos.UNIT_PARAGRAPH,gesture,None)
+	script_previousParagraph.resumeSayAllMode=sayAllHandler.CURSOR_CARET
+
 	__gestures = {
 		"kb:control+[":"increaseDecreaseFontSize",
 		"kb:control+]":"increaseDecreaseFontSize",
@@ -982,8 +1007,33 @@ class WordDocument(EditableTextWithoutAutoSelectDetection, Window):
 		"kb:control+alt+downArrow": "nextRow",
 		"kb:control+alt+leftArrow": "previousColumn",
 		"kb:control+alt+rightArrow": "nextColumn",
+		"kb:control+downArrow":"nextParagraph",
+		"kb:control+upArrow":"previousParagraph",
 		"kb:control+pageUp": "caret_moveByLine",
 		"kb:control+pageDown": "caret_moveByLine",
 		"kb:NVDA+alt+c":"reportCurrentComment",
+	}
+
+class WordDocument_WwN(WordDocument):
+
+	def _get_documentWindowHandle(self):
+		w=NVDAHelper.localLib.findWindowWithClassInThread(self.windowThreadID,u"_WwG",True)
+		if not w:
+			log.debugWarning("Could not find window for class _WwG in thread.")
+			w=super(WordDocument_WwN,self).documentWindowHandle
+		return w
+
+	def _get_WinwordWindowObject(self):
+		window=super(WordDocument_WwN,self).WinwordWindowObject
+		if not window: return None
+		try:
+			return window.application.activeWindow.activePane
+		except COMError:
+			log.debugWarning("Unable to get activePane")
+			return window.application.windows[1].activePane
+
+	__gestures={
+		"kb:tab":None,
+		"kb:shift+tab":None,
 	}
 

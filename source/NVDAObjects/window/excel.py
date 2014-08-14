@@ -28,6 +28,25 @@ from . import Window
 from .. import NVDAObjectTextInfo
 import scriptHandler
 
+xlCenter=-4108
+xlJustify=-4130
+xlLeft=-4131
+xlRight=-4152
+xlDistributed=-4117
+xlBottom=-4107
+xlTop=-4160
+
+alignmentLabels={
+	xlCenter:"center",
+	xlJustify:"justify",
+	xlLeft:"left",
+	xlRight:"right",
+	xlDistributed:"distributed",
+	xlBottom:"botom",
+	xlTop:"top",
+	1:"default",
+}
+
 xlA1 = 1
 xlRC = 2
 xlUnderlineStyleNone=-4142
@@ -309,6 +328,15 @@ class ExcelWorksheet(ExcelBase):
 		"kb:shift+control+end",
 		"kb:shift+space",
 		"kb:control+space",
+		"kb:pageUp",
+		"kb:pageDown",
+		"kb:shift+pageUp",
+		"kb:shift+pageDown",
+		"kb:alt+pageUp",
+		"kb:alt+pageDown",
+		"kb:alt+shift+pageUp",
+		"kb:alt+shift+pageDown",
+		"kb:control+shift+8",
 		"kb:control+pageUp",
 		"kb:control+pageDown",
 		"kb:control+a",
@@ -320,6 +348,13 @@ class ExcelCellTextInfo(NVDAObjectTextInfo):
 	def _getFormatFieldAndOffsets(self,offset,formatConfig,calculateOffsets=True):
 		formatField=textInfos.FormatField()
 		fontObj=self.obj.excelCellObject.font
+		if formatConfig['reportAlignment']:
+			value=alignmentLabels.get(self.obj.excelCellObject.horizontalAlignment)
+			if value:
+				formatField['text-align']=value
+			value=alignmentLabels.get(self.obj.excelCellObject.verticalAlignment)
+			if value:
+				formatField['vertical-align']=value
 		if formatConfig['reportFontName']:
 			formatField['font-name']=fontObj.name
 		if formatConfig['reportFontSize']:
@@ -329,6 +364,13 @@ class ExcelCellTextInfo(NVDAObjectTextInfo):
 			formatField['italic']=fontObj.italic
 			underline=fontObj.underline
 			formatField['underline']=False if underline is None or underline==xlUnderlineStyleNone else True
+		if formatConfig['reportStyle']:
+			try:
+				styleName=self.obj.excelCellObject.style.nameLocal
+			except COMError:
+				styleName=None
+			if styleName:
+				formatField['style']=styleName
 		if formatConfig['reportColor']:
 			try:
 				formatField['color']=colors.RGB.fromCOLORREF(int(fontObj.color))
@@ -525,10 +567,40 @@ class ExcelCell(ExcelBase):
 		if previous:
 			return ExcelCell(windowHandle=self.windowHandle,excelWindowObject=self.excelWindowObject,excelCellObject=previous)
 
+	def script_reportComment(self,gesture):
+		commentObj=self.excelCellObject.comment
+		text=commentObj.text() if commentObj else None
+		if text:
+			ui.message(text)
+		else:
+			# Translators: A message in Excel when there is no comment
+			ui.message(_("Not on a comment"))
+	# Translators: the description  for a script for Excel
+	script_reportComment.__doc__=_("Reports the comment on the current cell")
+
+	def script_editComment(self,gesture):
+		commentObj=self.excelCellObject.comment
+		d = wx.TextEntryDialog(gui.mainFrame, 
+			# Translators: Dialog text for 
+			_("Editing comment for cell {address}").format(address=self.cellCoordsText),
+			# Translators: Title of a dialog edit an Excel comment 
+			_("Comment"),
+			defaultValue=commentObj.text() if commentObj else u"",
+			style=wx.TE_MULTILINE|wx.OK|wx.CANCEL)
+		def callback(result):
+			if result == wx.ID_OK:
+				if commentObj:
+					commentObj.text(d.Value)
+				else:
+					self.excelCellObject.addComment(d.Value)
+		gui.runScriptModalDialog(d, callback)
+
 	__gestures = {
 		"kb:NVDA+shift+c": "setColumnHeader",
 		"kb:NVDA+shift+r": "setRowHeader",
+		"kb:shift+f2":"editComment",
 		"kb:alt+downArrow":"openDropdown",
+		"kb:NVDA+alt+c":"reportComment",
 	}
 
 class ExcelSelection(ExcelBase):

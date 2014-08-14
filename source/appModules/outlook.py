@@ -67,7 +67,7 @@ class AppModule(appModuleHandler.AppModule):
 	def _registerCOMWithFocusJuggle(self):
 		import wx
 		import gui
-		# Translators: A title for a dialog shown while Microsoft PowerPoint initializes
+		# Translators: The title for the dialog shown while Microsoft Outlook initializes.
 		d=wx.Dialog(None,title=_("Waiting for Outlook..."))
 		gui.mainFrame.prePopup()
 		d.Show()
@@ -132,9 +132,7 @@ class AppModule(appModuleHandler.AppModule):
 		windowClassName=obj.windowClassName
 		states=obj.states
 		controlID=obj.windowControlID
-		if windowClassName=="MsoCommandBar" and role==controlTypes.ROLE_TOOLBAR:
-			clsList.insert(0,MsoCommandBarToolBar)
-		elif windowClassName=="REListBox20W" and role==controlTypes.ROLE_CHECKBOX:
+		if windowClassName=="REListBox20W" and role==controlTypes.ROLE_CHECKBOX:
 			clsList.insert(0,REListBox20W_CheckBox)
 		elif role==controlTypes.ROLE_LISTITEM and (windowClassName.startswith("REListBox") or windowClassName.startswith("NetUIHWND")):
 			clsList.insert(0,AutoCompleteListItem)
@@ -303,29 +301,6 @@ class AutoCompleteListItem(IAccessible):
 			speech.cancelSpeech()
 			ui.message(self.name)
 
-class MsoCommandBarToolBar(IAccessible):
-
-	def _get_isPresentableFocusAncestor(self):
-		# #4096: Many single controls in Signature dialog wrapped in their own SmoCommandBar toolbar.
-		# Therefore suppress reporting of these toolbars in focus ancestry if they only have one child.
-		if self.childCount==1:
-			return False
-		return super(MsoCommandBarToolBar,self).isPresentableFocusAncestor
-
-	def _get_name(self):
-		name=super(MsoCommandBarToolBar,self).name
-		# #3407: overly verbose and programmatic toolbar label
-		if name and name.startswith('MSO Generic Control Container'):
-			name=u""
-		return name
-
-	def _get_description(self):
-		description=super(MsoCommandBarToolBar,self).description
-		# #3407: overly verbose and programmatic toolbar description
-		if description and description.startswith('MSO Generic Control Container'):
-			description=u""
-		return description
-
 class CalendarView(IAccessible):
 	"""Support for announcing time slots and appointments in Outlook Calendar.
 	"""
@@ -342,7 +317,8 @@ class CalendarView(IAccessible):
 		if endDate!=startDate:
 			endText="%s %s"%(winKernel.GetDateFormat(winKernel.LOCALE_USER_DEFAULT, winKernel.DATE_LONGDATE, endTime, None),endText)
 		CalendarView._lastStartDate=startDate
-		return "%s to %s"%(startText,endText)
+		# Translators: a message reporting the time range (i.e. start time to end time) of an Outlook calendar entry
+		return _("{startTime} to {endTime}").format(startTime=startText,endTime=endText)
 
 	def isDuplicateIAccessibleEvent(self,obj):
 		return False
@@ -365,11 +341,15 @@ class CalendarView(IAccessible):
 				except COMError:
 					return super(CalendarView,self).reportFocus()
 				t=self._generateTimeRangeText(start,end)
-				speech.speakMessage("Appointment %s, %s"%(p.subject,t))
+				# Translators: A message reported when on a calendar appointment in Microsoft Outlook
+				speech.speakMessage(_("Appointment {subject}, {time}").format(subject=p.subject,time=t))
 			else:
 				v=e.currentView
-				selectedStartTime=v.selectedStartTime
-				selectedEndTime=v.selectedEndTime
+				try:
+					selectedStartTime=v.selectedStartTime
+					selectedEndTime=v.selectedEndTime
+				except COMError:
+					return super(CalendarView,self).reportFocus()
 				timeSlotText=self._generateTimeRangeText(selectedStartTime,selectedEndTime)
 				startLimit=u"%s %s"%(winKernel.GetDateFormat(winKernel.LOCALE_USER_DEFAULT, winKernel.DATE_LONGDATE, selectedStartTime, None),winKernel.GetTimeFormat(winKernel.LOCALE_USER_DEFAULT, winKernel.TIME_NOSECONDS, selectedStartTime, None))
 				endLimit=u"%s %s"%(winKernel.GetDateFormat(winKernel.LOCALE_USER_DEFAULT, winKernel.DATE_LONGDATE, selectedEndTime, None),winKernel.GetTimeFormat(winKernel.LOCALE_USER_DEFAULT, winKernel.TIME_NOSECONDS, selectedEndTime, None))
@@ -378,7 +358,8 @@ class CalendarView(IAccessible):
 				i.sort('[Start]')
 				i.IncludeRecurrences =True
 				if i.find(query):
-					timeSlotText="has appointment "+timeSlotText
+					# Translators: a message when the current time slot on an Outlook Calendar has an appointment
+					timeSlotText=_("has appointment")+" "+timeSlotText
 				speech.speakMessage(timeSlotText)
 		else:
 			self.event_valueChange()
