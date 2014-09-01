@@ -118,6 +118,8 @@ An NVDAObject for a window
 			from .edit import RichEdit20 as newCls
 		elif windowClassName=="RICHEDIT50W":
 			from .edit import RichEdit50 as newCls
+		if windowClassName=="REComboBox20W":
+			from .edit import RichEdit20 as newCls
 		elif windowClassName in ("Scintilla","TScintilla"):
 			from .scintilla import Scintilla as newCls
 		elif windowClassName in ("AkelEditW", "AkelEditA"):
