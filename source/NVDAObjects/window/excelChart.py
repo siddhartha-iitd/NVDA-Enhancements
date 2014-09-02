@@ -298,8 +298,17 @@ class ExcelChart(excel.ExcelBase):
 		return self.excelChartObject.Parent.Index == other.excelChartObject.Parent.Index
 
 	def _get_name(self):
-		name=self.excelChartObject.Name
-		return _("%s chart" %(name))
+		if self.excelChartObject.HasTitle:
+			name=self.excelChartObject.ChartTitle.Text
+		else:
+			name=self.excelChartObject.Name
+#find the type of the chart
+		chartType = self.excelChartObject.ChartType
+		if chartType in chartTypeDict.keys():
+			chartTypeText=_("%s" %(chartTypeDict[chartType]))
+		else:
+			chartTypeText=_("unknown")
+		return _("Chart title equals %s type equals %s" %(name, chartTypeText))
 
 	def _get_title(self):
 		try:
@@ -317,25 +326,10 @@ class ExcelChart(excel.ExcelBase):
 		cellObj=self._getSelection()
 		eventHandler.queueEvent("gainFocus",cellObj)
 
-	def script_speakType(self,gesture):
-		chartType = self.excelChartObject.ChartType
-		if chartType in chartTypeDict.keys():
-			text=_("%s chart type" %(chartTypeDict[chartType]))
-		else:
-			text=_("Chart type unknown")
-		speech.speak([text])
+	def script_reportTitle(self,gesture):
+		ui.message (self._get_name())
 
-	def script_speakTitle(self,gesture):
-		title = self._get_title()
-		text=_("Chart title is %s" %(title.text)) if title else _("No chart title defined")
-		speech.speak([text])
-
-	def script_speakName(self,gesture):
-		name=self._get_name()
-		text=_("Chart name is %s" %(name))
-		speech.speak([text])
-
-	def speakAxisTitle(self, axisType):
+	def reportAxisTitle(self, axisType):
 		axis=None
 		if self.excelChartObject.HasAxis(axisType, xlPrimary):
 			axis = self.excelChartObject.Axes(axisType, xlPrimary)
@@ -344,18 +338,18 @@ class ExcelChart(excel.ExcelBase):
 		axisTitle = axis.AxisTitle.Text if axis and axis.HasTitle else "Not defined"
 		axisName = "Category" if axisType==xlCategory else "Value" if axisType==xlValue else "Series"
 		text=_("%s Axis is %s" %(axisName, axisTitle))
-		speech.speak([text])
+		ui.message(text)
 
-	def script_speakCategoryAxis(self, gesture):
-		self.speakAxisTitle(xlCategory)
+	def script_reportCategoryAxis(self, gesture):
+		self.reportAxisTitle(xlCategory)
 
-	def script_speakValueAxis(self, gesture):
-		self.speakAxisTitle(xlValue)
+	def script_reportValueAxis(self, gesture):
+		self.reportAxisTitle(xlValue)
 
-	def script_speakSeriesAxis(self, gesture):
-		self.speakAxisTitle(xlSeriesAxis)
+	def script_reportSeriesAxis(self, gesture):
+		self.reportAxisTitle(xlSeriesAxis)
 
-	def script_speakSeriesInfo(self, gesture):
+	def script_reportSeriesSummary(self, gesture):
 		count = self.excelChartObject.SeriesCollection().count
 		if count>0:
 			seriesValueString="%d series in this chart" %(count)
@@ -364,30 +358,28 @@ class ExcelChart(excel.ExcelBase):
 			text=_(seriesValueString)	
 		else:
 			text=_("No Series defined.")
-		speech.speak([text])
+		ui.message(text)
 
-
-	def script_speakSummary(self, gesture):
+	def script_reportSeriesFormula(self, gesture):
 		count = self.excelChartObject.SeriesCollection().count
 		if count>0:
 			seriesValueString="%d series in this chart" %(count)
 			for i in xrange(1, count+1):
-				seriesValueString += ", Series %d %s" %(i, self.excelChartObject.SeriesCollection(i).Name)
+				seriesValueString += ", Series %d %s" %(i, self.excelChartObject.SeriesCollection(i).FormulaR1C1)
 			text=_(seriesValueString)	
 		else:
 			text=_("No Series defined.")
-		speech.speak([text])
+		log.debugWarning(text)
 
 
 	__gestures = {
 		"kb:escape": "switchToCell",
-		"kb:NVDA+t" : "speakTitle",
-		"kb:NVDA+shift+1" : "speakType",		
-		"kb:NVDA+shift+2" : "speakName",
-		"kb:NVDA+shift+3" : "speakCategoryAxis",
-		"kb:NVDA+shift+4" : "speakValueAxis",
-		"kb:NVDA+shift+5" : "speakSeriesAxis",
-		"kb:NVDA+shift+6" : "speakSeriesInfo",
+		"kb:NVDA+t" : "reportTitle",
+		"kb:NVDA+shift+1" : "reportCategoryAxis",
+		"kb:NVDA+shift+2" : "reportValueAxis",
+		"kb:NVDA+shift+3" : "reportSeriesAxis",
+		"kb:NVDA+shift+4" : "reportSeriesSummary",
+		"kb:NVDA+shift+5" : "reportSeriesFormula",
 	}
 
 	def script_changeSelection(self,gesture):
