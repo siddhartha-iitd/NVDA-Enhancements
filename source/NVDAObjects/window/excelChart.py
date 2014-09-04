@@ -16,26 +16,27 @@ from . import Window
 import scriptHandler
 
 from comtypes.client import *
-
+import comtypes
+from comtypes.automation import IDispatch
+import ctypes
 import comtypes.GUID
-import _winreg
-from comtypes.client._generate import GetModule
+
 import math
 from NVDAObjects import NVDAObject
 import string
-excelCLSID = comtypes.GUID.from_progid("Excel.Application")
-#print excelCLSID 
-regValue= ("\CLSID\%s\LocalServer32" %(excelCLSID))
 
-excelRegHandle = _winreg.OpenKey(_winreg.HKEY_CLASSES_ROOT, regValue)
-if  excelRegHandle:
-	excelPath = _winreg.QueryValue( excelRegHandle , "")
-	log.debugWarning("registry path: {}".format( excelPath ) )
-	excelPath = excelPath.rstrip( " /automation" )
-	log.debugWarning("registry path after strip: {}".format( excelPath ) )
-	GetModule(excelPath) 
-	from comtypes.gen import Excel
-	_winreg.CloseKey( excelRegHandle )
+#ChartEvents definition
+class ChartEvents(IDispatch):
+	_case_insensitive_ = True
+	_iid_ = comtypes.GUID('{0002440F-0000-0000-C000-000000000046}')
+	_idlflags_ = ['hidden']
+	_methods_ = []
+	_disp_methods_=[
+		comtypes.DISPMETHOD([comtypes.dispid(235)], None, 'Select',
+			( ['in'], ctypes.c_int, 'ElementID' ),
+			( ['in'], ctypes.c_int, 'Arg1' ),
+			( ['in'], ctypes.c_int, 'Arg2' )),
+		]
 
 # Chart types in Microsoft Excel.
 xl3DArea = -4098
@@ -279,6 +280,41 @@ xlSecondary = 2
 
 
 
+# values for enumeration 'XlChartItem'
+xlDataLabel = 0
+xlChartArea = 2
+xlSeries = 3
+xlChartTitle = 4
+xlWalls = 5
+xlCorners = 6
+xlDataTable = 7
+xlTrendline = 8
+xlErrorBars = 9
+xlXErrorBars = 10
+xlYErrorBars = 11
+xlLegendEntry = 12
+xlLegendKey = 13
+xlShape = 14
+xlMajorGridlines = 15
+xlMinorGridlines = 16
+xlAxisTitle = 17
+xlUpBars = 18
+xlPlotArea = 19
+xlDownBars = 20
+xlAxis = 21
+xlSeriesLines = 22
+xlFloor = 23
+xlLegend = 24
+xlHiLoLines = 25
+xlDropLines = 26
+xlRadarAxisLabels = 27
+xlNothing = 28
+xlLeaderLines = 29
+xlDisplayUnitLabel = 30
+xlPivotChartFieldButton = 31
+xlPivotChartDropZone = 32
+XlChartItem = ctypes.c_int # enum
+
 
 
 class ExcelChart(excel.ExcelBase):
@@ -287,7 +323,7 @@ class ExcelChart(excel.ExcelBase):
 		self.excelChartObject=excelChartObject
 		self.excelChartEventHandlerObject = ExcelChartEventHandler( windowHandle=windowHandle)
 		self.excelChartEventHandlerObject.excelChartObject= self.excelChartObject
-		self.excelChartEventConnection = GetEvents( self.excelChartObject , self.excelChartEventHandlerObject , Excel.ChartEvents)
+		self.excelChartEventConnection = GetEvents( self.excelChartObject , self.excelChartEventHandlerObject , ChartEvents)
 		super(ExcelChart,self).__init__(windowHandle=windowHandle)
 		for gesture in self.__changeSelectionGestures:
 			self.bindGesture(gesture, "changeSelection")
@@ -413,7 +449,7 @@ class ExcelChartEventHandler(Window):
 
 	def __init__(self, windowHandle  ):
 		self.windowHandle=windowHandle 
-		#self.excelChartObject = excelChartObject
+		#self.excelChartObject is defined during initialization
 		super(ExcelChartEventHandler ,self).__init__(windowHandle=windowHandle)
 
 
@@ -436,128 +472,119 @@ class ExcelChartEventHandler(Window):
 
 	def _Select(self, ElementID ,arg1,arg2):
 		
-		if ElementID == Excel.xlAxis:
+		if ElementID == xlAxis:
 			if arg1 == xlPrimary: 
-				axisGroup = "Primary"
+				axisGroup = _("Primary")
 			elif arg1 == xlSecondary :
-				axisGroup = "Secondary"
+				axisGroup = _("Secondary")
 
 			if arg2 == xlCategory: 
-				axisType= "Category"
+				axisType= _("Category")
 			elif arg2 == xlValue:
-				axisType= "Value"
+				axisType= _("Value")
 			elif arg2 == xlSeriesAxis: 
-				axisType= "Series"
+				axisType= _("Series")
 
 			axisTitle=""
 			if self.excelChartObject.HasAxis( arg2 ) and self.excelChartObject.Axes( arg2 ).HasTitle:
-				axisTitle += "Chart Axis, type equals {}, group equals {}, Title equals {}".format( axisType , axisGroup , self.excelChartObject.Axes( arg2 , arg1 ).AxisTitle.Text ) 
+				axisTitle += _("Chart Axis, type equals {}, group equals {}, Title equals {}").format( axisType , axisGroup , self.excelChartObject.Axes( arg2 , arg1 ).AxisTitle.Text ) 
 			elif self.excelChartObject.HasAxis( arg2 ) and not self.excelChartObject.Axes( arg2 ).HasTitle:
-				axisTitle += "Chart Axis, type equals {}, group equals {}, Title equals {}".format( axisType , axisGroup , "none"  ) 
+				axisTitle += _("Chart Axis, type equals {}, group equals {}, Title equals {}").format( axisType , axisGroup , _("none")  ) 
 
 			ui.message ( axisTitle )
 
-		elif ElementID == Excel.xlAxisTitle:  
+		elif ElementID == xlAxisTitle:  
 
 			axisTitle=""
 			if self.excelChartObject.HasAxis( arg2 ) and self.excelChartObject.Axes( arg2 ).HasTitle:
-				axisTitle += "Chart Axis Title equals {} ".format( self.excelChartObject.Axes( arg2 , arg1 ).AxisTitle.Text  ) 
+				axisTitle += _("Chart Axis Title equals {} ").format( self.excelChartObject.Axes( arg2 , arg1 ).AxisTitle.Text  ) 
 			elif self.excelChartObject.HasAxis( arg2 ) and not self.excelChartObject.Axes( arg2 ).HasTitle:
-				axisTitle += "Chart Axis Title equals {} ".format( "none" ) 
-
-
+				axisTitle += _("Chart Axis Title equals {} ").format( _("none") ) 
 
 			ui.message ( axisTitle )
 
+		elif ElementID == xlDisplayUnitLabel:  
+			ui.message ( _( "Display Unit Label") )
 
+		elif ElementID == xlMajorGridlines:  
+			ui.message ( _( "Major Gridlines" ) )
 
-		elif ElementID == Excel.xlDisplayUnitLabel:  
-			ui.message ( _( "xlDisplayUnitLabel") )
+		elif ElementID == xlMinorGridlines:  
+			ui.message ( _( "Minor Gridlines" ) )
 
-		elif ElementID == Excel.xlDisplayUnitLabel:  
-			ui.message ( _( "xlDisplayUnitLabel") )
+		elif ElementID == xlPivotChartDropZone:  
+			ui.message ( _( "Pivot Chart Drop Zone" ) )
 
-		elif ElementID == Excel.xlMajorGridlines:  
-			ui.message ( "xlMajorGridlines" )
+		elif ElementID == xlPivotChartFieldButton:
+			ui.message ( _( "Pivot Chart Field Button" ) )
 
-		elif ElementID == Excel.xlMinorGridlines:  
-			ui.message ( "xlMinorGridlines" )
+		elif ElementID == xlDownBars:
+			ui.message ( _( "Down Bars" ) )
 
-		elif ElementID == Excel.xlPivotChartDropZone:  
-			ui.message ( "xlPivotChartDropZone" )
+		elif ElementID == xlDropLines:
+			ui.message ( _( "Drop Lines" ) )
 
-		elif ElementID == Excel.xlPivotChartFieldButton:
-			ui.message ( "xlPivotChartFieldButton" )
+		elif ElementID == xlHiLoLines:
+			ui.message ( _( "Hi Lo Lines" ))
 
-		elif ElementID == Excel.xlDownBars:
-			ui.message ( "xlDownBars" )
+		elif ElementID == xlRadarAxisLabels:
+			ui.message ( _( "Radar Axis Labels" ) )
 
-		elif ElementID == Excel.xlDropLines:
-			ui.message ( "xlDropLines" )
+		elif ElementID == xlSeriesLines:
+			ui.message ( _( "Series Lines" ) )
 
-		elif ElementID == Excel.xlHiLoLines:
-			ui.message ( "xlHiLoLines" )
+		elif ElementID == xlUpBars:
+			ui.message ( _( "Up Bars" ) )
 
-		elif ElementID == Excel.xlRadarAxisLabels:
-			ui.message ( "xlRadarAxisLabels" )
+		elif ElementID == xlChartArea:
+			ui.message ( _( "Chart area height equals {}, width equals {}, top equals {}, left equals {}").format ( self.excelChartObject.ChartArea.Height , self.excelChartObject.ChartArea.Width , self.excelChartObject.ChartArea.Top , self.excelChartObject.ChartArea.Left) )
 
-		elif ElementID == Excel.xlSeriesLines:
-			ui.message ( "xlSeriesLines" )
-
-		elif ElementID == Excel.xlUpBars:
-			ui.message ( "xlUpBars" )
-
-		elif ElementID == Excel.xlChartArea:
-			ui.message ( "Chart area height equals {}, width equals {}, top equals {}, left equals {}".format ( self.excelChartObject.ChartArea.Height , self.excelChartObject.ChartArea.Width , self.excelChartObject.ChartArea.Top , self.excelChartObject.ChartArea.Left) )
-
-		elif ElementID == Excel.xlChartTitle:
+		elif ElementID == xlChartTitle:
 			if self.excelChartObject.HasTitle:
-				ui.message ( "Chart Title equals {}".format ( self.excelChartObject.ChartTitle.Text ) )
+				ui.message ( _( "Chart Title equals {}").format ( self.excelChartObject.ChartTitle.Text ) )
 			else:
-				ui.message ( "Untitled chart" )
+				ui.message ( _( "Untitled chart" ) )
 
-		elif ElementID == Excel.xlCorners:
-			ui.message ( "xlCorners" )
+		elif ElementID == xlCorners:
+			ui.message ( _( "Corners" ) )
 
-		elif ElementID == Excel.xlDataTable:
-			ui.message ( "xlDataTable" )
+		elif ElementID == xlDataTable:
+			ui.message ( _( "Data Table" ) )
 
-		elif ElementID == Excel.xlFloor:
-			ui.message ( "xlFloor" )
+		elif ElementID == xlFloor:
+			ui.message ( _( "Floor" ) )
 
-		elif ElementID == Excel.xlLegend:
+		elif ElementID == xlLegend:
 			if self.excelChartObject.HasLegend:
-				ui.message ( "Legend") 
+				ui.message ( _( "Legend" ) ) 
 			else:
-				ui.message ( "No legend" )
+				ui.message ( _( "No legend" ) )
 
+		elif ElementID == xlNothing:
+			ui.message ( _( "xlNothing" ) )
 
+		elif ElementID == xlPlotArea:
+			# useing {:.0f} to remove fractions
+			ui.message ( _( "Plot Area inside height equals {:.0f}, inside width equals {:.0f}, inside top equals {:.0f}, inside left equals {:.0f}").format ( self.excelChartObject.PlotArea.InsideHeight , self.excelChartObject.PlotArea.InsideWidth , self.excelChartObject.PlotArea.InsideTop , self.excelChartObject.PlotArea.InsideLeft ))
 
+		elif ElementID == xlWalls:
+			ui.message ( _( "Walls" ) )
 
-		elif ElementID == Excel.xlNothing:
-			ui.message ( "xlNothing" )
+		elif ElementID == xlDataLabel:
+			ui.message ( _( "Data Label" ) )
 
-		elif ElementID == Excel.xlPlotArea:
-			ui.message ( "Plot Area inside height equals {:.0f}, inside width equals {:.0f}, inside top equals {:.0f}, inside left equals {:.0f}".format ( self.excelChartObject.PlotArea.InsideHeight , self.excelChartObject.PlotArea.InsideWidth , self.excelChartObject.PlotArea.InsideTop , self.excelChartObject.PlotArea.InsideLeft ))
+		elif ElementID == xlErrorBars:
+			ui.message ( _( "Error Bars" ) )
 
-		elif ElementID == Excel.xlWalls:
-			ui.message ( "xlWalls" )
+		elif ElementID == xlLegendEntry:
+			ui.message ( _( "Legend entry for Series {}, {} of {}").format( self.excelChartObject.SeriesCollection(arg1).Name , arg1 , self.excelChartObject.SeriesCollection().Count ) )
 
-		elif ElementID == Excel.xlDataLabel:
-			ui.message ( "xlDataLabel" )
+		elif ElementID == xlLegendKey:
+			ui.message ( _( "Legend key for Series {} {} of {}").format( self.excelChartObject.SeriesCollection(arg1).Name , arg1 , self.excelChartObject.SeriesCollection().Count ) )
 
-		elif ElementID == Excel.xlErrorBars:
-			ui.message ( "xlErrorBars" )
-
-		elif ElementID == Excel.xlLegendEntry:
-			ui.message ( "Legend entry for Series {}, {} of {}".format( self.excelChartObject.SeriesCollection(arg1).Name , arg1 , self.excelChartObject.SeriesCollection().Count ) )
-
-		elif ElementID == Excel.xlLegendKey:
-			ui.message ( "Legend key for Series {} {} of {}".format( self.excelChartObject.SeriesCollection(arg1).Name , arg1 , self.excelChartObject.SeriesCollection().Count ) )
-
-		elif ElementID == Excel.xlSeries:
+		elif ElementID == xlSeries:
 			if arg2 == -1:
-				ui.message ( "{0} Series {1} of {2}".format( self.excelChartObject.SeriesCollection(arg1).Name , arg1 , self.excelChartObject.SeriesCollection().Count ) )
+				ui.message ( _( "{} Series {} of {}").format( self.excelChartObject.SeriesCollection(arg1).Name , arg1 , self.excelChartObject.SeriesCollection().Count ) )
 			else:
 # if XValue is a float, change it to int, else dates are shown with points. hope this does not introduce another bug
 				if isinstance( self.excelChartObject.SeriesCollection(arg1).XValues[arg2 - 1] , float): 
@@ -570,52 +597,47 @@ class ExcelChartEventHandler(Window):
 					if arg2 > 1:
 
 						if self.excelChartObject.SeriesCollection(arg1).Values[arg2 - 1] == self.excelChartObject.SeriesCollection(arg1).Values[arg2 - 2]: 
-							output += "no change from point {}, ".format( arg2 - 1 )
+							output += _( "no change from point {}, ").format( arg2 - 1 )
 						elif self.excelChartObject.SeriesCollection(arg1).Values[arg2 - 1] > self.excelChartObject.SeriesCollection(arg1).Values[arg2 - 2]: 
-							output += "Increased by {} from point {}, ".format( self.excelChartObject.SeriesCollection(arg1).Values[arg2 - 1] - self.excelChartObject.SeriesCollection(arg1).Values[arg2 - 2] , arg2 - 1 ) 
+							output += _( "Increased by {} from point {}, ").format( self.excelChartObject.SeriesCollection(arg1).Values[arg2 - 1] - self.excelChartObject.SeriesCollection(arg1).Values[arg2 - 2] , arg2 - 1 ) 
 						else:
-							output += "decreased by {} from point {}, ".format( self.excelChartObject.SeriesCollection(arg1).Values[arg2 - 2] - self.excelChartObject.SeriesCollection(arg1).Values[arg2 - 1] , arg2 - 1 ) 
+							output += _( "decreased by {} from point {}, ").format( self.excelChartObject.SeriesCollection(arg1).Values[arg2 - 2] - self.excelChartObject.SeriesCollection(arg1).Values[arg2 - 1] , arg2 - 1 ) 
 
-				if self.excelChartObject.HasAxis(Excel.xlCategory) and self.excelChartObject.Axes(Excel.xlCategory).HasTitle:
-					output += "{0} {1}: ".format( self.excelChartObject.Axes(Excel.xlCategory).AxisTitle.Text , excelSeriesXValue ) 
+				if self.excelChartObject.HasAxis(xlCategory) and self.excelChartObject.Axes(xlCategory).HasTitle:
+					output += _( "{} {}: ").format( self.excelChartObject.Axes(xlCategory).AxisTitle.Text , excelSeriesXValue ) 
 				else:
-					output += "Category {0}: ".format( excelSeriesXValue ) 
+					output += _( "Category {}: ").format( excelSeriesXValue ) 
 
-				if self.excelChartObject.HasAxis(Excel.xlValue) and self.excelChartObject.Axes(Excel.xlValue).HasTitle:
-					output +=  "{0} {1}".format( self.excelChartObject.Axes(Excel.xlValue).AxisTitle.Text , self.excelChartObject.SeriesCollection(arg1).Values[arg2-1]) 
+				if self.excelChartObject.HasAxis(xlValue) and self.excelChartObject.Axes(xlValue).HasTitle:
+					output +=  _( "{} {}").format( self.excelChartObject.Axes(xlValue).AxisTitle.Text , self.excelChartObject.SeriesCollection(arg1).Values[arg2-1]) 
 				else:
-					output +=  "value {0}".format( self.excelChartObject.SeriesCollection(arg1).Values[arg2-1]) 
+					output +=  _( "value {}").format( self.excelChartObject.SeriesCollection(arg1).Values[arg2-1]) 
 
 				if self.excelChartObject.ChartType == xlPie or self.excelChartObject.ChartType == xlPieExploded or self.excelChartObject.ChartType == xlPieOfPie: 
 					total = math.fsum( self.excelChartObject.SeriesCollection(arg1).Values ) 
-					output += " fraction {0:.2f} Percent {1} {2} of {3}".format( self.excelChartObject.SeriesCollection(arg1).Values[arg2-1] / total *100.00 , self.GetChartSegment() ,  arg2 , len( self.excelChartObject.SeriesCollection(arg1).Values ) )
+					output += _( " fraction {:.2f} Percent {} {} of {}").format( self.excelChartObject.SeriesCollection(arg1).Values[arg2-1] / total *100.00 , self.GetChartSegment() ,  arg2 , len( self.excelChartObject.SeriesCollection(arg1).Values ) )
 				else:
-					output += " {0} {1} of {2}".format( self.GetChartSegment() ,  arg2 , len( self.excelChartObject.SeriesCollection(arg1).Values ) )
+					output += _( " {} {} of {}").format( self.GetChartSegment() ,  arg2 , len( self.excelChartObject.SeriesCollection(arg1).Values ) )
 
 				ui.message ( output )
 
 
-			#ui.message ( "xlSeries: SeriesIndex {0} PointIndex {1}".format( arg1 , arg2 ) )
-			#ui.message ( self.excelChartObject.SeriesCollection(arg1).Points(arg2).DataLabel.Text )
-
-
-		elif ElementID == Excel.xlTrendline:
+		elif ElementID == xlTrendline:
 			if self.excelChartObject.SeriesCollection(arg1).Trendlines(arg2).DisplayEquation    or self.excelChartObject.SeriesCollection(arg1).Trendlines(arg2).DisplayRSquared:
-				trendlineText = unicode( self.excelChartObject.SeriesCollection(arg1).Trendlines(arg2).DataLabel.Text ).encode("utf-8").replace("\xc2\xb2"," square " )
-				ui.message ( " trendline {0} ".format( trendlineText )) 
+				trendlineText = unicode( self.excelChartObject.SeriesCollection(arg1).Trendlines(arg2).DataLabel.Text ).encode("utf-8").replace("\xc2\xb2" , _( " square " ) )
+				ui.message ( _( " trendline {} ").format( trendlineText )) 
 			else:
-				ui.message ( "Trendline" )
+				ui.message ( _( "Trendline" ) )
 
-		elif ElementID == Excel.xlXErrorBars:
-			ui.message ( "xlXErrorBars" )
+		elif ElementID == xlXErrorBars:
+			ui.message ( _( "X Error Bars" ) )
 
-		elif ElementID == Excel.xlYErrorBars:
-			ui.message ( "xlYErrorBars" )
+		elif ElementID == xlYErrorBars:
+			ui.message ( _( "Y Error Bars" ) )
 
-		elif ElementID == Excel.xlShape:
-			ui.message ( _("xlShape" ) )
+		elif ElementID == xlShape:
+			ui.message ( _( "Shape" ) )
 
-		#print "selection changed: element {0}, arg1 {1}, arg2 {2}.".format(ElementID,arg1,arg2)
 	#end def _Select
 # end class ExcelChartEventHandler
 
