@@ -33,7 +33,11 @@ import controlTypes
 from tableUtils import HeaderCellInfo, HeaderCellTracker
 from . import Window
 from ..behaviors import EditableTextWithoutAutoSelectDetection
- 
+
+import queueHandler 
+import characterProcessing
+
+
 #Word constants
 
 # wdMeasurementUnits
@@ -732,6 +736,7 @@ class WordDocument(EditableTextWithoutAutoSelectDetection, Window):
 		return self._WinwordVersion
 
 	def _get_documentWindowHandle(self):
+		self._captureFunc = None
 		return self.windowHandle
 
 	def _get_WinwordWindowObject(self):
@@ -989,13 +994,82 @@ class WordDocument(EditableTextWithoutAutoSelectDetection, Window):
 		self._caretScriptPostMovedHelper(textInfos.UNIT_PARAGRAPH,gesture,None)
 	script_previousParagraph.resumeSayAllMode=sayAllHandler.CURSOR_CARET
 
+	def getScript(self,gesture):
+		if self.isQuickNavigationActive: 
+			return self.script_quickNavigationCaptor
+		else:
+			return super(WordDocument,self).getScript(gesture)
+
+	def _get_isQuickNavigationActive(self):
+		"""Whether quick navigation is enabled, wherein the keys are not typed, but used for navigation.
+		@rtype: bool
+		"""
+		return self._captureFunc == self.script_quickNavigationCaptor
+
+	def _set_isQuickNavigationActive(self, enable):
+		if enable:
+			self._captureFunc = self.script_quickNavigationCaptor
+		elif self.isQuickNavigationActive:
+			self._captureFunc = None
+
+	def script_quickNavigationCaptor(self, gesture):
+		#bypass = gesture.bypassInputHelp or getattr(gesture.script, "bypassInputHelp", False)
+		queueHandler.queueFunction(queueHandler.eventQueue, self._handleQuickNavigation , gesture, False )
+		#return bypass
+
+	def _handleQuickNavigation(self, gesture, onlyLog=False):
+		textList = [gesture.displayName]
+		script = super(WordDocument,self).getScript(gesture)
+		runScript = False
+		logMsg = "Input help: gesture %s"%gesture.logIdentifier
+		if script:
+			scriptName = scriptHandler.getScriptName(script)
+			logMsg+=", bound to script %s" % scriptName
+			scriptLocation = scriptHandler.getScriptLocation(script)
+			if scriptLocation:
+				logMsg += " on %s" % scriptLocation
+			if scriptName == "toggleQuicknavigation":
+				runScript = True
+			else:
+				desc = script.__doc__
+				if desc:
+					textList.append(desc)
+
+		log.info(logMsg)
+		if onlyLog:
+			return
+
+		import braille
+		braille.handler.message("\t\t".join(textList))
+		# Punctuation must be spoken for the gesture name (the first chunk) so that punctuation keys are spoken.
+		speech.speakText(textList[0], reason=controlTypes.REASON_MESSAGE, symbolLevel=characterProcessing.SYMLVL_ALL)
+		for text in textList[1:]:
+			speech.speakMessage(text)
+
+		if runScript:
+			script (gesture)
+
+
+	def script_toggleQuicknavigation(self,gesture):
+		self.isQuickNavigationActive = not self.isQuickNavigationActive
+		# Translators: This will be presented when the input help is toggled.
+		stateOn = _("quick navigation on")
+		# Translators: This will be presented when the input help is toggled.
+		stateOff = _("quick navigation off")
+		state = stateOn if self.isQuickNavigationActive else stateOff
+		ui.message(state)
+		#self.quickNavigationGesture = gesture
+	# Translators: Input help mode message for toggle input help command.
+	script_toggleQuicknavigation.__doc__=_("Turns quick navigation on or off. When on, keys will not be typed but will be used to navigate in the document.")
+	#script_toggleQuicknavigation.category=SCRCAT_INPUT
+
 	__gestures = {
 		"kb:control+[":"increaseDecreaseFontSize",
 		"kb:control+]":"increaseDecreaseFontSize",
 		"kb:control+shift+,":"increaseDecreaseFontSize",
 		"kb:control+shift+.":"increaseDecreaseFontSize",
 		"kb:control+b":"toggleBold",
-		"kb:control+i":"toggleItalic",
+	"kb:control+i":"toggleItalic",
 		"kb:control+u":"toggleUnderline",
 		"kb:control+=":"toggleSuperscriptSubscript",
 		"kb:control+shift+=":"toggleSuperscriptSubscript",
@@ -1023,6 +1097,7 @@ class WordDocument(EditableTextWithoutAutoSelectDetection, Window):
 		"kb:control+pageUp": "caret_moveByLine",
 		"kb:control+pageDown": "caret_moveByLine",
 		"kb:NVDA+alt+c":"reportCurrentComment",
+		"kb:NVDA+space":"toggleQuicknavigation",
 	}
 
 class WordDocument_WwN(WordDocument):
