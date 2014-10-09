@@ -760,7 +760,6 @@ class WordDocument(EditableTextWithoutAutoSelectDetection, Window):
 		return self._WinwordVersion
 
 	def _get_documentWindowHandle(self):
-		self._captureFunc = None
 		return self.windowHandle
 
 	def _get_WinwordWindowObject(self):
@@ -771,6 +770,8 @@ class WordDocument(EditableTextWithoutAutoSelectDetection, Window):
 				log.debugWarning("Could not get MS Word object model from window %s with class %s"%(self.documentWindowHandle,winUser.getClassName(self.documentWindowHandle)),exc_info=True)
 				return None
 			self._WinwordWindowObject=comtypes.client.dynamic.Dispatch(pDispatch)
+			self._captureFunc = None
+			self._quickNavigationCommandsObject = QuickNavigationCommands(self)
 		return self._WinwordWindowObject
 
 	def _get_WinwordDocumentObject(self):
@@ -1033,10 +1034,9 @@ class WordDocument(EditableTextWithoutAutoSelectDetection, Window):
 	def _set_isQuickNavigationActive(self, enable):
 		if enable:
 			self._captureFunc = self.script_quickNavigationCaptor
-			self._quickNavigationCommandsObject = QuickNavigationCommands(self)
 		elif self.isQuickNavigationActive:
 			self._captureFunc = None
-			self._quickNavigationCommandsObject = None
+
 
 	def script_quickNavigationCaptor(self, gesture):
 		#bypass = gesture.bypassInputHelp or getattr(gesture.script, "bypassInputHelp", False)
