@@ -36,6 +36,7 @@ from ..behaviors import EditableTextWithoutAutoSelectDetection
 
 import queueHandler 
 import characterProcessing
+import baseObject
 
 
 #Word constants
@@ -87,6 +88,7 @@ wdGoToPrevious=3
 #GoTo - units
 wdGoToPage=1
 wdGoToLine=3
+wdGoToHeading=11
 
 wdCommentsStory=4
 wdEndnotesStory=3
@@ -540,6 +542,28 @@ class WordDocumentTextInfo(textInfos.TextInfo):
 	def updateSelection(self):
 		self.obj.WinwordWindowObject.ScrollIntoView(self._rangeObj)
 		self.obj.WinwordSelectionObject.SetRange(self._rangeObj.Start,self._rangeObj.End)
+
+class QuickNavigationCommands(baseObject.ScriptableObject):
+
+	def __init__(self,owner):
+		self.owner=owner
+		super(QuickNavigationCommands , self).__init__()
+
+	def script_nextHeading(self,gesture):
+		info=self.owner.makeTextInfo(textInfos.POSITION_CARET)
+		# #4375: keeping cemetrical with nextParagraph script. 
+		tempRange = info._rangeObj.GoTo(wdGoToHeading , wdGoToNext )
+		tempRange.Collapse( wdCollapseEnd ) 
+		info._rangeObj = tempRange
+		info.updateCaret()
+		#ui.message("next heading")
+
+		self.owner._caretScriptPostMovedHelper(textInfos.UNIT_LINE,gesture,info)
+	script_nextHeading.resumeSayAllMode=sayAllHandler.CURSOR_CARET
+
+	__gestures = {
+		"kb:h":"nextHeading",
+	}
 
 class WordDocument(EditableTextWithoutAutoSelectDetection, Window):
 
@@ -1009,8 +1033,10 @@ class WordDocument(EditableTextWithoutAutoSelectDetection, Window):
 	def _set_isQuickNavigationActive(self, enable):
 		if enable:
 			self._captureFunc = self.script_quickNavigationCaptor
+			self._quickNavigationCommandsObject = QuickNavigationCommands(self)
 		elif self.isQuickNavigationActive:
 			self._captureFunc = None
+			self._quickNavigationCommandsObject = None
 
 	def script_quickNavigationCaptor(self, gesture):
 		#bypass = gesture.bypassInputHelp or getattr(gesture.script, "bypassInputHelp", False)
@@ -1018,36 +1044,12 @@ class WordDocument(EditableTextWithoutAutoSelectDetection, Window):
 		#return bypass
 
 	def _handleQuickNavigation(self, gesture, onlyLog=False):
-		textList = [gesture.displayName]
-		script = super(WordDocument,self).getScript(gesture)
 		runScript = False
-		logMsg = "Input help: gesture %s"%gesture.logIdentifier
+		script = self._quickNavigationCommandsObject.getScript(gesture)
 		if script:
 			scriptName = scriptHandler.getScriptName(script)
-			logMsg+=", bound to script %s" % scriptName
-			scriptLocation = scriptHandler.getScriptLocation(script)
-			if scriptLocation:
-				logMsg += " on %s" % scriptLocation
-			if scriptName == "toggleQuicknavigation":
-				runScript = True
-			else:
-				desc = script.__doc__
-				if desc:
-					textList.append(desc)
-
-		log.info(logMsg)
-		if onlyLog:
-			return
-
-		import braille
-		braille.handler.message("\t\t".join(textList))
-		# Punctuation must be spoken for the gesture name (the first chunk) so that punctuation keys are spoken.
-		speech.speakText(textList[0], reason=controlTypes.REASON_MESSAGE, symbolLevel=characterProcessing.SYMLVL_ALL)
-		for text in textList[1:]:
-			speech.speakMessage(text)
-
-		if runScript:
-			script (gesture)
+			if scriptName == "toggleQuicknavigation" or scriptName == "nextHeading":
+				script (gesture)
 
 
 	def script_toggleQuicknavigation(self,gesture):
