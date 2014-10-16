@@ -561,8 +561,16 @@ class QuickNavigationCommands(baseObject.ScriptableObject):
 		self.owner._caretScriptPostMovedHelper(textInfos.UNIT_LINE,gesture,info)
 	script_nextHeading.resumeSayAllMode=sayAllHandler.CURSOR_CARET
 
+	def script_toggleQuicknavigation(self,gesture):
+		self.owner.script_toggleQuicknavigation(gesture)  
+
+	def script_handleOtherCommands(self,gesture):
+		#ui.message("send")
+		gesture.send()
+
 	__gestures = {
 		"kb:h":"nextHeading",
+		"kb:NVDA+Space":"toggleQuicknavigation",
 	}
 
 class WordDocument(EditableTextWithoutAutoSelectDetection, Window):
@@ -1044,13 +1052,18 @@ class WordDocument(EditableTextWithoutAutoSelectDetection, Window):
 		#return bypass
 
 	def _handleQuickNavigation(self, gesture, onlyLog=False):
-		runScript = False
 		script = self._quickNavigationCommandsObject.getScript(gesture)
 		if script:
-			scriptName = scriptHandler.getScriptName(script)
-			if scriptName == "toggleQuicknavigation" or scriptName == "nextHeading":
+			script (gesture)
+		else:
+			script = super(WordDocument,self).getScript(gesture)
+			if script:
 				script (gesture)
-
+			else:
+				import globalCommands
+				script = globalCommands.commands.getScript(gesture)
+				if script:
+					script (gesture)
 
 	def script_toggleQuicknavigation(self,gesture):
 		self.isQuickNavigationActive = not self.isQuickNavigationActive
