@@ -188,8 +188,31 @@ def _speakSpellingGen(text,locale,useCharacterDescriptions):
 		for count,char in enumerate(text): 
 			uppercase=char.isupper()
 			charDesc=None
+			ligaturePresent = False #signifies whether text contains ligature or not
 			if useCharacterDescriptions:
-				charDesc=characterProcessing.getCharacterDescription(locale,char.lower())
+# textLength more than 3 might be the case of ligature along with an associated sound				
+				if textLength > 3:
+					ligatureCharacter = text[:textLength - 1]
+					associatedSound = text[textLength - 1 : textLength]	
+					ligatureCharDesc=characterProcessing.getCharacterDescription(locale,ligatureCharacter)
+					if not ligatureCharDesc:
+						charDesc=characterProcessing.getCharacterDescription(locale,char.lower())
+					else:	
+						ligatureCharDesc=u''.join(ligatureCharDesc)
+						associatedSoundCharDesc=characterProcessing.getCharacterDescription(locale,associatedSound)
+						associatedSoundCharDesc=u''.join(associatedSoundCharDesc)
+						charDesc = ligatureCharDesc + u' ' + associatedSoundCharDesc
+						ligaturePresent = True
+						charDesc = charDesc.split('\n') #convert charDesc back into list with entire description text as one unit	
+#textLength equal to 3 might be the case of a ligature				
+				elif textLength == 3:
+					charDesc=characterProcessing.getCharacterDescription(locale,text)
+					if not charDesc:
+						charDesc=characterProcessing.getCharacterDescription(locale,char.lower())
+					else:
+						ligaturePresent = True	
+				else:
+					charDesc=characterProcessing.getCharacterDescription(locale,char.lower())	
 			if charDesc:
 				#Consider changing to multiple synth speech calls
 				char=charDesc[0] if textLength>1 else u"\u3001".join(charDesc)
@@ -209,7 +232,16 @@ def _speakSpellingGen(text,locale,useCharacterDescriptions):
 			if index is not None:
 				speechSequence.append(IndexCommand(index))
 			speechSequence.append(char)
-			synth.speak(speechSequence)
+			if textLength >= 3:
+				if not ligaturePresent:
+					synth.speak(speechSequence)
+				else:
+#In case of ligatures, description should be spoken only once					
+					if index <= 1:
+						synth.speak(speechSequence)
+			else:
+				synth.speak(speechSequence)
+					
 			if uppercase and synth.isSupported("pitch") and synthConfig["capPitchChange"]:
 				synth.pitch=oldPitch
 			while textLength>1 and (isPaused or getLastSpeechIndex()!=index):
