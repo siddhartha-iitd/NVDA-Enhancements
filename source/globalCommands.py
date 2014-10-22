@@ -750,6 +750,35 @@ class GlobalCommands(ScriptableObject):
 	script_review_endOfLine.__doc__=_("Moves the review cursor to the last character of the line where it is situated in the current navigator object and speaks it")
 	script_review_endOfLine.category=SCRCAT_TEXTREVIEW
 
+################################################################################ SENTENCE NAVIGATION #######################################################################
+
+	def _moveBySentence(self, direction=1):
+		""" Helper method to move by sentence
+		@param direction: positive for next negative for or previous
+		@type direction: int
+		"""
+
+		info=api.getFocusObject().makeTextInfo(textInfos.POSITION_CARET)
+		try:
+			info.expand(textInfos.UNIT_SENTENCE)
+			end = True if direction > 0 else False
+			info.collapse(end) #This will fail at the last sentence of the document.
+		except:
+			pass
+		info.move(textInfos.UNIT_CHARACTER, direction)
+		info.expand(textInfos.UNIT_SENTENCE)
+		speech.speakTextInfo(info,reason=controlTypes.REASON_CARET)
+		info.collapse()
+		info.updateCaret()
+
+	def script_nextSentence(self, gesture):
+		self._moveBySentence(1)
+
+	def script_previousSentence(self, gesture):
+		self._moveBySentence(-1)
+
+################################################################################ SENTENCE NAVIGATION #######################################################################	
+
 	def script_speechMode(self,gesture):
 		curMode=speech.speechMode
 		speech.speechMode=speech.speechMode_talk
@@ -1549,6 +1578,11 @@ class GlobalCommands(ScriptableObject):
 		"kb:NVDA+control+z": "activatePythonConsole",
 		"kb:NVDA+control+f3": "reloadPlugins",
 		"kb(desktop):NVDA+control+f2": "test_navigatorDisplayModelText",
+		
+		#Sentence Navigation
+		"kb:alt+upArrow": "previousSentence",
+		"kb:alt+downArrow": "nextSentence",
+		
 	}
 
 #: The single global commands instance.
