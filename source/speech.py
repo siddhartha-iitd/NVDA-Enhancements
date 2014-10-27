@@ -188,8 +188,44 @@ def _speakSpellingGen(text,locale,useCharacterDescriptions):
 		for count,char in enumerate(text): 
 			uppercase=char.isupper()
 			charDesc=None
+			ligaturePresent = False #ligaturePresent signifies whether a character is glyph/ligature or not
 			if useCharacterDescriptions:
-				charDesc=characterProcessing.getCharacterDescription(locale,char.lower())
+				if textLength > 2:
+					copyOfText = text
+					splitPoint = textLength #Point at which text needs to be split
+					
+					while ((characterProcessing.getCharacterDescription(locale,copyOfText) is None) and (ligaturePresent is False)):
+						splitPoint = splitPoint - 1
+						copyOfText = copyOfText[:splitPoint]
+                    
+					if splitPoint <= 1: #If copyOfText reduces to a singleton character
+						charDesc=characterProcessing.getCharacterDescription(locale,char.lower())
+					else:
+						ligaturePresent = True
+                                                
+						textPartOne = text[:splitPoint]
+						textPartTwo = text[splitPoint :]	
+						charDescPartOne=characterProcessing.getCharacterDescription(locale,textPartOne)
+						charDescPartTwo=characterProcessing.getCharacterDescription(locale,textPartTwo)
+						
+						if (charDescPartOne is None) or (charDescPartTwo is None):
+							charDesc=characterProcessing.getCharacterDescription(locale,char.lower())
+							ligaturePresent = False
+						else:	
+							charDesc1=u''.join(charDesc1)
+							charDesc2=u''.join(charDesc2)
+							charDesc = charDesc1 + u' ' + charDesc2
+							ligaturePresent = True
+
+							charDesc = charDesc.split('\n')	
+				elif textLength == 2:
+					charDesc=characterProcessing.getCharacterDescription(locale,text)
+					if charDesc is None:
+						charDesc=characterProcessing.getCharacterDescription(locale,char.lower())
+					else:
+						ligaturePresent = True	
+				else: #Singleton characters
+					charDesc=characterProcessing.getCharacterDescription(locale,char.lower())	
 			if charDesc:
 				#Consider changing to multiple synth speech calls
 				char=charDesc[0] if textLength>1 else u"\u3001".join(charDesc)
@@ -209,7 +245,16 @@ def _speakSpellingGen(text,locale,useCharacterDescriptions):
 			if index is not None:
 				speechSequence.append(IndexCommand(index))
 			speechSequence.append(char)
-			synth.speak(speechSequence)
+			if textLength >= 2:
+				if not ligaturePresent:
+					synth.speak(speechSequence)
+				else:
+#In case of ligatures, description should be spoken only once					
+					if index <= 1:
+						synth.speak(speechSequence)
+			else:
+				synth.speak(speechSequence)
+					
 			if uppercase and synth.isSupported("pitch") and synthConfig["capPitchChange"]:
 				synth.pitch=oldPitch
 			while textLength>1 and (isPaused or getLastSpeechIndex()!=index):
@@ -220,7 +265,6 @@ def _speakSpellingGen(text,locale,useCharacterDescriptions):
 				tones.beep(2000,50)
 		args=yield
 		if args: buf.append(args)
-
 def speakObjectProperties(obj,reason=controlTypes.REASON_QUERY,index=None,**allowedProperties):
 	if speechMode==speechMode_off:
 		return
