@@ -194,17 +194,20 @@ def _speakSpellingGen(text,locale,useCharacterDescriptions):
 					copyOfText = text
 					splitPoint = textLength #Point at which text needs to be split
 					
-					while ((characterProcessing.getCharacterDescription(locale,copyOfText) is None) and (ligaturePresent is False)):
+					while not characterProcessing.getCharacterDescription(locale,copyOfText):
 						splitPoint = splitPoint - 1
 						copyOfText = copyOfText[:splitPoint]
                     
 					if splitPoint <= 1: #If copyOfText reduces to a singleton character
 						charDesc=characterProcessing.getCharacterDescription(locale,char.lower())
-					else:
+					elif splitPoint == textLength: #Just a ligature
+						charDesc=characterProcessing.getCharacterDescription(locale,text)
+						ligaturePresent = True
+					else: #Ligature coupled with other character(s)
 						ligaturePresent = True
                                                 
 						textPartOne = text[:splitPoint]
-						textPartTwo = text[splitPoint :]	
+						textPartTwo = text[splitPoint:]	
 						charDescPartOne=characterProcessing.getCharacterDescription(locale,textPartOne)
 						charDescPartTwo=characterProcessing.getCharacterDescription(locale,textPartTwo)
 						
@@ -212,9 +215,9 @@ def _speakSpellingGen(text,locale,useCharacterDescriptions):
 							charDesc=characterProcessing.getCharacterDescription(locale,char.lower())
 							ligaturePresent = False
 						else:	
-							charDesc1=u''.join(charDesc1)
-							charDesc2=u''.join(charDesc2)
-							charDesc = charDesc1 + u' ' + charDesc2
+							charDescPartOne=u''.join(charDescPartOne)
+							charDescPartTwo=u''.join(charDescPartTwo)
+							charDesc = charDescPartOne + u' ' + charDescPartTwo
 							ligaturePresent = True
 
 							charDesc = charDesc.split('\n')	
