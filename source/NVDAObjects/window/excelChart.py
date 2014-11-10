@@ -484,9 +484,15 @@ class ExcelChartEventHandler(comtypes.COMObject):
 		super(ExcelChartEventHandler ,self).__init__()
 
 	def ChartEvents_Select(self, this, ElementID ,arg1,arg2):
-		selectedChartElement = ExcelChartElementBase( windowHandle=self.owner.windowHandle , excelChartObject=self.owner.excelChartObject  , elementID=ElementID  , arg1=arg1 , arg2=arg2 )
-		selectedChartElement.parent = self.owner 
-		eventHandler.queueEvent("gainFocus", selectedChartElement )
+		if ElementID == xlSeries:
+			selectedChartElement = ExcelChartElementSeries( windowHandle=self.owner.windowHandle , excelChartObject=self.owner.excelChartObject  , elementID=ElementID  , arg1=arg1 , arg2=arg2 )
+			selectedChartElement.parent = self.owner 
+			eventHandler.queueEvent("gainFocus", selectedChartElement )
+
+		else:
+			selectedChartElement = ExcelChartElementBase( windowHandle=self.owner.windowHandle , excelChartObject=self.owner.excelChartObject  , elementID=ElementID  , arg1=arg1 , arg2=arg2 )
+			selectedChartElement.parent = self.owner 
+			eventHandler.queueEvent("gainFocus", selectedChartElement )
 
 class ExcelChartElementBase(Window):
 
@@ -639,45 +645,6 @@ class ExcelChartElementBase(Window):
 		elif ElementID == xlLegendKey:
 			return _( "Legend key for Series {} {} of {}").format( self.excelChartObject.SeriesCollection(arg1).Name , arg1 , self.excelChartObject.SeriesCollection().Count )
 
-		elif ElementID == xlSeries:
-			if arg2 == -1:
-				return _( "{} Series {} of {}").format( self.excelChartObject.SeriesCollection(arg1).Name , arg1 , self.excelChartObject.SeriesCollection().Count )
-			else:
-# if XValue is a float, change it to int, else dates are shown with points. hope this does not introduce another bug
-				if isinstance( self.excelChartObject.SeriesCollection(arg1).XValues[arg2 - 1] , float): 
-					excelSeriesXValue = int(self.excelChartObject.SeriesCollection(arg1).XValues[arg2 - 1] )
-				else:
-					excelSeriesXValue = self.excelChartObject.SeriesCollection(arg1).XValues[arg2 - 1] 
-
-				output=""
-				if self.excelChartObject.ChartType == xlLine or self.excelChartObject.ChartType == xlLineMarkers  or self.excelChartObject.ChartType == xlLineMarkersStacked or self.excelChartObject.ChartType == xlLineMarkersStacked100 or self.excelChartObject.ChartType == xlLineStacked or self.excelChartObject.ChartType == xlLineStacked100: 
-					if arg2 > 1:
-
-						if self.excelChartObject.SeriesCollection(arg1).Values[arg2 - 1] == self.excelChartObject.SeriesCollection(arg1).Values[arg2 - 2]: 
-							output += _( "no change from point {}, ").format( arg2 - 1 )
-						elif self.excelChartObject.SeriesCollection(arg1).Values[arg2 - 1] > self.excelChartObject.SeriesCollection(arg1).Values[arg2 - 2]: 
-							output += _( "Increased by {} from point {}, ").format( self.excelChartObject.SeriesCollection(arg1).Values[arg2 - 1] - self.excelChartObject.SeriesCollection(arg1).Values[arg2 - 2] , arg2 - 1 ) 
-						else:
-							output += _( "decreased by {} from point {}, ").format( self.excelChartObject.SeriesCollection(arg1).Values[arg2 - 2] - self.excelChartObject.SeriesCollection(arg1).Values[arg2 - 1] , arg2 - 1 ) 
-
-				if self.excelChartObject.HasAxis(xlCategory) and self.excelChartObject.Axes(xlCategory).HasTitle:
-					output += _( "{} {}: ").format( self.excelChartObject.Axes(xlCategory).AxisTitle.Text , excelSeriesXValue ) 
-				else:
-					output += _( "Category {}: ").format( excelSeriesXValue ) 
-
-				if self.excelChartObject.HasAxis(xlValue) and self.excelChartObject.Axes(xlValue).HasTitle:
-					output +=  _( "{} {}").format( self.excelChartObject.Axes(xlValue).AxisTitle.Text , self.excelChartObject.SeriesCollection(arg1).Values[arg2-1]) 
-				else:
-					output +=  _( "value {}").format( self.excelChartObject.SeriesCollection(arg1).Values[arg2-1]) 
-
-				if self.excelChartObject.ChartType == xlPie or self.excelChartObject.ChartType == xlPieExploded or self.excelChartObject.ChartType == xlPieOfPie: 
-					total = math.fsum( self.excelChartObject.SeriesCollection(arg1).Values ) 
-					output += _( " fraction {:.2f} Percent {} {} of {}").format( self.excelChartObject.SeriesCollection(arg1).Values[arg2-1] / total *100.00 , self.GetChartSegment() ,  arg2 , len( self.excelChartObject.SeriesCollection(arg1).Values ) )
-				else:
-					output += _( " {} {} of {}").format( self.GetChartSegment() ,  arg2 , len( self.excelChartObject.SeriesCollection(arg1).Values ) )
-
-				return  output 
-
 		elif ElementID == xlTrendline:
 			if self.excelChartObject.SeriesCollection(arg1).Trendlines(arg2).DisplayEquation    or self.excelChartObject.SeriesCollection(arg1).Trendlines(arg2).DisplayRSquared:
 				trendlineText = unicode( self.excelChartObject.SeriesCollection(arg1).Trendlines(arg2).DataLabel.Text ).encode("utf-8").replace("\xc2\xb2" , _( " square " ) )
@@ -740,6 +707,54 @@ class ExcelChartElementBase(Window):
 
 # end class ExcelChartEventHandler
 
+class ExcelChartElementSeries(ExcelChartElementBase):
 
+	def __init__(self, windowHandle=None , excelChartObject=None   , elementID=None  , arg1=None , arg2=None ):
+		self.excelChartObject = excelChartObject
+		self.elementID = elementID 
+		self.arg1 = arg1
+		self.arg2 = arg2
+		super(ExcelChartElementSeries,self).__init__( windowHandle=windowHandle , excelChartObject=excelChartObject , elementID=elementID , arg1=arg1 , arg2=arg2 )
+
+
+	def _Select(self, ElementID ,arg1,arg2 , reportExtraInfo=False ):
+		if ElementID == xlSeries:
+			if arg2 == -1:
+				return _( "{} Series {} of {}").format( self.excelChartObject.SeriesCollection(arg1).Name , arg1 , self.excelChartObject.SeriesCollection().Count )
+			else:
+# if XValue is a float, change it to int, else dates are shown with points. hope this does not introduce another bug
+				if isinstance( self.excelChartObject.SeriesCollection(arg1).XValues[arg2 - 1] , float): 
+					excelSeriesXValue = int(self.excelChartObject.SeriesCollection(arg1).XValues[arg2 - 1] )
+				else:
+					excelSeriesXValue = self.excelChartObject.SeriesCollection(arg1).XValues[arg2 - 1] 
+
+				output=""
+				if self.excelChartObject.ChartType == xlLine or self.excelChartObject.ChartType == xlLineMarkers  or self.excelChartObject.ChartType == xlLineMarkersStacked or self.excelChartObject.ChartType == xlLineMarkersStacked100 or self.excelChartObject.ChartType == xlLineStacked or self.excelChartObject.ChartType == xlLineStacked100: 
+					if arg2 > 1:
+
+						if self.excelChartObject.SeriesCollection(arg1).Values[arg2 - 1] == self.excelChartObject.SeriesCollection(arg1).Values[arg2 - 2]: 
+							output += _( "no change from point {}, ").format( arg2 - 1 )
+						elif self.excelChartObject.SeriesCollection(arg1).Values[arg2 - 1] > self.excelChartObject.SeriesCollection(arg1).Values[arg2 - 2]: 
+							output += _( "Increased by {} from point {}, ").format( self.excelChartObject.SeriesCollection(arg1).Values[arg2 - 1] - self.excelChartObject.SeriesCollection(arg1).Values[arg2 - 2] , arg2 - 1 ) 
+						else:
+							output += _( "decreased by {} from point {}, ").format( self.excelChartObject.SeriesCollection(arg1).Values[arg2 - 2] - self.excelChartObject.SeriesCollection(arg1).Values[arg2 - 1] , arg2 - 1 ) 
+
+				if self.excelChartObject.HasAxis(xlCategory) and self.excelChartObject.Axes(xlCategory).HasTitle:
+					output += _( "{} {}: ").format( self.excelChartObject.Axes(xlCategory).AxisTitle.Text , excelSeriesXValue ) 
+				else:
+					output += _( "Category {}: ").format( excelSeriesXValue ) 
+
+				if self.excelChartObject.HasAxis(xlValue) and self.excelChartObject.Axes(xlValue).HasTitle:
+					output +=  _( "{} {}").format( self.excelChartObject.Axes(xlValue).AxisTitle.Text , self.excelChartObject.SeriesCollection(arg1).Values[arg2-1]) 
+				else:
+					output +=  _( "value {}").format( self.excelChartObject.SeriesCollection(arg1).Values[arg2-1]) 
+
+				if self.excelChartObject.ChartType == xlPie or self.excelChartObject.ChartType == xlPieExploded or self.excelChartObject.ChartType == xlPieOfPie: 
+					total = math.fsum( self.excelChartObject.SeriesCollection(arg1).Values ) 
+					output += _( " fraction {:.2f} Percent {} {} of {}").format( self.excelChartObject.SeriesCollection(arg1).Values[arg2-1] / total *100.00 , self.GetChartSegment() ,  arg2 , len( self.excelChartObject.SeriesCollection(arg1).Values ) )
+				else:
+					output += _( " {} {} of {}").format( self.GetChartSegment() ,  arg2 , len( self.excelChartObject.SeriesCollection(arg1).Values ) )
+
+				return  output 
 
 
