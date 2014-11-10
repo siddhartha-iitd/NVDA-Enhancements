@@ -323,13 +323,21 @@ class ExcelChart(excel.ExcelBase):
 		self.windowHandle = windowHandle
 		self.excelWindowObject = excelWindowObject
 		self.excelChartObject = excelChartObject
-		self.excelChartEventHandlerObject = ExcelChartEventHandler( self )
+		#self.excelChartEventHandlerObject = ExcelChartEventHandler( self )
 		#self.selectedChartElement = ExcelChartElementBase(windowHandle=self.windowHandle,excelWindowObject=self.excelWindowObject,excelChartObject=self.excelChartObject)
-		self.excelChartEventConnection = GetEvents( self.excelChartObject , self.excelChartEventHandlerObject , ChartEvents)
+		#self.excelChartEventConnection = GetEvents( self.excelChartObject , self.excelChartEventHandlerObject , ChartEvents)
 		log.debugWarning("ExcelChart init")
 		super(ExcelChart,self).__init__(windowHandle=windowHandle)
 		for gesture in self.__changeSelectionGestures:
 			self.bindGesture(gesture, "changeSelection")
+
+
+	def initExcelEvents(self):
+		self.excelChartEventHandlerObject = ExcelChartEventHandler( self )
+		self.excelChartEventConnection = GetEvents( self.excelChartObject , self.excelChartEventHandlerObject , ChartEvents)
+
+	def clearExcelEvents(self):
+		self.excelChartEventConnection = None
 
 	def _isEqual(self, other):
 		if not super(ExcelChart, self)._isEqual(other):
@@ -431,12 +439,6 @@ class ExcelChart(excel.ExcelBase):
 			text=_("No Series defined.")
 		log.debugWarning(text)
 
-	def script_reportCurrentChartElementWithExtraInfo(self, gesture):
-		self.selectedChartElement.reportCurrentChartElementWithExtraInfo()
-
-	def script_reportCurrentChartElementColor(self, gesture):
-		self.selectedChartElement.reportCurrentChartElementColor()
-
 	__gestures = {
 		"kb:escape": "switchToCell",
 		"kb:NVDA+t" : "reportTitle",
@@ -445,8 +447,6 @@ class ExcelChart(excel.ExcelBase):
 		"kb:NVDA+shift+3" : "reportSeriesAxis",
 		"kb:NVDA+shift+4" : "reportSeriesSummary",
 		"kb:NVDA+shift+5" : "reportSeriesFormula",
-		"kb:NVDA+d" : "reportCurrentChartElementWithExtraInfo",
-		"kb:NVDA+f" : "reportCurrentChartElementColor",
 	}
 
 	def script_changeSelection(self,gesture):
@@ -485,6 +485,7 @@ class ExcelChartEventHandler(comtypes.COMObject):
 
 	def ChartEvents_Select(self, this, ElementID ,arg1,arg2):
 		selectedChartElement = ExcelChartElementBase( windowHandle=self.owner.windowHandle , excelChartObject=self.owner.excelChartObject  , elementID=ElementID  , arg1=arg1 , arg2=arg2 )
+		selectedChartElement.parent = self.owner 
 		eventHandler.queueEvent("gainFocus", selectedChartElement )
 
 class ExcelChartElementBase(Window):
@@ -513,15 +514,13 @@ class ExcelChartElementBase(Window):
 	def _get_name(self):
 		return self._Select(self.elementID , self.arg1 , self.arg2)
 
-	def reportCurrentChartElementWithExtraInfo(self):
-		self._Select(self.elementID , self.arg1 , self.arg2 , True )
+	def script_reportCurrentChartElementWithExtraInfo(self,gesture):
+		ui.message( self._Select(self.elementID , self.arg1 , self.arg2 , True ) )
 
-	def reportCurrentChartElementColor(self):
+	def script_reportCurrentChartElementColor(self,gesture):
 		if self.elementID == xlSeries:
 			if self.arg2 == -1:
 				ui.message ( _( "Series color: {} ").format(colors.RGB.fromCOLORREF(int( self.excelChartObject.SeriesCollection( self.arg1 ).Interior.Color ) )  ) )
-
-
 
 	def _Select(self, ElementID ,arg1,arg2 , reportExtraInfo=False ):
 		
@@ -696,6 +695,49 @@ class ExcelChartElementBase(Window):
 			return _( "Shape" )
 
 	#end def _Select
+
+	#redirects for implementations in parent excelChart object
+	def script_changeSelection(self,gesture):
+		self.parent.script_changeSelection(gesture)
+
+	def script_switchToCell(self,gesture):
+		self.parent.script_switchToCell(gesture)
+
+	def script_reportTitle(self,gesture):
+		self.parent.script_reportTitle(gesture)
+
+	def script_reportCategoryAxis(self,gesture):
+		self.parent.script_reportCategoryAxis(gesture)
+
+	def script_reportValueAxis(self,gesture):
+		self.parent.script_reportValueAxis(gesture)
+
+	def script_reportSeriesAxis(self,gesture):
+		self.parent.script_reportSeriesAxis(gesture)
+
+	def script_reportSeriesSummary(self,gesture):
+		self.parent.script_reportSeriesSummary(gesture)
+
+	def script_reportSeriesFormula(self,gesture):
+		self.parent.script_reportSeriesFormula(gesture)
+
+	__gestures = {
+		"kb:tab":"changeSelection",
+		"kb:shift+tab":"changeSelection",
+		"kb:escape": "switchToCell",
+		"kb:NVDA+t" : "reportTitle",
+		"kb:NVDA+shift+1" : "reportCategoryAxis",
+		"kb:NVDA+shift+2" : "reportValueAxis",
+		"kb:NVDA+shift+3" : "reportSeriesAxis",
+		"kb:NVDA+shift+4" : "reportSeriesSummary",
+		"kb:NVDA+shift+5" : "reportSeriesFormula",
+		"kb:NVDA+d" : "reportCurrentChartElementWithExtraInfo",
+		"kb:NVDA+f" : "reportCurrentChartElementColor",
+	}
+
+
+
+
 # end class ExcelChartEventHandler
 
 

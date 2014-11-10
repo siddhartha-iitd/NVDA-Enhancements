@@ -127,7 +127,7 @@ class ExcelBase(Window):
 			obj=ExcelCell(windowHandle=self.windowHandle,excelWindowObject=self.excelWindowObject,excelCellObject=selection)
 		elif isChartActive:
 			selection = self.excelWindowObject.ActiveChart
-			obj=ExcelChart(windowHandle=self.windowHandle,excelWindowObject=self.excelWindowObject,excelChartObject=selection)
+			obj=excelChart.ExcelChart(windowHandle=self.windowHandle,excelWindowObject=self.excelWindowObject,excelChartObject=selection)
 		return obj
 
 
@@ -970,4 +970,4 @@ class CellsListDialog(wx.Dialog):
 		except(COMError):
 			pass
 
-from excelChart import ExcelChart
+import excelChart
