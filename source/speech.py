@@ -180,94 +180,85 @@ def speakSpelling(text,locale=None,useCharacterDescriptions=False):
 		queueHandler.registerGeneratorObject(_speakSpellingGenerator)
 
 def _speakSpellingGen(text,locale,useCharacterDescriptions):
-	synth=getSynth()
-	synthConfig=config.conf["speech"][synth.name]
-	buf=[(text,locale,useCharacterDescriptions)]
-	for text,locale,useCharacterDescriptions in buf:
-		textLength=len(text)
-		for count,char in enumerate(text): 
-			uppercase=char.isupper()
-			charDesc=None
-			ligaturePresent = False #ligaturePresent signifies whether a character is glyph/ligature or not
-			if useCharacterDescriptions:
-				if textLength > 2:
-					copyOfText = text
-					splitPoint = textLength #Point at which text needs to be split
-					
-					while not characterProcessing.getCharacterDescription(locale,copyOfText):
-						splitPoint = splitPoint - 1
-						copyOfText = copyOfText[:splitPoint]
+    synth=getSynth()
+    synthConfig=config.conf["speech"][synth.name]
+    buf=[(text,locale,useCharacterDescriptions)]
+    for text,locale,useCharacterDescriptions in buf:
+        textLength=len(text)
+        charDesc=None
+        ligaturePresent = False #ligaturePresent signifies whether a character is glyph/ligature or not
+        if useCharacterDescriptions:
+            if textLength > 2:
+                copyOfText = text
+                splitPoint = textLength #Point at which text needs to be split
                     
-					if splitPoint <= 1: #If copyOfText reduces to a singleton character
-						charDesc=characterProcessing.getCharacterDescription(locale,char.lower())
-					elif splitPoint == textLength: #Just a ligature
-						charDesc=characterProcessing.getCharacterDescription(locale,text)
-						ligaturePresent = True
-					else: #Ligature coupled with other character(s)
-						ligaturePresent = True
+                while not characterProcessing.getCharacterDescription(locale,copyOfText):
+                    splitPoint = splitPoint - 1
+                    copyOfText = copyOfText[:splitPoint]
+                    
+                if splitPoint <= 1: #If copyOfText reduces to a singleton character
+                    charDesc= None
+                elif splitPoint == textLength: #Just a ligature
+                    charDesc=characterProcessing.getCharacterDescription(locale,text)
+                    ligaturePresent = True
+                else: #Ligature coupled with other character(s)
+                    ligaturePresent = True
                                                 
-						textPartOne = text[:splitPoint]
-						textPartTwo = text[splitPoint:]	
-						charDescPartOne=characterProcessing.getCharacterDescription(locale,textPartOne)
-						charDescPartTwo=characterProcessing.getCharacterDescription(locale,textPartTwo)
-						
-						if (charDescPartOne is None) or (charDescPartTwo is None):
-							charDesc=characterProcessing.getCharacterDescription(locale,char.lower())
-							ligaturePresent = False
-						else:	
-							charDescPartOne=u''.join(charDescPartOne)
-							charDescPartTwo=u''.join(charDescPartTwo)
-							charDesc = charDescPartOne + u' ' + charDescPartTwo
-							ligaturePresent = True
-
-							charDesc = charDesc.split('\n')	
-				elif textLength == 2:
-					charDesc=characterProcessing.getCharacterDescription(locale,text)
-					if charDesc is None:
-						charDesc=characterProcessing.getCharacterDescription(locale,char.lower())
-					else:
-						ligaturePresent = True	
-				else: #Singleton characters
-					charDesc=characterProcessing.getCharacterDescription(locale,char.lower())	
-			if charDesc:
-				#Consider changing to multiple synth speech calls
-				char=charDesc[0] if textLength>1 else u"\u3001".join(charDesc)
-			else:
-				char=characterProcessing.processSpeechSymbol(locale,char)
-			if uppercase and synthConfig["sayCapForCapitals"]:
-				# Translators: cap will be spoken before the given letter when it is capitalized.
-				char=_("cap %s")%char
-			if uppercase and synth.isSupported("pitch") and synthConfig["capPitchChange"]:
-				oldPitch=synthConfig["pitch"]
-				synth.pitch=max(0,min(oldPitch+synthConfig["capPitchChange"],100))
-			index=count+1
-			log.io("Speaking character %r"%char)
-			speechSequence=[LangChangeCommand(locale)] if config.conf['speech']['autoLanguageSwitching'] else []
-			if len(char) == 1 and synthConfig["useSpellingFunctionality"]:
-				speechSequence.append(CharacterModeCommand(True))
-			if index is not None:
-				speechSequence.append(IndexCommand(index))
-			speechSequence.append(char)
-			if textLength >= 2:
-				if not ligaturePresent:
-					synth.speak(speechSequence)
-				else:
-#In case of ligatures, description should be spoken only once					
-					if index <= 1:
-						synth.speak(speechSequence)
-			else:
-				synth.speak(speechSequence)
-					
-			if uppercase and synth.isSupported("pitch") and synthConfig["capPitchChange"]:
-				synth.pitch=oldPitch
-			while textLength>1 and (isPaused or getLastSpeechIndex()!=index):
-				for x in xrange(2):
-					args=yield
-					if args: buf.append(args)
-			if uppercase and  synthConfig["beepForCapitals"]:
-				tones.beep(2000,50)
-		args=yield
-		if args: buf.append(args)
+                    textPartOne = text[:splitPoint]
+                    textPartTwo = text[splitPoint:]    
+                    charDescPartOne=characterProcessing.getCharacterDescription(locale,textPartOne)
+                    charDescPartTwo=characterProcessing.getCharacterDescription(locale,textPartTwo)
+                        
+                    if (charDescPartOne is None) or (charDescPartTwo is None):
+                        charDesc= None
+                        ligaturePresent = False
+                    else:    
+                        charDescPartOne=u''.join(charDescPartOne)
+                        charDescPartTwo=u''.join(charDescPartTwo)
+                        charDesc = charDescPartOne + u' ' + charDescPartTwo
+                        ligaturePresent = True
+                        charDesc = charDesc.split('\n')
+                            
+            elif textLength == 2:
+                 charDesc=characterProcessing.getCharacterDescription(locale,text)
+                 if charDesc is not None:
+                    ligaturePresent = True   
+        for count,char in enumerate(text): 
+            uppercase=char.isupper()
+            if useCharacterDescriptions :
+                if count != 0 or charDesc is None:
+                    charDesc=characterProcessing.getCharacterDescription(locale,char.lower())
+            if charDesc:
+                #Consider changing to multiple synth speech calls
+                char=charDesc[0] if textLength>1 else u"\u3001".join(charDesc)
+            else:
+                char=characterProcessing.processSpeechSymbol(locale,char)
+            if uppercase and synthConfig["sayCapForCapitals"]:
+                # Translators: cap will be spoken before the given letter when it is capitalized.
+                char=_("cap %s")%char
+            if uppercase and synth.isSupported("pitch") and synthConfig["capPitchChange"]:
+                oldPitch=synthConfig["pitch"]
+                synth.pitch=max(0,min(oldPitch+synthConfig["capPitchChange"],100))
+            index=count+1
+            log.io("Speaking character %r"%char)
+            speechSequence=[LangChangeCommand(locale)] if config.conf['speech']['autoLanguageSwitching'] else []
+            if len(char) == 1 and synthConfig["useSpellingFunctionality"]:
+                speechSequence.append(CharacterModeCommand(True))
+            if index is not None:
+                speechSequence.append(IndexCommand(index))
+            speechSequence.append(char)
+            synth.speak(speechSequence)
+            if uppercase and synth.isSupported("pitch") and synthConfig["capPitchChange"]:
+                synth.pitch=oldPitch
+            while textLength>1 and (isPaused or getLastSpeechIndex()!=index):
+                for x in xrange(2):
+                    args=yield
+                    if args: buf.append(args)
+            if uppercase and  synthConfig["beepForCapitals"]:
+                tones.beep(2000,50)
+        args=yield
+        if args: buf.append(args)
+        
 def speakObjectProperties(obj,reason=controlTypes.REASON_QUERY,index=None,**allowedProperties):
 	if speechMode==speechMode_off:
 		return
