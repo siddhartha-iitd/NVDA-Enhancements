@@ -595,12 +595,25 @@ class ExcelCell(ExcelBase):
 					self.excelCellObject.addComment(d.Value)
 		gui.runScriptModalDialog(d, callback)
 
+	def script_reportTextOverflow(self,gesture):
+		log.io("\nOriginal Column Width: " + str(self.excelCellObject.ColumnWidth) + "\n")
+		cellAddress = ExcelBase.getCellAddress(self.excelCellObject)
+		columnName = cellAddress.rstrip('0123456789')
+		columnName = '"' + columnName + ':' + columnName + '"'
+		#self.excelCellObject.ActiveSheet.Columns("A:B").Select
+		self.excelCellObject.EntireColumn.Autofit
+		#self.excelCellObject.Selection.Autofit
+		#self.excelCellObject.EntireColumn.Select
+		#self.excelCellObject.Columns(self._rowAndColumnNumber[1]).Autofit
+		log.io("\nAutofit Column Width: " + str(self.excelCellObject.ColumnWidth) + "\n")
+		
 	__gestures = {
 		"kb:NVDA+shift+c": "setColumnHeader",
 		"kb:NVDA+shift+r": "setRowHeader",
 		"kb:shift+f2":"editComment",
 		"kb:alt+downArrow":"openDropdown",
 		"kb:NVDA+alt+c":"reportComment",
+		"kb:NVDA+alt+d":"reportTextOverflow",		
 	}
 
 class ExcelSelection(ExcelBase):
