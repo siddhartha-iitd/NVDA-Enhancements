@@ -469,6 +469,18 @@ class ExcelChart(excel.ExcelBase):
 		"kb:shift+tab",
 	}
 
+	def elementChanged( self , ElementID ,arg1,arg2):
+
+		if ElementID == xlSeries:
+			selectedChartElement = ExcelChartElementSeries( windowHandle= self.windowHandle , excelChartObject= self.excelChartObject  , elementID=ElementID  , arg1=arg1 , arg2=arg2 )
+			selectedChartElement.parent = self
+			eventHandler.queueEvent("gainFocus", selectedChartElement )
+
+		else:
+			selectedChartElement = ExcelChartElementBase( windowHandle= self.windowHandle , excelChartObject= self.excelChartObject  , elementID=ElementID  , arg1=arg1 , arg2=arg2 )
+			selectedChartElement.parent = self
+			eventHandler.queueEvent("gainFocus", selectedChartElement )
+
 class ExcelChartEventHandler(comtypes.COMObject):
 	_com_interfaces_=[ChartEvents,IDispatch]
 
@@ -477,15 +489,7 @@ class ExcelChartEventHandler(comtypes.COMObject):
 		super(ExcelChartEventHandler ,self).__init__()
 
 	def ChartEvents_Select(self, this, ElementID ,arg1,arg2):
-		if ElementID == xlSeries:
-			selectedChartElement = ExcelChartElementSeries( windowHandle=self.owner.windowHandle , excelChartObject=self.owner.excelChartObject  , elementID=ElementID  , arg1=arg1 , arg2=arg2 )
-			selectedChartElement.parent = self.owner 
-			eventHandler.queueEvent("gainFocus", selectedChartElement )
-
-		else:
-			selectedChartElement = ExcelChartElementBase( windowHandle=self.owner.windowHandle , excelChartObject=self.owner.excelChartObject  , elementID=ElementID  , arg1=arg1 , arg2=arg2 )
-			selectedChartElement.parent = self.owner 
-			eventHandler.queueEvent("gainFocus", selectedChartElement )
+		self.owner.elementChanged( ElementID ,arg1,arg2)
 
 class ExcelChartElementBase(Window):
 
