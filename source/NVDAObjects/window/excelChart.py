@@ -25,6 +25,8 @@ import comtypes.GUID
 import math
 from NVDAObjects import NVDAObject
 import string
+import weakref
+
 
 #ChartEvents definition
 class ChartEvents(IDispatch):
@@ -323,21 +325,12 @@ class ExcelChart(excel.ExcelBase):
 		self.windowHandle = windowHandle
 		self.excelWindowObject = excelWindowObject
 		self.excelChartObject = excelChartObject
-		#self.excelChartEventHandlerObject = ExcelChartEventHandler( self )
-		#self.selectedChartElement = ExcelChartElementBase(windowHandle=self.windowHandle,excelWindowObject=self.excelWindowObject,excelChartObject=self.excelChartObject)
-		#self.excelChartEventConnection = GetEvents( self.excelChartObject , self.excelChartEventHandlerObject , ChartEvents)
+		self.excelChartEventHandlerObject = ExcelChartEventHandler( self  )
+		self.excelChartEventConnection = GetEvents( self.excelChartObject , self.excelChartEventHandlerObject , ChartEvents)
 		log.debugWarning("ExcelChart init")
 		super(ExcelChart,self).__init__(windowHandle=windowHandle)
 		for gesture in self.__changeSelectionGestures:
 			self.bindGesture(gesture, "changeSelection")
-
-
-	def initExcelEvents(self):
-		self.excelChartEventHandlerObject = ExcelChartEventHandler( self )
-		self.excelChartEventConnection = GetEvents( self.excelChartObject , self.excelChartEventHandlerObject , ChartEvents)
-
-	def clearExcelEvents(self):
-		self.excelChartEventConnection = None
 
 	def _isEqual(self, other):
 		if not super(ExcelChart, self)._isEqual(other):
@@ -480,7 +473,7 @@ class ExcelChartEventHandler(comtypes.COMObject):
 	_com_interfaces_=[ChartEvents,IDispatch]
 
 	def __init__(self, owner ):
-		self.owner = owner
+		self.owner = weakref.proxy( owner )
 		super(ExcelChartEventHandler ,self).__init__()
 
 	def ChartEvents_Select(self, this, ElementID ,arg1,arg2):
