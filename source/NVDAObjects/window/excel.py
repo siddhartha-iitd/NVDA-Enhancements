@@ -58,6 +58,7 @@ class ExcelBase(Window):
 
 	@staticmethod
 	def excelWindowObjectFromWindow(windowHandle):
+		#log.io("\nInside ExcelBase->excelWindowObjectFromWindow\n",stack_info = True)
 		try:
 			pDispatch=oleacc.AccessibleObjectFromWindow(windowHandle,winUser.OBJID_NATIVEOM,interface=comtypes.automation.IDispatch)
 		except (COMError,WindowsError):
@@ -66,6 +67,7 @@ class ExcelBase(Window):
 
 	@staticmethod
 	def getCellAddress(cell, external=False,format=xlA1):
+		#log.io("\nInside ExcelBase->getCellAddress\n",stack_info = True)	
 		text=cell.Address(False, False, format, external)
 		textList=text.split(':')
 		if len(textList)==2:
@@ -74,6 +76,7 @@ class ExcelBase(Window):
 		return text
 
 	def _getDropdown(self):
+		#log.io("\nInside ExcelBase->_getDropdown\n",stack_info = True)		
 		w=winUser.getAncestor(self.windowHandle,winUser.GA_ROOT)
 		if not w:
 			log.debugWarning("Could not get ancestor window (GA_ROOT)")
@@ -93,6 +96,7 @@ class ExcelBase(Window):
 		return obj
 
 	def _getSelection(self):
+		#log.io("\nInside ExcelBase-> _getSelection\n",stack_info = True)		
 		selection=self.excelWindowObject.Selection
 		try:
 			isMerged=selection.mergeCells
@@ -596,16 +600,24 @@ class ExcelCell(ExcelBase):
 		gui.runScriptModalDialog(d, callback)
 
 	def script_reportTextOverflow(self,gesture):
-		log.io("\nOriginal Column Width: " + str(self.excelCellObject.ColumnWidth) + "\n")
-		cellAddress = ExcelBase.getCellAddress(self.excelCellObject)
-		columnName = cellAddress.rstrip('0123456789')
-		columnName = '"' + columnName + ':' + columnName + '"'
-		#self.excelCellObject.ActiveSheet.Columns("A:B").Select
-		self.excelCellObject.EntireColumn.Autofit
+		oldWidth = self.excelCellObject.ColumnWidth
+		#cellAddress = ExcelBase.getCellAddress(self.excelCellObject)
+		#columnName = cellAddress.rstrip('0123456789')
+		#columnName = '"' + columnName +  '"'
+		#self.excelCellObject.Columns(columnName).Autofit
+		#self.excelCellObject.Columns(columnName).EntireColumn.Autofit
+		#self.excelCellObject.WorkSheets(1).Activate
+		#self.excelCellObject.ActiveSheet.Columns.Autofit
+		#self.excelCellObject.Columns(self._rowAndColumnNumber[1]).Autofit()
+		#self.excelCellObject.EntireColumn.Autofit()
 		#self.excelCellObject.Selection.Autofit
 		#self.excelCellObject.EntireColumn.Select
-		#self.excelCellObject.Columns(self._rowAndColumnNumber[1]).Autofit
-		log.io("\nAutofit Column Width: " + str(self.excelCellObject.ColumnWidth) + "\n")
+		self.excelCellObject.Columns.Autofit()
+		fitWidth = self.excelCellObject.ColumnWidth
+		self.excelCellObject.ColumnWidth = oldWidth
+		if fitWidth > oldWidth:
+			pass
+			#Done!
 		
 	__gestures = {
 		"kb:NVDA+shift+c": "setColumnHeader",
@@ -613,9 +625,8 @@ class ExcelCell(ExcelBase):
 		"kb:shift+f2":"editComment",
 		"kb:alt+downArrow":"openDropdown",
 		"kb:NVDA+alt+c":"reportComment",
-		"kb:NVDA+alt+d":"reportTextOverflow",		
 	}
-
+	
 class ExcelSelection(ExcelBase):
 
 	role=controlTypes.ROLE_TABLECELL

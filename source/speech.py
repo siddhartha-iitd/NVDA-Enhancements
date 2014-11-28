@@ -277,6 +277,7 @@ def speakObjectProperties(obj,reason=controlTypes.REASON_QUERY,index=None,**allo
 	#Get the speech text for the properties we want to speak, and then speak it
 	text=getSpeechTextForProperties(reason,**newPropertyValues)
 	if text:
+		log.io("\nspeakObjectProperties -> text: " + text + "\n", stack_info=True)
 		speakText(text,index=index)
 
 def speakObject(obj,reason=controlTypes.REASON_QUERY,index=None):
