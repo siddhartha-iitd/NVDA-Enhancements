@@ -185,23 +185,35 @@ def _speakSpellingGen(text,locale,useCharacterDescriptions):
 	buf=[(text,locale,useCharacterDescriptions)]
 	for text,locale,useCharacterDescriptions in buf:
 		textLength=len(text)
-		for count,char in enumerate(text): 
-			uppercase=char.isupper()
+		count = 0
+		while count < textLength:
+			uppercase=text[count].isupper()
 			charDesc=None
+			char = text[count]
+			if (count+1 < textLength and unicodedata.category(unicode(text[count+1])) == 'Mn') and unicodedata.category(unicode(text[count])) == 'Lo' and (count+2 < textLength and unicodedata.category(unicode(text[count+2])) == 'Lo'):
+				charDesc = characterProcessing.getCharacterDescription(locale,text[count:count+3])
+				if charDesc:
+					char = text[count:count+3]
+					count += 2
 			if useCharacterDescriptions:
-				charDesc=characterProcessing.getCharacterDescription(locale,char.lower())
+				if charDesc is None:
+					charDesc=characterProcessing.getCharacterDescription(locale,char.lower())
+			else:
+				charDesc = None		
 			if charDesc:
 				#Consider changing to multiple synth speech calls
-				char=charDesc[0] if textLength>1 else u"\u3001".join(charDesc)
+ 				char=charDesc[0] if textLength>1 else u"\u3001".join(charDesc)
 			else:
 				char=characterProcessing.processSpeechSymbol(locale,char)
+			log.io("\n\n Line#240 char is\t" + '\n'.join([unicodedata.name(c) for c in char]) + "\n\n")
 			if uppercase and synthConfig["sayCapForCapitals"]:
 				# Translators: cap will be spoken before the given letter when it is capitalized.
 				char=_("cap %s")%char
 			if uppercase and synth.isSupported("pitch") and synthConfig["capPitchChange"]:
 				oldPitch=synthConfig["pitch"]
 				synth.pitch=max(0,min(oldPitch+synthConfig["capPitchChange"],100))
-			index=count+1
+			count = count + 1
+ 			index=count + 1
 			log.io("Speaking character %r"%char)
 			speechSequence=[LangChangeCommand(locale)] if config.conf['speech']['autoLanguageSwitching'] else []
 			if len(char) == 1 and synthConfig["useSpellingFunctionality"]:
