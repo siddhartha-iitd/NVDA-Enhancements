@@ -190,7 +190,10 @@ def _speakSpellingGen(text,locale,useCharacterDescriptions):
 			uppercase=text[count].isupper()
 			charDesc=None
 			char = text[count]
-			if (count+1 < textLength and unicodedata.category(unicode(text[count+1])) == 'Mn') and unicodedata.category(unicode(text[count])) == 'Lo' and (count+2 < textLength and unicodedata.category(unicode(text[count+2])) == 'Lo'):
+			if (count+1 < textLength and unicodedata.category(text[count+1]) == 'Mn') and unicodedata.category(text[count]) == 'Lo' and (count+2 < textLength and unicodedata.category(text[count+2]) == 'Lo'):
+			# Check that the bounds of text are not exceeded. 
+			# Also, if the next character is a Combining NonSpacing Character(category 'Mn'), the characters at i,i+1 and i+2 might form a Devanagari conjunct character ksha, tra or shra.
+			# If one of these conjunct characters is there in the text, the conjunct character will be processed not the individual characters.	
 				charDesc = characterProcessing.getCharacterDescription(locale,text[count:count+3])
 				if charDesc:
 					char = text[count:count+3]
