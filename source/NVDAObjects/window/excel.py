@@ -53,6 +53,7 @@ xlUnderlineStyleNone=-4142
 
 re_absRC=re.compile(r'^R(\d+)C(\d+)(?::R(\d+)C(\d+))?$')
 
+
 class ExcelBase(Window):
 	"""A base that all Excel NVDAObjects inherit from, which contains some useful methods."""
 
@@ -507,7 +508,10 @@ class ExcelCell(ExcelBase):
 		return thisAddr==otherAddr
 
 	def _get_cellCoordsText(self):
-		return self.getCellAddress(self.excelCellObject)
+		cellCoordsText = self.getCellAddress(self.excelCellObject)
+		log.io("\nCellCoordsText\t" + cellCoordsText + "\n", stack_info = True)
+		return cellCoordsText
+# 		return self.getCellAddress(self.excelCellObject)
 
 	def _get__rowAndColumnNumber(self):
 		rc=self.excelCellObject.address(True,True,xlRC,False)
