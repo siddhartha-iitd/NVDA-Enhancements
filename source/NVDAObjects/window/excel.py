@@ -508,10 +508,7 @@ class ExcelCell(ExcelBase):
 		return thisAddr==otherAddr
 
 	def _get_cellCoordsText(self):
-		cellCoordsText = self.getCellAddress(self.excelCellObject)
-		log.io("\nCellCoordsText\t" + cellCoordsText + "\n", stack_info = True)
-		return cellCoordsText
-# 		return self.getCellAddress(self.excelCellObject)
+ 		return self.getCellAddress(self.excelCellObject)
 
 	def _get__rowAndColumnNumber(self):
 		rc=self.excelCellObject.address(True,True,xlRC,False)
@@ -552,7 +549,63 @@ class ExcelCell(ExcelBase):
 			comment=None
 		if comment:
 			states.add(controlTypes.STATE_HASCOMMENT)
+			
+########################################################################################################			
+		if self._overlapInfo is not None:
+			states.add(controlTypes.STATE_OBSCURED)
 		return states
+
+	def _get__overlapInfo(self):
+		cellAddress = ExcelBase.getCellAddress(self.excelCellObject)
+ 	
+		oldWidth  = self.excelCellObject.Range(str(cellAddress)).Width
+		self.excelCellObject.Columns.Autofit()
+		fitWidth = self.excelCellObject.Range(str(cellAddress)).Width
+		self.excelCellObject.ColumnWidth = oldWidth
+ 		isAdjacentCellEmpty = True if self.excelCellObject.Offset(0,1).Value else False
+# 		left=self.ppObject.left
+# 		top=self.ppObject.top
+# 		right=left+self.ppObject.width
+# 		bottom=top+self.ppObject.height
+# 		name=self.ppObject.name
+		info={}
+		if isAdjacentCellEmpty:
+			info['overlapsRightBy']=fitWidth - oldWidth if fitWidth > oldWidth else 0
+		else:
+			info['obscuredFromRightBy']=fitWidth - oldWidth if fitWidth > oldWidth else 0
+		
+# 		cellHeight = self.excelCellObject.Range(str(cellAddress)).Height
+# 		self.excelCellObject.Rows.Autofit()	
+# 		fitHeight = self.excelCellObject.Range(str(cellAddress)).Height
+# 		self.excelCellObject.RowHeight = cellHeight
+# 		info['overlapsBottomBy']=fitHeight-oldHeight if fitHeight > oldHeight else 0
+ 
+		self._overlapInfo= info
+		return self._overlapInfo
+
+ 	def _getOverlapText(self):
+		textList=[]
+		overlapsRightBy=otherInfo['overlapsRightBy']
+		obscuredFromRightBy=otherInfo['obscuredFromRightBy']
+		total=True
+		if overlapsRightBy>0:
+			total=False
+			# Translators: A message when a shape is infront of another shape on a Powerpoint slide 
+			textList.append(_("extends right by {distance:.3g} points").format(distance=overlapsRightBy))
+		elif obscuredFromRightBy>0:
+			# Translators: A message when a shape is behind  another shape on a powerpoint slide
+			textList.append(_("obscured from right by {distance:.3g} points").format(distance=obscuredFromRightBy))
+
+		return ", ".join(textList)
+
+	def _get_locationText(self):
+		textList=[]
+		text=self._getOverlapText()
+		if text:
+			textList.append(text)
+		return ", ".join(textList)
+
+########################################################################################################
 
 	def _get_parent(self):
 		worksheet=self.excelCellObject.Worksheet
@@ -603,32 +656,41 @@ class ExcelCell(ExcelBase):
 					self.excelCellObject.addComment(d.Value)
 		gui.runScriptModalDialog(d, callback)
 
-	def script_reportTextOverflow(self,gesture):
-		oldWidth = self.excelCellObject.ColumnWidth
-		#cellAddress = ExcelBase.getCellAddress(self.excelCellObject)
-		#columnName = cellAddress.rstrip('0123456789')
-		#columnName = '"' + columnName +  '"'
-		#self.excelCellObject.Columns(columnName).Autofit
-		#self.excelCellObject.Columns(columnName).EntireColumn.Autofit
-		#self.excelCellObject.WorkSheets(1).Activate
-		#self.excelCellObject.ActiveSheet.Columns.Autofit
-		#self.excelCellObject.Columns(self._rowAndColumnNumber[1]).Autofit()
-		#self.excelCellObject.EntireColumn.Autofit()
-		#self.excelCellObject.Selection.Autofit
-		#self.excelCellObject.EntireColumn.Select
-		self.excelCellObject.Columns.Autofit()
-		fitWidth = self.excelCellObject.ColumnWidth
-		self.excelCellObject.ColumnWidth = oldWidth
-		if fitWidth > oldWidth:
-			pass
-			#Done!
+# 	def script_reportTextOverflow(self,gesture):
+# 		oldWidth = self.excelCellObject.ColumnWidth
+# 		cellAddress = ExcelBase.getCellAddress(self.excelCellObject)
+# 		cellWidth = self.excelCellObject.Range(str(cellAddress)).Width
+# 		log.io("\n\nCellAddress\t" + cellAddress + "\n")
+# 		log.io("\n\nCellWidth\t" + str(cellWidth) + "\n")
+# 		#columnName = cellAddress.rstrip('0123456789')
+# 		#columnName = '"' + columnName +  '"'
+# 		#self.excelCellObject.Columns(columnName).Autofit
+# 		#self.excelCellObject.Columns(columnName).EntireColumn.Autofit
+# 		#self.excelCellObject.WorkSheets(1).Activate
+# 		#self.excelCellObject.ActiveSheet.Columns.Autofit
+# 		#self.excelCellObject.Columns(self._rowAndColumnNumber[1]).Autofit()
+# 		#self.excelCellObject.EntireColumn.Autofit()
+# 		#self.excelCellObject.Selection.Autofit
+# 		#self.excelCellObject.EntireColumn.Select
+# 		self.excelCellObject.Columns.Autofit()
+# 		fitWidth = self.excelCellObject.ColumnWidth
+# 		self.excelCellObject.ColumnWidth = oldWidth
+# 		isAdjacentCellEmpty = False if self.excelCellObject.Offset(0,1).Value else True
+# 		log.io("\nisAdjacentCellEmpty\t" + str(isAdjacentCellEmpty) + "\n")
+# 		
+# 		
+# 		if fitWidth > oldWidth:
+# 			pass
+# 			#Done!
 		
 	__gestures = {
 		"kb:NVDA+shift+c": "setColumnHeader",
 		"kb:NVDA+shift+r": "setRowHeader",
 		"kb:shift+f2":"editComment",
 		"kb:alt+downArrow":"openDropdown",
-		"kb:NVDA+alt+c":"reportComment",
+ 		"kb:NVDA+alt+c":"reportComment",
+# 		"kb:NVDA+alt+c":"reportTextOverflow",
+		
 	}
 	
 class ExcelSelection(ExcelBase):
