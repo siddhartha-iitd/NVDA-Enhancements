@@ -358,13 +358,14 @@ class ExcelChart(excel.ExcelBase):
 		return title
 	
 	def _get_role(self):
-		return controlTypes.ROLE_UNKNOWN
+		return controlTypes.ROLE_CHART 
 	
 	def script_switchToCell(self,gesture):
 		cell=self.excelWindowObject.ActiveCell
 		cell.Activate()
 		cellObj=self._getSelection()
 		eventHandler.queueEvent("gainFocus",cellObj)
+	script_switchToCell.canPropagate=True
 
 	def event_gainFocus(self):
 		if self.excelChartObject.HasTitle:
@@ -382,6 +383,7 @@ class ExcelChart(excel.ExcelBase):
 
 	def script_reportTitle(self,gesture):
 		ui.message (self._get_name())
+	script_reportTitle.canPropagate=True
 
 	def reportAxisTitle(self, axisType):
 		axis=None
@@ -396,12 +398,15 @@ class ExcelChart(excel.ExcelBase):
 
 	def script_reportCategoryAxis(self, gesture):
 		self.reportAxisTitle(xlCategory)
+	script_reportCategoryAxis.canPropagate=True
 
 	def script_reportValueAxis(self, gesture):
 		self.reportAxisTitle(xlValue)
+	script_reportValueAxis.canPropagate=True
 
 	def script_reportSeriesAxis(self, gesture):
 		self.reportAxisTitle(xlSeriesAxis)
+	script_reportSeriesAxis.canPropagate=True
 
 	def reportSeriesSummary(self ):
 		count = self.excelChartObject.SeriesCollection().count
@@ -420,17 +425,7 @@ class ExcelChart(excel.ExcelBase):
 
 	def script_reportSeriesSummary(self, gesture):
 		self.reportSeriesSummary()
-
-	def script_reportSeriesFormula(self, gesture):
-		count = self.excelChartObject.SeriesCollection().count
-		if count>0:
-			seriesValueString="%d series in this chart" %(count)
-			for i in xrange(1, count+1):
-				seriesValueString += ", Series %d %s" %(i, self.excelChartObject.SeriesCollection(i).FormulaR1C1)
-			text=_(seriesValueString)	
-		else:
-			text=_("No Series defined.")
-		log.debugWarning(text)
+	script_reportSeriesSummary.canPropagate=True
 
 	__gestures = {
 		"kb:escape": "switchToCell",
@@ -439,7 +434,6 @@ class ExcelChart(excel.ExcelBase):
 		"kb:NVDA+shift+2" : "reportValueAxis",
 		"kb:NVDA+shift+3" : "reportSeriesAxis",
 		"kb:NVDA+shift+4" : "reportSeriesSummary",
-		"kb:NVDA+shift+5" : "reportSeriesFormula",
 	}
 
 	def script_changeSelection(self,gesture):
@@ -461,6 +455,7 @@ class ExcelChart(excel.ExcelBase):
 			curTime=time.time()
 		if newSelection:
 			eventHandler.executeEvent('gainFocus',newSelection)
+	script_changeSelection.canPropagate=True
 			
 	__changeSelectionGestures = {
 		"kb:control+pageUp",
@@ -470,15 +465,34 @@ class ExcelChart(excel.ExcelBase):
 	}
 
 	def elementChanged( self , ElementID ,arg1,arg2):
-
-		if ElementID == xlSeries:
+		selectedChartElement = None
+		if ElementID == xlAxis:
+			selectedChartElement = ExcelChartElementAxis( windowHandle= self.windowHandle , excelChartObject= self.excelChartObject  , elementID=ElementID  , arg1=arg1 , arg2=arg2 )
+		elif ElementID == xlAxisTitle:  
+			selectedChartElement = ExcelChartElementAxisTitle( windowHandle= self.windowHandle , excelChartObject= self.excelChartObject  , elementID=ElementID  , arg1=arg1 , arg2=arg2 )
+		elif ElementID == xlSeries:
 			selectedChartElement = ExcelChartElementSeries( windowHandle= self.windowHandle , excelChartObject= self.excelChartObject  , elementID=ElementID  , arg1=arg1 , arg2=arg2 )
-			selectedChartElement.parent = self
-			eventHandler.queueEvent("gainFocus", selectedChartElement )
-
+		elif ElementID == xlTrendline:
+			selectedChartElement = ExcelChartElementTrendline( windowHandle= self.windowHandle , excelChartObject= self.excelChartObject  , elementID=ElementID  , arg1=arg1 , arg2=arg2 )
+		elif ElementID == xlChartTitle:
+			selectedChartElement = ExcelChartElementChartTitle( windowHandle= self.windowHandle , excelChartObject= self.excelChartObject  , elementID=ElementID  , arg1=arg1 , arg2=arg2 )
+		elif ElementID == xlChartArea:
+			selectedChartElement = ExcelChartElementChartArea( windowHandle= self.windowHandle , excelChartObject= self.excelChartObject  , elementID=ElementID  , arg1=arg1 , arg2=arg2 )
+		elif ElementID == xlPlotArea:
+			selectedChartElement = ExcelChartElementPlotArea( windowHandle= self.windowHandle , excelChartObject= self.excelChartObject  , elementID=ElementID  , arg1=arg1 , arg2=arg2 )
+		elif ElementID == xlLegend:
+			selectedChartElement = ExcelChartElementLegend( windowHandle= self.windowHandle , excelChartObject= self.excelChartObject  , elementID=ElementID  , arg1=arg1 , arg2=arg2 )
+		elif ElementID == xlLegendEntry:
+			selectedChartElement = ExcelChartElementLegendEntry( windowHandle= self.windowHandle , excelChartObject= self.excelChartObject  , elementID=ElementID  , arg1=arg1 , arg2=arg2 )
+		elif ElementID == xlLegendKey:
+			selectedChartElement = ExcelChartElementLegendKey( windowHandle= self.windowHandle , excelChartObject= self.excelChartObject  , elementID=ElementID  , arg1=arg1 , arg2=arg2 )
 		else:
 			selectedChartElement = ExcelChartElementBase( windowHandle= self.windowHandle , excelChartObject= self.excelChartObject  , elementID=ElementID  , arg1=arg1 , arg2=arg2 )
+
+		if selectedChartElement :
 			selectedChartElement.parent = self
+			selectedChartElement.previous = None
+			selectedChartElement.next = None
 			eventHandler.queueEvent("gainFocus", selectedChartElement )
 
 class ExcelChartEventHandler(comtypes.COMObject):
@@ -508,57 +522,23 @@ class ExcelChartElementBase(Window):
 			text=_("item")
 		return text
 
-	#def event_stateChange(self):
-		#self.reportFocus()
-
 	def _get_role(self):
 			return controlTypes.ROLE_UNKNOWN
 
 	def _get_name(self):
-		return self._Select(self.elementID , self.arg1 , self.arg2)
+		return self._getChartElementText(self.elementID , self.arg1 , self.arg2)
 
 	def script_reportCurrentChartElementWithExtraInfo(self,gesture):
-		ui.message( self._Select(self.elementID , self.arg1 , self.arg2 , True ) )
+		ui.message( self._getChartElementText(self.elementID , self.arg1 , self.arg2 , True ) )
 
 	def script_reportCurrentChartElementColor(self,gesture):
 		if self.elementID == xlSeries:
 			if self.arg2 == -1:
 				ui.message ( _( "Series color: {} ").format(colors.RGB.fromCOLORREF(int( self.excelChartObject.SeriesCollection( self.arg1 ).Interior.Color ) )  ) )
+				#ui.message ( _( "Series color: {} ").format( self.excelChartObject.SeriesCollection( self.arg1 ).Interior.Color   ) )
 
-	def _Select(self, ElementID ,arg1,arg2 , reportExtraInfo=False ):
-		
-		if ElementID == xlAxis:
-			if arg1 == xlPrimary: 
-				axisGroup = _("Primary")
-			elif arg1 == xlSecondary :
-				axisGroup = _("Secondary")
-
-			if arg2 == xlCategory: 
-				axisType= _("Category")
-			elif arg2 == xlValue:
-				axisType= _("Value")
-			elif arg2 == xlSeriesAxis: 
-				axisType= _("Series")
-
-			axisTitle=""
-			if self.excelChartObject.HasAxis( arg2 ) and self.excelChartObject.Axes( arg2 ).HasTitle:
-				axisTitle += _("Chart Axis, type equals {}, group equals {}, Title equals {}").format( axisType , axisGroup , self.excelChartObject.Axes( arg2 , arg1 ).AxisTitle.Text ) 
-			elif self.excelChartObject.HasAxis( arg2 ) and not self.excelChartObject.Axes( arg2 ).HasTitle:
-				axisTitle += _("Chart Axis, type equals {}, group equals {}, Title equals {}").format( axisType , axisGroup , _("none")  ) 
-
-			return  axisTitle 
-
-		elif ElementID == xlAxisTitle:  
-
-			axisTitle=""
-			if self.excelChartObject.HasAxis( arg2 ) and self.excelChartObject.Axes( arg2 ).HasTitle:
-				axisTitle += _("Chart Axis Title equals {} ").format( self.excelChartObject.Axes( arg2 , arg1 ).AxisTitle.Text  ) 
-			elif self.excelChartObject.HasAxis( arg2 ) and not self.excelChartObject.Axes( arg2 ).HasTitle:
-				axisTitle += _("Chart Axis Title equals {} ").format( _("none") ) 
-
-			return  axisTitle 
-
-		elif ElementID == xlDisplayUnitLabel:  
+	def _getChartElementText(self, ElementID ,arg1,arg2 , reportExtraInfo=False ):
+		if ElementID == xlDisplayUnitLabel:  
 			return  _( "Display Unit Label") 
 
 		elif ElementID == xlMajorGridlines:  
@@ -591,17 +571,6 @@ class ExcelChartElementBase(Window):
 		elif ElementID == xlUpBars:
 			return _( "Up Bars" )
 
-		elif ElementID == xlChartArea:
-			if reportExtraInfo:
-				return _( "Chart area height equals {}, width equals {}, top equals {}, left equals {}").format ( self.excelChartObject.ChartArea.Height , self.excelChartObject.ChartArea.Width , self.excelChartObject.ChartArea.Top , self.excelChartObject.ChartArea.Left)
-			else:
-				return _( "Chart area ")
-		elif ElementID == xlChartTitle:
-			if self.excelChartObject.HasTitle:
-				return _( "Chart Title equals {}").format ( self.excelChartObject.ChartTitle.Text )
-			else:
-				return _( "Untitled chart" )
-
 		elif ElementID == xlCorners:
 			return _( "Corners" )
 
@@ -611,21 +580,8 @@ class ExcelChartElementBase(Window):
 		elif ElementID == xlFloor:
 			return  _( "Floor" )
 
-		elif ElementID == xlLegend:
-			if self.excelChartObject.HasLegend:
-				return _( "Legend" ) 
-			else:
-				return _( "No legend" )
-
 		elif ElementID == xlNothing:
 			return _( "xlNothing" )
-
-		elif ElementID == xlPlotArea:
-			if reportExtraInfo:
-			# useing {:.0f} to remove fractions
-				return _( "Plot Area inside height equals {:.0f}, inside width equals {:.0f}, inside top equals {:.0f}, inside left equals {:.0f}").format ( self.excelChartObject.PlotArea.InsideHeight , self.excelChartObject.PlotArea.InsideWidth , self.excelChartObject.PlotArea.InsideTop , self.excelChartObject.PlotArea.InsideLeft )
-			else:
-				return _( "Plot Area " )
 
 		elif ElementID == xlWalls:
 			return _( "Walls" )
@@ -635,19 +591,6 @@ class ExcelChartElementBase(Window):
 
 		elif ElementID == xlErrorBars:
 			return _( "Error Bars" )
-
-		elif ElementID == xlLegendEntry:
-			return _( "Legend entry for Series {}, {} of {}").format( self.excelChartObject.SeriesCollection(arg1).Name , arg1 , self.excelChartObject.SeriesCollection().Count ) 
-
-		elif ElementID == xlLegendKey:
-			return _( "Legend key for Series {} {} of {}").format( self.excelChartObject.SeriesCollection(arg1).Name , arg1 , self.excelChartObject.SeriesCollection().Count )
-
-		elif ElementID == xlTrendline:
-			if self.excelChartObject.SeriesCollection(arg1).Trendlines(arg2).DisplayEquation    or self.excelChartObject.SeriesCollection(arg1).Trendlines(arg2).DisplayRSquared:
-				trendlineText = unicode( self.excelChartObject.SeriesCollection(arg1).Trendlines(arg2).DataLabel.Text ).encode("utf-8").replace("\xc2\xb2" , _( " square " ) )
-				return  _( " trendline {} ").format( trendlineText ) 
-			else:
-				return _( "Trendline" ) 
 
 		elif ElementID == xlXErrorBars:
 			return _( "X Error Bars" )
@@ -660,41 +603,7 @@ class ExcelChartElementBase(Window):
 
 	#end def _Select
 
-	#redirects for implementations in parent excelChart object
-	def script_changeSelection(self,gesture):
-		self.parent.script_changeSelection(gesture)
-
-	def script_switchToCell(self,gesture):
-		self.parent.script_switchToCell(gesture)
-
-	def script_reportTitle(self,gesture):
-		self.parent.script_reportTitle(gesture)
-
-	def script_reportCategoryAxis(self,gesture):
-		self.parent.script_reportCategoryAxis(gesture)
-
-	def script_reportValueAxis(self,gesture):
-		self.parent.script_reportValueAxis(gesture)
-
-	def script_reportSeriesAxis(self,gesture):
-		self.parent.script_reportSeriesAxis(gesture)
-
-	def script_reportSeriesSummary(self,gesture):
-		self.parent.script_reportSeriesSummary(gesture)
-
-	def script_reportSeriesFormula(self,gesture):
-		self.parent.script_reportSeriesFormula(gesture)
-
 	__gestures = {
-		"kb:tab":"changeSelection",
-		"kb:shift+tab":"changeSelection",
-		"kb:escape": "switchToCell",
-		"kb:NVDA+t" : "reportTitle",
-		"kb:NVDA+shift+1" : "reportCategoryAxis",
-		"kb:NVDA+shift+2" : "reportValueAxis",
-		"kb:NVDA+shift+3" : "reportSeriesAxis",
-		"kb:NVDA+shift+4" : "reportSeriesSummary",
-		"kb:NVDA+shift+5" : "reportSeriesFormula",
 		"kb:NVDA+d" : "reportCurrentChartElementWithExtraInfo",
 		"kb:NVDA+f" : "reportCurrentChartElementColor",
 	}
@@ -707,14 +616,9 @@ class ExcelChartElementBase(Window):
 class ExcelChartElementSeries(ExcelChartElementBase):
 
 	def __init__(self, windowHandle=None , excelChartObject=None   , elementID=None  , arg1=None , arg2=None ):
-		self.excelChartObject = excelChartObject
-		self.elementID = elementID 
-		self.arg1 = arg1
-		self.arg2 = arg2
 		super(ExcelChartElementSeries,self).__init__( windowHandle=windowHandle , excelChartObject=excelChartObject , elementID=elementID , arg1=arg1 , arg2=arg2 )
 
-
-	def _Select(self, ElementID ,arg1,arg2 , reportExtraInfo=False ):
+	def _getChartElementText(self, ElementID ,arg1,arg2 , reportExtraInfo=False ):
 		if ElementID == xlSeries:
 			if arg2 == -1:
 				return _( "{} Series {} of {}").format( self.excelChartObject.SeriesCollection(arg1).Name , arg1 , self.excelChartObject.SeriesCollection().Count )
@@ -753,5 +657,127 @@ class ExcelChartElementSeries(ExcelChartElementBase):
 					output += _( " {} {} of {}").format( self.GetChartSegment() ,  arg2 , len( self.excelChartObject.SeriesCollection(arg1).Values ) )
 
 				return  output 
+
+class ExcelChartElementAxis(ExcelChartElementBase):
+
+	def __init__(self, windowHandle=None , excelChartObject=None   , elementID=None  , arg1=None , arg2=None ):
+		super( ExcelChartElementAxis , self ).__init__( windowHandle=windowHandle , excelChartObject=excelChartObject , elementID=elementID , arg1=arg1 , arg2=arg2 )
+
+	def _getChartElementText(self, ElementID ,arg1,arg2 , reportExtraInfo=False ):
+		if ElementID == xlAxis:
+			if arg1 == xlPrimary: 
+				axisGroup = _("Primary")
+			elif arg1 == xlSecondary :
+				axisGroup = _("Secondary")
+
+			if arg2 == xlCategory: 
+				axisType= _("Category")
+			elif arg2 == xlValue:
+				axisType= _("Value")
+			elif arg2 == xlSeriesAxis: 
+				axisType= _("Series")
+
+			axisDescription =""
+			if self.excelChartObject.HasAxis( arg2 ) and self.excelChartObject.Axes( arg2 ).HasTitle:
+				axisDescription += _("Chart Axis, type equals {}, group equals {}, Title equals {}").format( axisType , axisGroup , self.excelChartObject.Axes( arg2 , arg1 ).AxisTitle.Text ) 
+			elif self.excelChartObject.HasAxis( arg2 ) and not self.excelChartObject.Axes( arg2 ).HasTitle:
+				axisDescription += _("Chart Axis, type equals {}, group equals {}, Title equals {}").format( axisType , axisGroup , _("none")  ) 
+
+			return  axisDescription 
+
+class ExcelChartElementAxisTitle(ExcelChartElementBase):
+
+	def __init__(self, windowHandle=None , excelChartObject=None   , elementID=None  , arg1=None , arg2=None ):
+		super( ExcelChartElementAxisTitle , self ).__init__( windowHandle=windowHandle , excelChartObject=excelChartObject , elementID=elementID , arg1=arg1 , arg2=arg2 )
+
+	def _getChartElementText(self, ElementID ,arg1,arg2 , reportExtraInfo=False ):
+		if ElementID == xlAxisTitle:  
+			axisTitle=""
+			if self.excelChartObject.HasAxis( arg2 ) and self.excelChartObject.Axes( arg2 ).HasTitle:
+				axisTitle += _("Chart Axis Title equals {} ").format( self.excelChartObject.Axes( arg2 , arg1 ).AxisTitle.Text  ) 
+			elif self.excelChartObject.HasAxis( arg2 ) and not self.excelChartObject.Axes( arg2 ).HasTitle:
+				axisTitle += _("Chart Axis Title equals {} ").format( _("none") ) 
+
+			return  axisTitle 
+
+class ExcelChartElementTrendline(ExcelChartElementBase):
+
+	def __init__(self, windowHandle=None , excelChartObject=None   , elementID=None  , arg1=None , arg2=None ):
+		super( ExcelChartElementTrendline , self ).__init__( windowHandle=windowHandle , excelChartObject=excelChartObject , elementID=elementID , arg1=arg1 , arg2=arg2 )
+
+	def _getChartElementText(self, ElementID ,arg1,arg2 , reportExtraInfo=False ):
+		if ElementID == xlTrendline:
+			if self.excelChartObject.SeriesCollection(arg1).Trendlines(arg2).DisplayEquation    or self.excelChartObject.SeriesCollection(arg1).Trendlines(arg2).DisplayRSquared:
+				trendlineText = unicode( self.excelChartObject.SeriesCollection(arg1).Trendlines(arg2).DataLabel.Text ).encode("utf-8").replace("\xc2\xb2" , _( " square " ) )
+				return  _( " trendline {} ").format( trendlineText ) 
+			else:
+				return _( "Trendline" ) 
+
+class ExcelChartElementChartTitle(ExcelChartElementBase):
+
+	def __init__(self, windowHandle=None , excelChartObject=None   , elementID=None  , arg1=None , arg2=None ):
+		super( ExcelChartElementChartTitle , self ).__init__( windowHandle=windowHandle , excelChartObject=excelChartObject , elementID=elementID , arg1=arg1 , arg2=arg2 )
+
+	def _getChartElementText(self, ElementID ,arg1,arg2 , reportExtraInfo=False ):
+		if ElementID == xlChartTitle:
+			if self.excelChartObject.HasTitle:
+				return _( "Chart Title equals {}").format ( self.excelChartObject.ChartTitle.Text )
+			else:
+				return _( "Untitled chart" )
+
+class ExcelChartElementChartArea(ExcelChartElementBase):
+
+	def __init__(self, windowHandle=None , excelChartObject=None   , elementID=None  , arg1=None , arg2=None ):
+		super( ExcelChartElementChartArea , self ).__init__( windowHandle=windowHandle , excelChartObject=excelChartObject , elementID=elementID , arg1=arg1 , arg2=arg2 )
+
+	def _getChartElementText(self, ElementID ,arg1,arg2 , reportExtraInfo=False ):
+		if ElementID == xlChartArea:
+			if reportExtraInfo:
+				return _( "Chart area height equals {}, width equals {}, top equals {}, left equals {}").format ( self.excelChartObject.ChartArea.Height , self.excelChartObject.ChartArea.Width , self.excelChartObject.ChartArea.Top , self.excelChartObject.ChartArea.Left)
+			else:
+				return _( "Chart area ")
+
+class ExcelChartElementPlotArea(ExcelChartElementBase):
+
+	def __init__(self, windowHandle=None , excelChartObject=None   , elementID=None  , arg1=None , arg2=None ):
+		super( ExcelChartElementPlotArea , self ).__init__( windowHandle=windowHandle , excelChartObject=excelChartObject , elementID=elementID , arg1=arg1 , arg2=arg2 )
+
+	def _getChartElementText(self, ElementID ,arg1,arg2 , reportExtraInfo=False ):
+		if ElementID == xlPlotArea:
+			if reportExtraInfo:
+			# useing {:.0f} to remove fractions
+				return _( "Plot Area inside height equals {:.0f}, inside width equals {:.0f}, inside top equals {:.0f}, inside left equals {:.0f}").format ( self.excelChartObject.PlotArea.InsideHeight , self.excelChartObject.PlotArea.InsideWidth , self.excelChartObject.PlotArea.InsideTop , self.excelChartObject.PlotArea.InsideLeft )
+			else:
+				return _( "Plot Area " )
+
+class ExcelChartElementLegend(ExcelChartElementBase):
+
+	def __init__(self, windowHandle=None , excelChartObject=None   , elementID=None  , arg1=None , arg2=None ):
+		super( ExcelChartElementLegend , self ).__init__( windowHandle=windowHandle , excelChartObject=excelChartObject , elementID=elementID , arg1=arg1 , arg2=arg2 )
+
+	def _getChartElementText(self, ElementID ,arg1,arg2 , reportExtraInfo=False ):
+		if ElementID == xlLegend:
+			if self.excelChartObject.HasLegend:
+				return _( "Legend" ) 
+			else:
+				return _( "No legend" )
+
+class ExcelChartElementLegendEntry(ExcelChartElementBase):
+
+	def __init__(self, windowHandle=None , excelChartObject=None   , elementID=None  , arg1=None , arg2=None ):
+		super( ExcelChartElementLegendEntry , self ).__init__( windowHandle=windowHandle , excelChartObject=excelChartObject , elementID=elementID , arg1=arg1 , arg2=arg2 )
+
+	def _getChartElementText(self, ElementID ,arg1,arg2 , reportExtraInfo=False ):
+		if ElementID == xlLegendEntry:
+			return _( "Legend entry for Series {}, {} of {}").format( self.excelChartObject.SeriesCollection(arg1).Name , arg1 , self.excelChartObject.SeriesCollection().Count ) 
+
+class ExcelChartElementLegendKey(ExcelChartElementBase):
+
+	def __init__(self, windowHandle=None , excelChartObject=None   , elementID=None  , arg1=None , arg2=None ):
+		super( ExcelChartElementLegendKey , self ).__init__( windowHandle=windowHandle , excelChartObject=excelChartObject , elementID=elementID , arg1=arg1 , arg2=arg2 )
+
+	def _getChartElementText(self, ElementID ,arg1,arg2 , reportExtraInfo=False ):
+		if ElementID == xlLegendKey:
+			return _( "Legend key for Series {} {} of {}").format( self.excelChartObject.SeriesCollection(arg1).Name , arg1 , self.excelChartObject.SeriesCollection().Count )
 
 
