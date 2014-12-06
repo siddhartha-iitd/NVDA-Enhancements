@@ -619,8 +619,7 @@ class ExcelChartElementBase(Window):
 	def script_reportCurrentChartElementColor(self,gesture):
 		if self.elementID == xlSeries:
 			if self.arg2 == -1:
-				ui.message ( _( "Series color: {} ").format(colors.RGB.fromCOLORREF(int( self.excelChartObject.SeriesCollection( self.arg1 ).Interior.Color ) )  ) )
-				#ui.message ( _( "Series color: {} ").format( self.excelChartObject.SeriesCollection( self.arg1 ).Interior.Color   ) )
+				ui.message ( _( "Series color: {} ").format(colors.RGB.fromCOLORREF(int( self.excelChartObject.SeriesCollection( self.arg1 ).Interior.Color ) ).name  ) )
 
 	def _getChartElementText(self, ElementID ,arg1,arg2 , reportExtraInfo=False ):
 		if ElementID == xlDisplayUnitLabel:  
