@@ -200,7 +200,7 @@ def _speakSpellingGen(text,locale,useCharacterDescriptions):
 					 i = i - 1 
 			count = 0
 			for ch in charList:
-				uppercase=c.isupper()
+				uppercase=ch.isupper()
 				if useCharacterDescriptions:
 					charDesc=characterProcessing.getCharacterDescription(locale,ch.lower())
 				if charDesc:
