@@ -178,6 +178,23 @@ def speakSpelling(text,locale=None,useCharacterDescriptions=False):
 		except StopIteration:
 			return
 		queueHandler.registerGeneratorObject(_speakSpellingGenerator)
+		
+def getCharacterListFromText(text,locale):
+	listOfWords = text.split()
+	#For each word in a locale a list of characters, charList, is prepared based on their description's presence in characterDescriptions.dic file of that locale.
+	charList = []
+	for word in listOfWords:
+		charDesc=None
+		i = len(word)
+		while i:
+			if characterProcessing.getCharacterDescription(locale,word[:i]) or i == 1:
+				charList.append(word[:i])
+				word = word[i:]
+				i = len(word)
+			else:
+				i = i - 1 
+	return charList
+			
 
 def _speakSpellingGen(text,locale,useCharacterDescriptions):
 	synth=getSynth()
@@ -185,53 +202,42 @@ def _speakSpellingGen(text,locale,useCharacterDescriptions):
 	buf=[(text,locale,useCharacterDescriptions)]
 	for text,locale,useCharacterDescriptions in buf:
 		textLength=len(text)
-		listOfWords = text.split()
-		#For each word in a locale a list of characters, charList, is prepared based on their presence in characterDescriptions.dic file of that locale.
-		for word in listOfWords: 
-			charDesc=None
-			i = len(word)
-			charList = []
-			while i:
-				if characterProcessing.getCharacterDescription(locale,word[:i]) or i == 1:
-					charList.append(word[:i])
-					word = word[i:]
-					i = len(word)
-				else:
-					 i = i - 1 
-			count = 0
-			for ch in charList:
-				uppercase=ch.isupper()
-				if useCharacterDescriptions:
-					charDesc=characterProcessing.getCharacterDescription(locale,ch.lower())
-				if charDesc:
-					#Consider changing to multiple synth speech calls
-					char=charDesc[0] if textLength>1 else u"\u3001".join(charDesc)
-				else:
-					char=characterProcessing.processSpeechSymbol(locale,ch)
-				if uppercase and synthConfig["sayCapForCapitals"]:
-					# Translators: cap will be spoken before the given letter when it is capitalized.
-					char=_("cap %s")%char
-				if uppercase and synth.isSupported("pitch") and synthConfig["capPitchChange"]:
-					oldPitch=synthConfig["pitch"]
-					synth.pitch=max(0,min(oldPitch+synthConfig["capPitchChange"],100))
-				count = len(ch)
-				index=count+1
-				log.io("Speaking character %r"%char)
-				speechSequence=[LangChangeCommand(locale)] if config.conf['speech']['autoLanguageSwitching'] else []
-				if len(char) == 1 and synthConfig["useSpellingFunctionality"]:
-					speechSequence.append(CharacterModeCommand(True))
-				if index is not None:
-					speechSequence.append(IndexCommand(index))
-				speechSequence.append(char)
-				synth.speak(speechSequence)
-				if uppercase and synth.isSupported("pitch") and synthConfig["capPitchChange"]:
-					synth.pitch=oldPitch
-				while textLength>1 and (isPaused or getLastSpeechIndex()!=index):
-					for x in xrange(2):
-						args=yield
-						if args: buf.append(args)
-				if uppercase and  synthConfig["beepForCapitals"]:
-					tones.beep(2000,50)
+		charDesc = None
+		count = 0
+		charList = getCharacterListFromText(text,locale)
+		for ch in charList:
+			uppercase=ch.isupper()
+			if useCharacterDescriptions:
+				charDesc=characterProcessing.getCharacterDescription(locale,ch.lower())
+			if charDesc:
+				#Consider changing to multiple synth speech calls
+				char=charDesc[0] if textLength>1 else u"\u3001".join(charDesc)
+			else:
+				char=characterProcessing.processSpeechSymbol(locale,ch)
+			if uppercase and synthConfig["sayCapForCapitals"]:
+				# Translators: cap will be spoken before the given letter when it is capitalized.
+				char=_("cap %s")%char
+			if uppercase and synth.isSupported("pitch") and synthConfig["capPitchChange"]:
+				oldPitch=synthConfig["pitch"]
+				synth.pitch=max(0,min(oldPitch+synthConfig["capPitchChange"],100))
+			count = len(ch)
+			index=count+1
+			log.io("Speaking character %r"%char)
+			speechSequence=[LangChangeCommand(locale)] if config.conf['speech']['autoLanguageSwitching'] else []
+			if len(char) == 1 and synthConfig["useSpellingFunctionality"]:
+				speechSequence.append(CharacterModeCommand(True))
+			if index is not None:
+				speechSequence.append(IndexCommand(index))
+			speechSequence.append(char)
+			synth.speak(speechSequence)
+			if uppercase and synth.isSupported("pitch") and synthConfig["capPitchChange"]:
+				synth.pitch=oldPitch
+			while textLength>1 and (isPaused or getLastSpeechIndex()!=index):
+				for x in xrange(2):
+					args=yield
+					if args: buf.append(args)
+			if uppercase and  synthConfig["beepForCapitals"]:
+				tones.beep(2000,50)
 		args=yield
 		if args: buf.append(args)
 
