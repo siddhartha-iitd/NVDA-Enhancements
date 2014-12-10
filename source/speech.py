@@ -180,19 +180,18 @@ def speakSpelling(text,locale=None,useCharacterDescriptions=False):
 		queueHandler.registerGeneratorObject(_speakSpellingGenerator)
 		
 def getCharacterListFromText(text,locale):
-	listOfWords = text.split()
-	#For each word in a locale a list of characters, charList, is prepared based on their description's presence in characterDescriptions.dic file of that locale.
+#This method prepares a list of characters, by checking the presence of character descriptions in characterDescriptions.dic of that locale for all possible sequence of characters in the text.
+#This is done to take care of conjunct characters present in several languages.
 	charList = []
-	for word in listOfWords:
-		charDesc=None
-		i = len(word)
-		while i:
-			if characterProcessing.getCharacterDescription(locale,word[:i]) or i == 1:
-				charList.append(word[:i])
-				word = word[i:]
-				i = len(word)
-			else:
-				i = i - 1 
+	charDesc=None
+	i = len(text)
+	while i:
+		if characterProcessing.getCharacterDescription(locale,text[:i]) or i == 1:
+			charList.append(text[:i])
+			text = text[i:]
+			i = len(text)
+		else:
+			i = i - 1 
 	return charList
 			
 
