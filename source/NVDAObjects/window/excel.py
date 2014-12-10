@@ -27,6 +27,7 @@ import controlTypes
 from . import Window
 from .. import NVDAObjectTextInfo
 import scriptHandler
+import ctypes
 
 xlCenter=-4108
 xlJustify=-4130
@@ -559,9 +560,11 @@ class ExcelCell(ExcelBase):
 		cellAddress = ExcelBase.getCellAddress(self.excelCellObject)
  	
 		oldWidth  = self.excelCellObject.Range(str(cellAddress)).Width
-		self.excelCellObject.Columns.Autofit()
-		fitWidth = self.excelCellObject.Range(str(cellAddress)).Width
-		self.excelCellObject.ColumnWidth = oldWidth
+# 		self.excelCellObject.Columns.Autofit()
+# 		fitWidth = self.excelCellObject.Range(str(cellAddress)).Width
+# 		self.excelCellObject.ColumnWidth = oldWidth
+		dc = ctypes.windll.user32.GetDC(0)
+		
  		isAdjacentCellEmpty = True if self.excelCellObject.Offset(0,1).Value else False
 # 		left=self.ppObject.left
 # 		top=self.ppObject.top
