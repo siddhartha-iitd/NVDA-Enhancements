@@ -101,7 +101,9 @@ class InstallerDialog(wx.Dialog):
 			# Translators: The label of a checkbox option in the Install NVDA dialog.
 			ctrl = self.createDesktopShortcutCheckbox = wx.CheckBox(self, label=_("&Keep existing desktop shortcut"))
 		else:
-			# Translators: The label of a checkbox option in the Install NVDA dialog.
+			# Translators: The label of the option to create a desktop shortcut in the Install NVDA dialog.
+			# If the shortcut key has been changed for this locale,
+			# this change must also be reflected here.
 			ctrl = self.createDesktopShortcutCheckbox = wx.CheckBox(self, label=_("Create &desktop icon and shortcut key (control+alt+n)"))
 		ctrl.Value = shortcutIsPrevInstalled if self.isUpdate else True 
 		optionsSizer.Add(ctrl)
@@ -126,6 +128,7 @@ class InstallerDialog(wx.Dialog):
 
 		self.Sizer = mainSizer
 		mainSizer.Fit(self)
+		self.Center(wx.BOTH | wx.CENTER_ON_SCREEN)
 
 	def onInstall(self, evt):
 		self.Hide()
@@ -175,6 +178,7 @@ class PortableCreaterDialog(wx.Dialog):
 
 		self.Sizer = mainSizer
 		mainSizer.Fit(self)
+		self.Center(wx.BOTH | wx.CENTER_ON_SCREEN)
 
 	def onBrowseForPortableDirectory(self, evt):
 		# Translators: The title of the dialog presented when browsing for the

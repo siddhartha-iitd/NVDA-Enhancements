@@ -387,6 +387,7 @@ class ElementsListDialog(wx.Dialog):
 
 		self.tree.SetFocus()
 		self.initElementType(self.ELEMENT_TYPES[self.lastSelectedElementType][0])
+		self.Center(wx.BOTH | wx.CENTER_ON_SCREEN)
 
 	def onElementTypeChange(self, evt):
 		elementType=evt.GetInt()
@@ -818,7 +819,7 @@ class VirtualBuffer(cursorManager.CursorManager, treeInterceptorHandler.TreeInte
 						tl=ancestors.index(self.rootNVDAObject)
 					except ValueError:
 						tl=len(ancestors)
-					if fdl<tl:
+					if fdl<=tl:
 						speech.speakObject(self.rootNVDAObject, reason=controlTypes.REASON_FOCUS)
 				info = self.selection
 				if not info.isCollapsed:

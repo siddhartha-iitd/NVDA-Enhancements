@@ -28,6 +28,25 @@ from . import Window
 from .. import NVDAObjectTextInfo
 import scriptHandler
 
+xlCenter=-4108
+xlJustify=-4130
+xlLeft=-4131
+xlRight=-4152
+xlDistributed=-4117
+xlBottom=-4107
+xlTop=-4160
+
+alignmentLabels={
+	xlCenter:"center",
+	xlJustify:"justify",
+	xlLeft:"left",
+	xlRight:"right",
+	xlDistributed:"distributed",
+	xlBottom:"botom",
+	xlTop:"top",
+	1:"default",
+}
+
 xlA1 = 1
 xlRC = 2
 xlUnderlineStyleNone=-4142
@@ -215,7 +234,12 @@ class ExcelWorksheet(ExcelBase):
 		return True
 
 	def fetchAssociatedHeaderCellText(self,cell,columnHeader=False):
-		cellRegion=cell.excelCellObject.currentRegion
+		# #4409: cell.currentRegion fails if the worksheet is protected.
+		try:
+			cellRegion=cell.excelCellObject.currentRegion
+		except COMError:
+			log.debugWarning("Possibly protected sheet")
+			return None
 		if cellRegion.count==1:
 			minRow=maxRow=minColumn=maxColumn=None
 		else:
@@ -227,10 +251,22 @@ class ExcelWorksheet(ExcelBase):
 			if columnHeader:
 				for headerRowNumber in xrange(info.rowNumber,info.rowNumber+info.rowSpan): 
 					headerCell=self.excelWorksheetObject.cells(headerRowNumber,cell.columnNumber)
+					# The header could be  merged cells. 
+					# if so, fetch text from the first in the merge as that always contains the content
+					try:
+						headerCell=headerCell.mergeArea.item(1)
+					except (COMError,NameError,AttributeError):
+						pass
 					textList.append(headerCell.text)
 			else:
 				for headerColumnNumber in xrange(info.columnNumber,info.columnNumber+info.colSpan): 
 					headerCell=self.excelWorksheetObject.cells(cell.rowNumber,headerColumnNumber)
+					# The header could be  merged cells. 
+					# if so, fetch text from the first in the merge as that always contains the content
+					try:
+						headerCell=headerCell.mergeArea.item(1)
+					except (COMError,NameError,AttributeError):
+						pass
 					textList.append(headerCell.text)
 			text=" ".join(textList)
 			if text:
@@ -309,6 +345,15 @@ class ExcelWorksheet(ExcelBase):
 		"kb:shift+control+end",
 		"kb:shift+space",
 		"kb:control+space",
+		"kb:pageUp",
+		"kb:pageDown",
+		"kb:shift+pageUp",
+		"kb:shift+pageDown",
+		"kb:alt+pageUp",
+		"kb:alt+pageDown",
+		"kb:alt+shift+pageUp",
+		"kb:alt+shift+pageDown",
+		"kb:control+shift+8",
 		"kb:control+pageUp",
 		"kb:control+pageDown",
 		"kb:control+a",
@@ -320,6 +365,13 @@ class ExcelCellTextInfo(NVDAObjectTextInfo):
 	def _getFormatFieldAndOffsets(self,offset,formatConfig,calculateOffsets=True):
 		formatField=textInfos.FormatField()
 		fontObj=self.obj.excelCellObject.font
+		if formatConfig['reportAlignment']:
+			value=alignmentLabels.get(self.obj.excelCellObject.horizontalAlignment)
+			if value:
+				formatField['text-align']=value
+			value=alignmentLabels.get(self.obj.excelCellObject.verticalAlignment)
+			if value:
+				formatField['vertical-align']=value
 		if formatConfig['reportFontName']:
 			formatField['font-name']=fontObj.name
 		if formatConfig['reportFontSize']:
@@ -329,6 +381,13 @@ class ExcelCellTextInfo(NVDAObjectTextInfo):
 			formatField['italic']=fontObj.italic
 			underline=fontObj.underline
 			formatField['underline']=False if underline is None or underline==xlUnderlineStyleNone else True
+		if formatConfig['reportStyle']:
+			try:
+				styleName=self.obj.excelCellObject.style.nameLocal
+			except COMError:
+				styleName=None
+			if styleName:
+				formatField['style']=styleName
 		if formatConfig['reportColor']:
 			try:
 				formatField['color']=colors.RGB.fromCOLORREF(int(fontObj.color))
