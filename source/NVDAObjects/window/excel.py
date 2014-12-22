@@ -553,78 +553,86 @@ class ExcelCell(ExcelBase):
 			
 ########################################################################################################			
 		if self._overlapInfo is not None:
-			states.add(controlTypes.STATE_OBSCURED)
+			if self._overlapInfo['obscuredFromRightBy'] > 0:
+				states.add(controlTypes.STATE_OBSCURED)
+			if self._overlapInfo['overlapsRightBy'] > 0:
+				states.add(controlTypes.STATE_OVERLAPPING)
+
 		return states
-
-	def _get__overlapInfo(self):
-		log.io("\n\n",stack_info = True)
-		cellAddress = ExcelBase.getCellAddress(self.excelCellObject)
-		cellWidth  = self.excelCellObject.Range(cellAddress).Width
-# 		hWnd = ctypes.windll.user32.FindWindowW("XLMAIN",None) 								#Get the handle of the main Excel window, which we can use for the device context
-# 		hDC = ctypes.windll.user32.GetDC(hWnd)												#Get a device context for the window
-# 		iOldMapMode = ctypes.windll.gdi32.GetMapMode										#Store the old mapping mode
-# 		a = ctypes.windll.gdi32.SetMapMode(hDC,6)
-# 		iFontSize = self.excelCellObject.Range(str(cellAddress)).Font.Size
-# 		iFontWeight = 700 if self.excelCellObject.Range(str(cellAddress)).Font.Bold else 400
-# 
-# 		sFontName = self.excelCellObject.Range(str(cellAddress)).Font.Name															#Set the new mapping mode to Twips (1/20 of a point - VBA functions use points)
-# 
-# 		hFont = ctypes.windll.gdi32.CreateFontW(-1, 0, 0, 0, iFontWeight, False, False, False, False, False, False, False, False,sFontName)  			#Create a font object with the correct size, weight and style
-# 		hOldFont = ctypes.windll.gdi32.SelectObject(hDC, hFont) 							#Load the font into the device context, storing the original font object
-		sText = self.excelCellObject.Range(cellAddress).Text
-		log.io("\nCellAddress\t"+str(cellAddress)+"\n")
+	
+ 	def getCellWidthAndTextWidth(self):
+ 		hDC = ctypes.windll.user32.GetDC(self.windowHandle)
+ 		tempBMP = ctypes.windll.gdi32.CreateCompatibleBitmap(hDC, 1, 1)
+ 		hBMP = ctypes.windll.gdi32.SelectObject(hDC, tempBMP)
+		iFontSize = self.excelCellObject.Font.Size
+		deviceCaps = ctypes.windll.gdi32.GetDeviceCaps(hDC, 90)
+		iFontSize = int(iFontSize)
+		iFontSize = ctypes.c_int(iFontSize)
+		iFontSize = ctypes.windll.kernel32.MulDiv(iFontSize, deviceCaps, 72)
+		iFontSize = iFontSize * -1
+ 		iFontWeight = 700 if self.excelCellObject.Font.Bold else 400
+  
+ 		sFontName = self.excelCellObject.Font.Name
+ 		sFontItalic = self.excelCellObject.Font.Italic
+ 		sFontUnderline = True if self.excelCellObject.Font.Underline else False
+ 		sFontStrikeThrough = self.excelCellObject.Font.Strikethrough
+		hFont = ctypes.windll.gdi32.CreateFontW(iFontSize, 0, 0, 0, iFontWeight, sFontItalic, sFontUnderline, sFontStrikeThrough, False, False, False, False, False,sFontName)  			#Create a font object with the correct size, weight and style
+		hOldFont = ctypes.windll.gdi32.SelectObject(hDC, hFont) 							#Load the font into the device context, storing the original font object
+		sText = self.excelCellObject.Text
 		log.io("\nText \t"+sText+"\n")
-# 		textLength = len(sText)
-# 		class structText(ctypes.Structure):
-# 			_fields_ = [("width", ctypes.c_int), ("height",ctypes.c_int)]
-# 		StructText = structText()	
-# 		getTextExtentPoint = ctypes.windll.gdi32.GetTextExtentPoint32W
-# 		getTextExtentPoint.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_int, ctypes.POINTER(structText)]
-# 		getTextExtentPoint.restype = ctypes.c_int
-# 		a = ctypes.windll.gdi32.GetTextExtentPoint32W(hDC, sText, textLength,ctypes.byref(StructText))         #Get the text dimensions
-# 		hFont = ctypes.windll.gdi32.SelectObject(hDC, hOldFont)           				#Retrieve the original font back into the device context
-# 		a = ctypes.windll.gdi32.SetMapMode(hDC, iOldMapMode)              				#Reset the original mapping mode
-# 		a = ctypes.windll.gdi32.DeleteObject(hFont)                       				#Delete the font object we created
-# 		a = ctypes.windll.user32.ReleaseDC(hWnd, hDC)                     				#Release the device context
-#                 textWidth = StructText.width / 20
-#                 adjacentCell = self.excelCellObject.Offset(0,1)
-#                 if adjacentCell.Text:
-#                         isAdjacentCellEmpty = False
-#                 else:
-#                         isAdjacentCellEmpty = True
-# 		info={}
-# 		log.io("\ncellWidth \t" + str(cellWidth) + "\n")
-# 		log.io("\ntextWidth\t" + str(textWidth) + "\n")
-# 		if isAdjacentCellEmpty:
-# 			info['overlapsRightBy']= textWidth - cellWidth if textWidth > cellWidth else 0
-# 		else:
-# 			info['obscuredFromRightBy']= textWidth - cellWidth if textWidth > cellWidth else 0
-#  		self._overlapInfo = info
-#  		return self._overlapInfo
-		return 0
-		
- 		#cellHeight = self.excelCellObject.Range(str(cellAddress)).Height
- 		#self.excelCellObject.Rows.Autofit()	
- 		#fitHeight = self.excelCellObject.Range(str(cellAddress)).Height
- 		#self.excelCellObject.RowHeight = cellHeight
-	 	#info['overlapsBottomBy']=fitHeight-oldHeight if fitHeight > oldHeight else 0
+		textLength = len(sText)
+		class structText(ctypes.Structure):
+			_fields_ = [("width", ctypes.c_int), ("height",ctypes.c_int)]
+		StructText = structText()	
+		getTextExtentPoint = ctypes.windll.gdi32.GetTextExtentPoint32W
+		getTextExtentPoint.argtypes = [ctypes.c_void_p, ctypes.c_wchar_p, ctypes.c_int, ctypes.POINTER(structText)]
+		getTextExtentPoint.restype = ctypes.c_int
+		sText = unicode(sText)
+		a = ctypes.windll.gdi32.GetTextExtentPoint32W(hDC, sText, textLength,ctypes.byref(StructText))      #Get the text dimensions
+		a = ctypes.windll.gdi32.DeleteObject(hFont)                       									#Delete the font object we created
+		a = ctypes.windll.gdi32.DeleteObject(tempBMP)  
+		a = ctypes.windll.user32.ReleaseDC(self.windowHandle, hDC)                     						#Release the device context
+		textWidth = StructText.width  + 5
+		cellWidth  = self.excelCellObject.ColumnWidth * 7.5919335705812574139976275207592					
+ 		return (cellWidth, textWidth) 		
+ 	
+ 	def _get__overlapInfo(self):
+ 		(cellWidth, textWidth) = self.getCellWidthAndTextWidth()
+ 		adjacentCell = self.excelCellObject.Offset(0,1)
+ 		if adjacentCell.Text:
+ 			isAdjacentCellEmpty = False
+ 		else:
+ 			isAdjacentCellEmpty = True
+ 		log.io("\ncellWidth \t" + str(cellWidth) + "\n")
+ 		log.io("\ntextWidth\t" + str(textWidth) + "\n")
+		info = {}
+		if textWidth > cellWidth:
+			if isAdjacentCellEmpty:
+				info['overlapsRightBy']= textWidth - cellWidth
+				info['obscuredFromRightBy'] = 0
+			else:
+				info['obscuredFromRightBy']= textWidth - cellWidth
+				info['overlapsRightBy'] = 0
+		else:
+			info = None
+ 		self._overlapInfo = info
+ 		return self._overlapInfo
+ 		
+  	def _getOverlapText(self):
+ 		textList=[]
+ 		overlapsRightBy=otherInfo['overlapsRightBy']
+ 		obscuredFromRightBy=otherInfo['obscuredFromRightBy']
+ 		total=True
+ 		if overlapsRightBy>0:
+ 			total=False
+ 			# Translators: A message when text is extending to adjacent cell(s) in MS Excel
+ 			textList.append(_("extends right by {distance:.3g} points").format(distance=overlapsRightBy))
+ 		elif obscuredFromRightBy>0:
+ 			# Translators: A message when text is obscured from right in MS Excel
+ 			textList.append(_("obscured from right by {distance:.3g} points").format(distance=obscuredFromRightBy))
  
-
- 	def _getOverlapText(self):
-		textList=[]
-		overlapsRightBy=otherInfo['overlapsRightBy']
-		obscuredFromRightBy=otherInfo['obscuredFromRightBy']
-		total=True
-		if overlapsRightBy>0:
-			total=False
-			# Translators: A message when a shape is infront of another shape on a Powerpoint slide 
-			textList.append(_("extends right by {distance:.3g} points").format(distance=overlapsRightBy))
-		elif obscuredFromRightBy>0:
-			# Translators: A message when a shape is behind  another shape on a powerpoint slide
-			textList.append(_("obscured from right by {distance:.3g} points").format(distance=obscuredFromRightBy))
-
-		return ", ".join(textList)
-
+ 		return ", ".join(textList)
+ 
 	def _get_locationText(self):
 		textList=[]
 		text=self._getOverlapText()
@@ -682,33 +690,6 @@ class ExcelCell(ExcelBase):
 				else:
 					self.excelCellObject.addComment(d.Value)
 		gui.runScriptModalDialog(d, callback)
-
-# 	def script_reportTextOverflow(self,gesture):
-# 		oldWidth = self.excelCellObject.ColumnWidth
-# 		cellAddress = ExcelBase.getCellAddress(self.excelCellObject)
-# 		cellWidth = self.excelCellObject.Range(str(cellAddress)).Width
-# 		log.io("\n\nCellAddress\t" + cellAddress + "\n")
-# 		log.io("\n\nCellWidth\t" + str(cellWidth) + "\n")
-# 		#columnName = cellAddress.rstrip('0123456789')
-# 		#columnName = '"' + columnName +  '"'
-# 		#self.excelCellObject.Columns(columnName).Autofit
-# 		#self.excelCellObject.Columns(columnName).EntireColumn.Autofit
-# 		#self.excelCellObject.WorkSheets(1).Activate
-# 		#self.excelCellObject.ActiveSheet.Columns.Autofit
-# 		#self.excelCellObject.Columns(self._rowAndColumnNumber[1]).Autofit()
-# 		#self.excelCellObject.EntireColumn.Autofit()
-# 		#self.excelCellObject.Selection.Autofit
-# 		#self.excelCellObject.EntireColumn.Select
-# 		self.excelCellObject.Columns.Autofit()
-# 		fitWidth = self.excelCellObject.ColumnWidth
-# 		self.excelCellObject.ColumnWidth = oldWidth
-# 		isAdjacentCellEmpty = False if self.excelCellObject.Offset(0,1).Value else True
-# 		log.io("\nisAdjacentCellEmpty\t" + str(isAdjacentCellEmpty) + "\n")
-# 		
-# 		
-# 		if fitWidth > oldWidth:
-# 			pass
-# 			#Done!
 		
 	__gestures = {
 		"kb:NVDA+shift+c": "setColumnHeader",
@@ -716,7 +697,6 @@ class ExcelCell(ExcelBase):
 		"kb:shift+f2":"editComment",
 		"kb:alt+downArrow":"openDropdown",
  		"kb:NVDA+alt+c":"reportComment",
-# 		"kb:NVDA+alt+c":"reportTextOverflow",
 		
 	}
 	
