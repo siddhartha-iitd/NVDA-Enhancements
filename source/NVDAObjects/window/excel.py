@@ -28,6 +28,8 @@ from . import Window
 from .. import NVDAObjectTextInfo
 import scriptHandler
 
+import browseMode
+
 xlCenter=-4108
 xlJustify=-4130
 xlLeft=-4131
@@ -65,6 +67,148 @@ xlCellTypeVisible             =12         # from enum XlCellType
 
 re_RC=re.compile(r'R(?:\[(\d+)\])?C(?:\[(\d+)\])?')
 re_absRC=re.compile(r'^R(\d+)C(\d+)(?::R(\d+)C(\d+))?$')
+
+
+class ExcelChartQuickNavItem(browseMode.QuickNavItem):
+
+	def __init__( self , nodeType , document , currentObject):
+		self.chartIndex = currentObject.Index
+		super(ExcelObjectQuickNavItem,self).__init__(itemType,document)
+
+	def __lt__(self,other):
+		return self.chartIndex < other.chartIndex
+
+	"""
+	def __lt__(self,other):
+		if self.row == other.row:
+			return self.column < other.column
+		else:
+			return self.row < other.row
+	"""
+
+	@property
+	def label(self):
+		return self.label
+
+	def activate(self):
+		pass
+
+	def isChild(self,parent):
+		if self.rangeObject.Parent ==  parent:
+			return True
+		return False
+
+	def moveTo(self,gesture=None,readUnit=None):
+		pass
+
+	@property
+	def isAfterSelection(self):
+		return True
+
+class ExcelQuicknavIterator(object):
+	"""
+	Allows iterating over an MS excel collection (e.g. HyperLinks) emitting L{QuickNavItem} objects.
+	"""
+
+	quickNavItemClass=ExcelChartQuickNavItem#: the QuickNavItem class that should be instanciated and emitted. 
+
+	def __init__(self,itemType,document,direction,rangeObj,includeCurrent):
+		"""
+		See L{QuickNavItemIterator} for itemType, document and direction definitions.
+		@param rangeObj: a Microsoft Word range object where the collection should be fetched from.
+		@ param includeCurrent: if true then any item at the initial position will be also emitted rather than just further ones. 
+		"""
+		self.document=document
+		self.itemType=itemType
+		self.direction=direction if direction else "next"
+		self.rangeObj=rangeObj
+		self.includeCurrent=includeCurrent
+
+	def collectionFromRange(self,worksheetObject):
+		"""
+		Fetches a Microsoft Word collection object from a Microsoft Word range object. E.g. HyperLinks from a range.
+		@param rangeObj: a Microsoft Word range object.
+		@return: a Microsoft Word collection object.
+		"""
+		raise NotImplementedError
+
+	def filter(self,item):
+		"""
+		Only allows certain items fom a collection to be emitted. E.g. a table who's borders are enabled.
+		@param item: an item from a Microsoft Word collection (e.g. HyperLink object).
+		@return True if this item should be allowd, false otherwise.
+		@rtype: bool
+		"""
+		return True
+
+	def iterate(self):
+		"""
+		returns a generator that emits L{QuickNavItem} objects for this collection.
+		"""
+		"""
+		if self.direction=="next":
+			self.rangeObj.moveEnd(wdStory,1)
+		elif self.direction=="previous":
+			self.rangeObj.collapse(wdCollapseStart)
+			self.rangeObj.moveStart(wdStory,-1)
+		"""
+		items=self.collectionFromRange(self.document)
+		itemCount=items.count
+		isFirst=True
+		for index in xrange(1,itemCount+1):
+			if self.direction=="previous":
+				index=itemCount-(index-1)
+			collectionItem=items[index]
+			item=self.quickNavItemClass(self.itemType,self.document,collectionItem)
+			itemRange=item.rangeObj
+			# Skip over the item we're already on.
+			if not self.includeCurrent and isFirst and ((self.direction=="next" and itemRange.start<=self.rangeObj.start) or (self.direction=="previous" and itemRange.end>self.rangeObj.end)):
+				continue
+			if not self.filter(collectionItem):
+				continue
+			yield item
+			isFirst=False
+
+
+class ChartExcelCollectionQuicknavIterator(ExcelQuicknavIterator):
+	def collectionFromRange( self , worksheetObject ):
+		return worksheetObject.ChartObjects() 
+
+
+class ExcelBrowseModeTreeInterceptor(browseMode.BrowseModeTreeInterceptor):
+
+	#TextInfo=BrowseModeWordDocumentTextInfo
+	needsReviewCursorTextInfoWrapper=False
+
+	def _get_isAlive(self):
+		return winUser.isWindow(self.rootNVDAObject.windowHandle)
+
+	def __contains__(self,obj):
+		return obj==self.rootNVDAObject
+
+	def _set_selection(self,info):
+		super(WordDocumentTreeInterceptor,self)._set_selection(info)
+		#review.handleCaretMove(info)
+
+	def _get_ElementsListDialog(self):
+		return ElementsListDialog
+
+	def _iterNodesByType(self,nodeType,direction="next",pos=None):
+		if nodeType=="chart":
+			return ChartExcelCollectionQuicknavIterator( nodeType , self.rootNVDAObject.excelWorksheetObject , direction , rangeObj , includeCurrent ).iterate()
+		else:
+			raise NotImplementedError
+
+
+class ElementsListDialog(browseMode.ElementsListDialog):
+
+	ELEMENT_TYPES=(
+		# Translators: The label of a radio button to select the type of element
+		# in the browse mode Elements List dialog.
+		("chart", _("&Chart")),
+	)
+
+
 
 class ExcelBase(Window):
 	"""A base that all Excel NVDAObjects inherit from, which contains some useful methods."""
