@@ -294,6 +294,11 @@ class Excel7Window(ExcelBase):
 
 class ExcelWorksheet(ExcelBase):
 
+
+	treeInterceptorClass=ExcelBrowseModeTreeInterceptor
+	shouldCreateTreeInterceptor=False
+
+
 	role=controlTypes.ROLE_TABLE
 
 	def _get_excelApplicationObject(self):
@@ -528,23 +533,6 @@ class ExcelWorksheet(ExcelBase):
 		"kb:control+a",
 		"kb:control+v",
 	)
-
-	def script_cellSelectionPopup(self, gesture):
-		# We need this to be a modal dialog, but it mustn't block this script.
-		def run():
-			gui.mainFrame.prePopup()
-			d = CellsListDialog(self.excelWorksheetObject)
-			d.ShowModal()
-			d.Destroy()
-			gui.mainFrame.postPopup()
-		wx.CallAfter(run)
-	script_cellSelectionPopup.canPropagate=True
-	# Translators: the description for a script
-	script_cellSelectionPopup.__doc__=_("Shows a dialog that lists cells with formulas or comments")
-
-	__gestures={
-		"kb:NVDA+f7":"cellSelectionPopup",
-	}
 
 class ExcelCellTextInfo(NVDAObjectTextInfo):
 
@@ -961,169 +949,3 @@ class ExcelMergedCell(ExcelCell):
 
 	def _get_colSpan(self):
 		return self.excelCellObject.mergeArea.columns.count
-
-class CellsListDialog(wx.Dialog):
-	## View modes, flat, tree etc.
-	modeRegionColCell = 0
-	modeRegionRowCell = 1
-	modeRegionCell = 2
-	modeCell = 3
-	modes = {
-		# Translators: one of the cell viewing modes in Cell List dialog in Excel.
-		modeCell : _("Cells (Flat)"),
-		# Translators: one of the cell viewing modes in Cell List dialog in Excel.
-		modeRegionCell : _("Area / Cell"),
-		#modeRegionRowCell : _("Area / Row / Cell"),
-		#modeRegionColCell : _("Area / Col / Cell"),
-	}
-
-	types = { 
-		# Translators: one of the cell types to show in Cell List dialog in Excel.
-		xlCellTypeComments : _("comments"),
-		# Translators: one of the cell types to show in Cell List dialog in Excel.
-		xlCellTypeFormulas : _("Formulas"),
-		# Translators: one of the cell types to show in Cell List dialog in Excel.
-		"chart" : _("Charts"),
-	}
-
-	def populate_cells(self,type,mode):
-		if type == xlCellTypeComments :
-			fn = lambda x: x.Comment.Text()
-		elif type == xlCellTypeFormulas :
-			fn = lambda x: x.Formula
-		else:
-			fn = lambda x: x.Text
-		try:
-			wholerange = self.cells.SpecialCells(type)
-			areacount = wholerange.Areas.Count
-			thisarea = 0
-			for range in wholerange.Areas:
-				thisarea += 1
-				if mode==self.modeRegionCell:
-					## Make Node for Range
-					first=range.Item(1).Address(False,False,1,False)
-					last=range.Cells.Item(range.Cells.Count).Address(False,False,1,False)
-					text ="Area from {first} to {last}".format(first=first,last=last)
-					this = self.tree.AppendItem(self.treeRoot,text)
-					self.tree.SetItemPyData(this, ( "range", range.cells))
-				elif mode==self.modeCell:
-					this=self.treeRoot
-				for cell in range.Cells:
-					text= cell.address(False,False,1,False) + " " + fn(cell)
-					item=self.tree.AppendItem(this,text)
-					self.tree.SetItemPyData(item, ("cell", cell) )
-		except (COMError):
-			# Translators: presented when there is no matching cell of cell type in Cell List dialog in Excel.
-			self.tree.AppendItem(self.treeRoot,_("No matching cells"))
-
-	def populate_charts(self,type,mode):
-		chartobjects = self.worksheet.ChartObjects()
-		if chartobjects.Count == 0 :
-		 	self.tree.AppendItem(self.treeRoot,_("Add Charts..."))
-
-		for chartobject in chartobjects:
-			chart = chartobject.Chart
-			if chart.HasTitle:
-				display_string = chart.ChartTitle.Text
-			else:
-				display_string = chart.Name
-		 	this = self.tree.AppendItem(self.treeRoot,display_string)
-			self.tree.SetItemPyData(this, ("chartobject", chartobject, chartobjects))
-
-	def populate(self,evt=None):
-		type = self.typeCombo.GetClientData(self.typeCombo.GetSelection())
-		mode = self.viewCombo.GetClientData(self.viewCombo.GetSelection())
-		self.tree.Freeze()
-		self.tree.DeleteChildren(self.treeRoot)
-		if type == "chart" :
-			self.populate_charts(type,mode)
-		else:
-			self.populate_cells(type,mode)
-
-		self.tree.Thaw()
-
-	def __init__(self, worksheet):
-		self.worksheet = worksheet
-		self.cells = worksheet.Cells
-		# Translators: the title of a dialog to show list of cells in Excel.
-		super(CellsListDialog, self).__init__(gui.mainFrame, wx.ID_ANY, _("Cell List"))
-		mainSizer = wx.BoxSizer(wx.VERTICAL)
-
-		typeSizer=wx.BoxSizer(wx.HORIZONTAL)                
-		# Translators: label for a combo box in Cells List in Excel.
-		typeLabel=wx.StaticText(self,-1,label=_("Cells to &show:"))
-		self.typeCombo = wx.Choice(self,wx.ID_ANY)
-		for x in self.types.keys():
-			self.typeCombo.Append(self.types[x],x)
-		self.typeCombo.SetSelection(0)
-		self.typeCombo.Bind(wx.EVT_CHOICE,self.populate)
-		typeSizer.Add(typeLabel)
-		typeSizer.Add(self.typeCombo)
-		mainSizer.Add(typeSizer)
-
-		viewSizer=wx.BoxSizer(wx.HORIZONTAL)                
-		# Translators: label for a combo box in Cells List in Excel.
-		viewLabel=wx.StaticText(self,-1,label=_("Viewing &mode"))
-		self.viewCombo = wx.Choice(self,wx.ID_ANY)
-		for x in self.modes.keys():
-			self.viewCombo.Append(self.modes[x],x)
-		self.viewCombo.SetSelection(1)
-		self.viewCombo.Bind(wx.EVT_CHOICE,self.populate)
-		viewSizer.Add(viewLabel)
-		viewSizer.Add(self.viewCombo)
-		mainSizer.Add(viewSizer)
-
-		self.tree = wx.TreeCtrl(self, wx.ID_ANY, style=wx.TR_HAS_BUTTONS | wx.TR_HIDE_ROOT | wx.TR_SINGLE)
-		self.tree.Bind(wx.EVT_CHAR, self.onTreeChar)
-		self.treeRoot = self.tree.AddRoot("root")
-		mainSizer.Add(self.tree,proportion=7,flag=wx.EXPAND)
-
-		sizer = wx.BoxSizer(wx.HORIZONTAL)
-		# Translators: The label of a button to select a cell 
-		# in the Excel cell list. 
-		self.selectButton = wx.Button(self, wx.ID_OK, _("&Select"))
-		self.Bind(wx.EVT_BUTTON, self.onOk, id=wx.ID_OK)
-		sizer.Add(self.selectButton)
-		sizer.Add(wx.Button(self, wx.ID_CANCEL))
-		mainSizer.Add(sizer,proportion=1)
-
-		mainSizer.Fit(self)
-		self.SetSizer(mainSizer)
-
-		self.treeRoot = self.tree.AddRoot("Root")
-		self.populate()
-		self.tree.SetFocus()
-
-	def onTreeChar(self, evt):
-		key = evt.KeyCode
-		if key == wx.WXK_RETURN:
-			# The enter key should be propagated to the dialog and thus activate the default button,
-			# but this is broken (wx ticket #3725).
-			# Therefore, we must catch the enter key here.
-			# Activate the current default button.
-			evt = wx.CommandEvent(wx.wxEVT_COMMAND_BUTTON_CLICKED, wx.ID_OK)
-			button = self.FindWindowById(wx.ID_OK)
-			if button.Enabled:
-				button.ProcessEvent(evt)
-			else:
-				wx.Bell()
-		else:
-			evt.Skip()
-
-	def onOk(self, evt):
-		pair=self.tree.GetItemPyData(self.tree.GetSelection())
-		self.EndModal(wx.ID_OK)
-		try:
-			if pair[0] == "cell" or pair[0] == "range":
-				pair[1].activate()
-			elif pair[0] == "chartobject":
-				pair[1].activate()
-				# After activate(), though the chart object is selected, 
-				# pressing arrow keys moves the object, rather than 
-				# let use go inside for sub-objects. Somehow 
-				# calling an COM function on a different object fixes that !
-				log.debugWarning(pair[2].Count)
-		except(COMError):
-			pass
-
-import excelChart
