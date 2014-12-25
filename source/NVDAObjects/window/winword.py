@@ -823,12 +823,6 @@ class BrowseModeWordDocumentTextInfo(textInfos.TextInfo):
 	def expand(self,unit):
 		return self.innerTextInfo.expand(unit)
 
-	__gestures={
-		# We want to fall back to MS Word's real page up and page down, rather than browseMode's faked 25 lines
-		"kb:pageUp":None,
-		"kb:pageDown":None,
-	}
-
 class WordDocumentTreeInterceptor(CursorManager,BrowseModeTreeInterceptorWithMakeTextInfo):
 
 	TextInfo=BrowseModeWordDocumentTextInfo
@@ -887,6 +881,14 @@ class WordDocumentTreeInterceptor(CursorManager,BrowseModeTreeInterceptorWithMak
 			return self._iterHeadings(nodeType,direction,rangeObj,includeCurrent)
 		else:
 			raise NotImplementedError
+
+	__gestures={
+		# We want to fall back to MS Word's real page up and page down, rather than browseMode's faked 25 lines
+		"kb:pageUp":None,
+		"kb:pageDown":None,
+		"kb:shift+pageUp":None,
+		"kb:shift+pageDown":None,
+	}
 
 class WordDocument(EditableTextWithoutAutoSelectDetection, Window):
 
