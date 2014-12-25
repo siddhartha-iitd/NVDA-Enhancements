@@ -133,14 +133,11 @@ class EditableText(ScriptableObject):
 		try:
 			info=self.makeTextInfo(textInfos.POSITION_CARET)
 			info.move(textInfos.UNIT_SENTENCE, direction)
-			info.expand(textInfos.UNIT_SENTENCE)
+			self._caretScriptPostMovedHelper(textInfos.UNIT_SENTENCE,gesture,info)
 		except:
 			gesture.send()
 			return
-		if info:
-			speech.speakTextInfo(info,reason=controlTypes.REASON_CARET)
-			info.collapse()
-			info.updateCaret()
+		gesture.send()
 
 	def script_caret_moveByLine(self,gesture):
 		self._caretMovementScriptHelper(gesture, textInfos.UNIT_LINE)
@@ -158,9 +155,11 @@ class EditableText(ScriptableObject):
 
 	def script_caret_previousSentence(self,gesture):
 		self._caretMoveBySentenceHelper(gesture, -1)
+	script_caret_previousSentence.resumeSayAllMode=sayAllHandler.CURSOR_CARET
 
 	def script_caret_nextSentence(self,gesture):
 		self._caretMoveBySentenceHelper(gesture, 1)
+	script_caret_nextSentence.resumeSayAllMode=sayAllHandler.CURSOR_CARET
 
 	def _backspaceScriptHelper(self,unit,gesture):
 		try:

@@ -518,7 +518,11 @@ class WordDocumentTextInfo(textInfos.TextInfo):
 			moveFunc=self._rangeObj.MoveEnd
 		else:
 			moveFunc=self._rangeObj.Move
+		if direction != 0 and endPoint!="end" and unit==wdSentence:
+			end = True if direction > 0 else False
+			self.collapse(end)
 		res=moveFunc(unit,direction)
+		self.updateCaret()
 		#units higher than character and word expand to contain the last text plus the insertion point offset in the document
 		#However move from a character before will incorrectly move to this offset which makes move/expand contridictory to each other
 		#Make sure that move fails if it lands on the final offset but the unit is bigger than character/word
@@ -972,30 +976,6 @@ class WordDocument(EditableTextWithoutAutoSelectDetection, Window):
 
 	def script_previousColumn(self,gesture):
 		self._moveInTable(row=False,forward=False)
- 
-	def _moveBySentence(self, direction=1):
-		""" Helper method to move by sentence
-		@param direction: positive for next negative for or previous
-		@type direction: int
-		"""
-		info=self.makeTextInfo(textInfos.POSITION_CARET)
-		try:
-			info.expand(textInfos.UNIT_SENTENCE)
-			end = True if direction > 0 else False
-			info.collapse(end) #This will fail at the last sentence of the document.
-		except:
-			pass
-		info.move(textInfos.UNIT_CHARACTER, direction)
-		info.expand(textInfos.UNIT_SENTENCE)
-		speech.speakTextInfo(info,reason=controlTypes.REASON_CARET)
-		info.collapse()
-		info.updateCaret()
-
-	def script_nextSentence(self, gesture):
-		self._moveBySentence(1)
-
-	def script_previousSentence(self, gesture):
-		self._moveBySentence(-1)
 
 	def script_nextParagraph(self,gesture):
 		info=self.makeTextInfo(textInfos.POSITION_CARET)
@@ -1047,8 +1027,6 @@ class WordDocument(EditableTextWithoutAutoSelectDetection, Window):
 		"kb:control+pageUp": "caret_moveByLine",
 		"kb:control+pageDown": "caret_moveByLine",
 		"kb:NVDA+alt+c":"reportCurrentComment",
-		"kb:alt+upArrow": "previousSentence",
-		"kb:alt+downArrow": "nextSentence",
 	}
 
 class WordDocument_WwN(WordDocument):
