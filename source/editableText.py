@@ -132,12 +132,18 @@ class EditableText(ScriptableObject):
 			return
 		try:
 			info=self.makeTextInfo(textInfos.POSITION_CARET)
-			info.move(textInfos.UNIT_SENTENCE, direction)
-			self._caretScriptPostMovedHelper(textInfos.UNIT_SENTENCE,gesture,info)
 		except:
 			gesture.send()
 			return
+		bookmark=info.bookmark
 		gesture.send()
+		caretMoved,newInfo=self._hasCaretMoved(bookmark) 
+		if not caretMoved:
+			# If the application doesn't natively support the sentence navigation gesture, attempt to move using the text info move implementation.
+			info.move(textInfos.UNIT_SENTENCE, direction)
+			caretMoved,newInfo=self._hasCaretMoved(bookmark)
+		if caretMoved:
+			self._caretScriptPostMovedHelper(textInfos.UNIT_SENTENCE,gesture,newInfo)
 
 	def script_caret_moveByLine(self,gesture):
 		self._caretMovementScriptHelper(gesture, textInfos.UNIT_LINE)
