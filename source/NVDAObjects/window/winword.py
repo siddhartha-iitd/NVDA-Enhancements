@@ -4,42 +4,45 @@
 #This file is covered by the GNU General Public License.
 #See the file COPYING for more details.
 
-import ctypes
-import time
-from comtypes import COMError, GUID, BSTR
-import comtypes.client
-import comtypes.automation
-import uuid
-import operator
-import locale
 import collections
-import sayAllHandler
-import eventHandler
-import braille
-import scriptHandler
-import languageHandler
-import ui
+import ctypes
+import locale
+import operator
+import time
+import uuid
+
+from comtypes import COMError, GUID, BSTR
+import comtypes.automation
+import comtypes.client
+
 import NVDAHelper
 import XMLFormatting
-from logHandler import log
-import winUser
-import oleacc
-import globalVars
-import speech
+import braille
+import browseMode
+import colors
 import config
+import controlTypes
+from cursorManager import CursorManager, ReviewCursorManager
+import eventHandler
+import globalVars
+import languageHandler
+from logHandler import log
+import oleacc
+import review
+import sayAllHandler
+import scriptHandler
+import speech
+from tableUtils import HeaderCellInfo, HeaderCellTracker
 import textInfos
 import textInfos.offsets
-import colors
-import controlTypes
-import browseMode
-import review
-from cursorManager import CursorManager, ReviewCursorManager
-from tableUtils import HeaderCellInfo, HeaderCellTracker
+import ui
+import winUser
+
 from . import Window
 from ..behaviors import EditableTextWithoutAutoSelectDetection
- 
-#Word constants
 
+
+#Word constants
 # wdMeasurementUnits
 wdInches=0
 wdCentimeters=1
