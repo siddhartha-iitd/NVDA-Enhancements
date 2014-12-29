@@ -706,10 +706,6 @@ class WordDocumentTextInfo(textInfos.TextInfo):
 		else:
 			moveFunc=_rangeObj.Move
 		res=moveFunc(unit,direction)
-		# for sentence navigation, we need to update the caret and collapse the range to the new location.
-		if direction != 0 and endPoint!="end" and unit==wdSentence:
-			self.updateCaret()
-			self.collapse()
 		#units higher than character and word expand to contain the last text plus the insertion point offset in the document
 		#However move from a character before will incorrectly move to this offset which makes move/expand contridictory to each other
 		#Make sure that move fails if it lands on the final offset but the unit is bigger than character/word

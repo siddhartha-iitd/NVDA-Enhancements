@@ -141,6 +141,8 @@ class EditableText(ScriptableObject):
 		if not caretMoved:
 			# If the application doesn't natively support the sentence navigation gesture, attempt to move using the text info move implementation.
 			info.move(textInfos.UNIT_SENTENCE, direction)
+			info.updateCaret()
+			info.collapse()
 			caretMoved,newInfo=self._hasCaretMoved(bookmark)
 		if caretMoved:
 			self._caretScriptPostMovedHelper(textInfos.UNIT_SENTENCE,gesture,newInfo)
