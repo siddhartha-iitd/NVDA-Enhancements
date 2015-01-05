@@ -598,6 +598,9 @@ class ExcelCell(ExcelBase):
  	
  	def _get__overlapInfo(self):
  		(cellWidth, textWidth) = self.getCellWidthAndTextWidth()
+ 		isWrapText = self.excelCellObject.WrapText
+ 		isShrinkToFit = self.excelCellObject.ShrinkToFit
+ 		isMerged = self.excelWindowObject.Selection.MergeCells
  		adjacentCell = self.excelCellObject.Offset(0,1)
  		if adjacentCell.Text:
  			isAdjacentCellEmpty = False
@@ -606,15 +609,28 @@ class ExcelCell(ExcelBase):
  		log.io("\ncellWidth \t" + str(cellWidth) + "\n")
  		log.io("\ntextWidth\t" + str(textWidth) + "\n")
 		info = {}
-		if textWidth > cellWidth:
+		if isMerged:
+			columnCountInMergeArea = self.excelCellObject.MergeArea.Columns.Count
+			curCol = self.excelCellObject.Column
+			curRow = self.excelCellObject.Row
+			cellWidth = 0
+			for x in xrange(columnCountInMergeArea):
+				cellWidth += self.excelCellObject.Cells(curRow, curCol).ColumnWidth
+				curCol += 1
+ 			cellWidth = cellWidth * 7.5919335705812574139976275207592
+			log.io("\nInside isMerged \n")
+			log.io("\nMerged cellWidth \t" + str(cellWidth) + "\n")
+		if isWrapText or isShrinkToFit or textWidth <= cellWidth:
+			info = None
+		else:
 			if isAdjacentCellEmpty:
 				info['overlapsRightBy']= textWidth - cellWidth
 				info['obscuredFromRightBy'] = 0
 			else:
 				info['obscuredFromRightBy']= textWidth - cellWidth
 				info['overlapsRightBy'] = 0
-		else:
-			info = None
+# 		else:
+# 			info = None
  		self._overlapInfo = info
  		return self._overlapInfo
  		
