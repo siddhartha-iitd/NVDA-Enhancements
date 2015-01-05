@@ -72,8 +72,18 @@ re_absRC=re.compile(r'^R(\d+)C(\d+)(?::R(\d+)C(\d+))?$')
 class ExcelChartQuickNavItem(browseMode.QuickNavItem):
 
 	def __init__( self , nodeType , document , currentObject):
+		self.excelChartObject = currentObject
 		self.chartIndex = currentObject.Index
-		super(ExcelObjectQuickNavItem,self).__init__(itemType,document)
+
+		if self.excelChartObject.Chart.HasTitle:
+
+			self.label = self.excelChartObject.Chart.ChartTitle.Text
+
+		else:
+
+			self.label = currentObject.Name
+		 
+		super( ExcelChartQuickNavItem ,self).__init__( nodeType , document )
 
 	def __lt__(self,other):
 		return self.chartIndex < other.chartIndex
@@ -86,16 +96,29 @@ class ExcelChartQuickNavItem(browseMode.QuickNavItem):
 			return self.row < other.row
 	"""
 
-	@property
-	def label(self):
-		return self.label
-
 	def activate(self):
-		pass
+		try:
+			self.excelChartObject.activate()
+
+			# After activate(), though the chart object is selected, 
+
+			# pressing arrow keys moves the object, rather than 
+
+			# let use go inside for sub-objects. Somehow 
+		# calling an COM function on a different object fixes that !
+
+			#log.debugWarning(self.excelChartObject.Application.Value)
+
+		except(COMError):
+
+			pass
+
+
+
 
 	def isChild(self,parent):
-		if self.rangeObject.Parent ==  parent:
-			return True
+		#if self.rangeObject.Parent ==  parent:
+			#return True
 		return False
 
 	def moveTo(self,gesture=None,readUnit=None):
@@ -112,16 +135,14 @@ class ExcelQuicknavIterator(object):
 
 	quickNavItemClass=ExcelChartQuickNavItem#: the QuickNavItem class that should be instanciated and emitted. 
 
-	def __init__(self,itemType,document,direction,rangeObj,includeCurrent):
+	def __init__(self, itemType , document , direction , includeCurrent):
 		"""
 		See L{QuickNavItemIterator} for itemType, document and direction definitions.
-		@param rangeObj: a Microsoft Word range object where the collection should be fetched from.
 		@ param includeCurrent: if true then any item at the initial position will be also emitted rather than just further ones. 
 		"""
 		self.document=document
 		self.itemType=itemType
 		self.direction=direction if direction else "next"
-		self.rangeObj=rangeObj
 		self.includeCurrent=includeCurrent
 
 	def collectionFromRange(self,worksheetObject):
@@ -154,26 +175,26 @@ class ExcelQuicknavIterator(object):
 		"""
 		items=self.collectionFromRange(self.document)
 		itemCount=items.count
+		log.debugWarning("item count {}".format( itemCount ) ) 
 		isFirst=True
 		for index in xrange(1,itemCount+1):
 			if self.direction=="previous":
 				index=itemCount-(index-1)
 			collectionItem=items[index]
 			item=self.quickNavItemClass(self.itemType,self.document,collectionItem)
-			itemRange=item.rangeObj
+			#itemRange=item.rangeObj
 			# Skip over the item we're already on.
-			if not self.includeCurrent and isFirst and ((self.direction=="next" and itemRange.start<=self.rangeObj.start) or (self.direction=="previous" and itemRange.end>self.rangeObj.end)):
-				continue
+			#if not self.includeCurrent and isFirst and ((self.direction=="next" and itemRange.start<=self.rangeObj.start) or (self.direction=="previous" and itemRange.end>self.rangeObj.end)):
+				#continue
 			if not self.filter(collectionItem):
 				continue
 			yield item
 			isFirst=False
 
-
 class ChartExcelCollectionQuicknavIterator(ExcelQuicknavIterator):
+
 	def collectionFromRange( self , worksheetObject ):
 		return worksheetObject.ChartObjects() 
-
 
 class ExcelBrowseModeTreeInterceptor(browseMode.BrowseModeTreeInterceptor):
 
@@ -181,10 +202,13 @@ class ExcelBrowseModeTreeInterceptor(browseMode.BrowseModeTreeInterceptor):
 	needsReviewCursorTextInfoWrapper=False
 
 	def _get_isAlive(self):
+		log.debugWarning("is alive" ) 
 		return winUser.isWindow(self.rootNVDAObject.windowHandle)
 
 	def __contains__(self,obj):
-		return obj==self.rootNVDAObject
+		return winUser.isDescendantWindow(self.rootNVDAObject.windowHandle,obj.windowHandle)
+
+
 
 	def _set_selection(self,info):
 		super(WordDocumentTreeInterceptor,self)._set_selection(info)
@@ -195,7 +219,7 @@ class ExcelBrowseModeTreeInterceptor(browseMode.BrowseModeTreeInterceptor):
 
 	def _iterNodesByType(self,nodeType,direction="next",pos=None):
 		if nodeType=="chart":
-			return ChartExcelCollectionQuicknavIterator( nodeType , self.rootNVDAObject.excelWorksheetObject , direction , rangeObj , includeCurrent ).iterate()
+			return ChartExcelCollectionQuicknavIterator( nodeType , self.rootNVDAObject.excelWorksheetObject , direction , None ).iterate()
 		else:
 			raise NotImplementedError
 

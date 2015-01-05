@@ -587,8 +587,9 @@ class ElementsListDialog(wx.Dialog):
 		self._elements = []
 		self._initialElement = None
 
-		caret = self.document.makeTextInfo(textInfos.POSITION_CARET)
-		caret.expand("character")
+		if isinstance( self.document , TextInfoQuickNavItem ): 
+			caret = self.document.makeTextInfo(textInfos.POSITION_CARET)
+			caret.expand("character")
 
 		parentElements = []
 		for item in self.document._iterNodesByType(elType):
