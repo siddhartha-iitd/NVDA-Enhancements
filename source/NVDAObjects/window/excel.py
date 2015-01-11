@@ -561,21 +561,23 @@ class ExcelCell(ExcelBase):
 		return states
 	
  	def getCellWidthAndTextWidth(self):
- 		hDC = ctypes.windll.user32.GetDC(self.windowHandle)
- 		tempBMP = ctypes.windll.gdi32.CreateCompatibleBitmap(hDC, 1, 1)
- 		hBMP = ctypes.windll.gdi32.SelectObject(hDC, tempBMP)
+ 		hDC = ctypes.windll.user32.GetDC(self.windowHandle) # handle to Device Context
+ 		tempBMP = ctypes.windll.gdi32.CreateCompatibleBitmap(hDC, 1, 1) # Temporary Compatible Bitmap for current Device Context 
+ 		hBMP = ctypes.windll.gdi32.SelectObject(hDC, tempBMP) # handle to the bitmap object
+		deviceCaps = ctypes.windll.gdi32.GetDeviceCaps(hDC, 90) 		
+# Fetching Font Size and Weight information
 		iFontSize = self.excelCellObject.Font.Size
-		deviceCaps = ctypes.windll.gdi32.GetDeviceCaps(hDC, 90)
 		iFontSize = int(iFontSize)
 		iFontSize = ctypes.c_int(iFontSize)
 		iFontSize = ctypes.windll.kernel32.MulDiv(iFontSize, deviceCaps, 72)
-		iFontSize = iFontSize * -1
  		iFontWeight = 700 if self.excelCellObject.Font.Bold else 400
-  
+ # Fetching Font Name and style information 
  		sFontName = self.excelCellObject.Font.Name
  		sFontItalic = self.excelCellObject.Font.Italic
  		sFontUnderline = True if self.excelCellObject.Font.Underline else False
  		sFontStrikeThrough = self.excelCellObject.Font.Strikethrough
+ 		
+		iFontSize = iFontSize * -1 		
 		hFont = ctypes.windll.gdi32.CreateFontW(iFontSize, 0, 0, 0, iFontWeight, sFontItalic, sFontUnderline, sFontStrikeThrough, False, False, False, False, False,sFontName)  			#Create a font object with the correct size, weight and style
 		hOldFont = ctypes.windll.gdi32.SelectObject(hDC, hFont) 							#Load the font into the device context, storing the original font object
 		sText = self.excelCellObject.Text
@@ -593,7 +595,7 @@ class ExcelCell(ExcelBase):
 		a = ctypes.windll.gdi32.DeleteObject(tempBMP)  
 		a = ctypes.windll.user32.ReleaseDC(self.windowHandle, hDC)                     						#Release the device context
 		textWidth = StructText.width  + 5
-		cellWidth  = self.excelCellObject.ColumnWidth * 7.5919335705812574139976275207592					
+		cellWidth  = self.excelCellObject.ColumnWidth * 7.5919335705812574139976275207592	#Conversion factor to convert the cellwidth to pixels				
  		return (cellWidth, textWidth) 		
  	
  	def _get__overlapInfo(self):
@@ -617,7 +619,7 @@ class ExcelCell(ExcelBase):
 			for x in xrange(columnCountInMergeArea):
 				cellWidth += self.excelCellObject.Cells(curRow, curCol).ColumnWidth
 				curCol += 1
- 			cellWidth = cellWidth * 7.5919335705812574139976275207592
+ 			cellWidth = cellWidth * 7.5919335705812574139976275207592 #Conversion factor to convert the cellwidth to pixels
 			log.io("\nInside isMerged \n")
 			log.io("\nMerged cellWidth \t" + str(cellWidth) + "\n")
 		if isWrapText or isShrinkToFit or textWidth <= cellWidth:
