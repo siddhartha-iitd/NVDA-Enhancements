@@ -417,7 +417,6 @@ class WordDocumentTextInfo(textInfos.TextInfo):
 		if links.count>0:
 			links[1].follow()
 			return
-		super(WordDocumentTextInfo,self).activate()
 
 	def _expandToLineAtCaret(self):
 		lineStart=ctypes.c_int()
@@ -878,7 +877,33 @@ class WordDocumentTreeInterceptor(CursorManager,BrowseModeTreeInterceptorWithMak
 		else:
 			raise NotImplementedError
 
+	def event_gainFocus(self,obj,nextHandler):
+		obj.reportFocus()
+		braille.handler.handleGainFocus(self)
+
+	def script_nextRow(self,gesture):
+		self.rootNVDAObject._moveInTable(row=True,forward=True)
+		braille.handler.handleCaretMove(self)
+
+	def script_previousRow(self,gesture):
+		self.rootNVDAObject._moveInTable(row=True,forward=False)
+		braille.handler.handleCaretMove(self)
+
+	def script_nextColumn(self,gesture):
+		self.rootNVDAObject._moveInTable(row=False,forward=True)
+		braille.handler.handleCaretMove(self)
+
+	def script_previousColumn(self,gesture):
+		self.rootNVDAObject._moveInTable(row=False,forward=False)
+		braille.handler.handleCaretMove(self)
+
 	__gestures={
+		"kb:tab":"trapNonCommandGesture",
+		"kb:shift+tab":"trapNonCommandGesture",
+		"kb:control+alt+upArrow": "previousRow",
+		"kb:control+alt+downArrow": "nextRow",
+		"kb:control+alt+leftArrow": "previousColumn",
+		"kb:control+alt+rightArrow": "nextColumn",
 		# We want to fall back to MS Word's real page up and page down, rather than browseMode's faked 25 lines
 		"kb:pageUp":None,
 		"kb:pageDown":None,
@@ -1201,7 +1226,7 @@ class WordDocument(EditableTextWithoutAutoSelectDetection, Window):
 			isCollapsed=False
 		if not isCollapsed:
 			speech.speakTextInfo(info,reason=controlTypes.REASON_FOCUS)
-		braille.handler.handleCaretMove(info)
+		braille.handler.handleCaretMove(self)
 		if isCollapsed:
 			offset=info._rangeObj.information(wdHorizontalPositionRelativeToPage)
 			msg=self.getLocalizedMeasurementTextForPointSize(offset)
