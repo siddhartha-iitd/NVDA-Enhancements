@@ -399,6 +399,13 @@ class TableWinWordCollectionQuicknavIterator(WinWordCollectionQuicknavIterator):
 
 class WordDocumentTextInfo(textInfos.TextInfo):
 
+	def find(self,text,caseSensitive=False,reverse=False):
+		f=self._rangeObj.find
+		f.text=text
+		f.matchCase=caseSensitive
+		f.forward=not reverse
+		return f.execute()
+
 	shouldIncludeLayoutTables=True #: layout tables should always be included (no matter the user's browse mode setting).
 
 	def activate(self):
@@ -770,6 +777,9 @@ class BrowseModeWordDocumentTextInfo(textInfos.TextInfo):
 		super(BrowseModeWordDocumentTextInfo,self).__init__(obj,position)
 		self.innerTextInfo=WordDocumentTextInfoForTreeInterceptor(obj.rootNVDAObject,position,_rangeObj=_rangeObj)
 
+	def find(self,text,caseSensitive=False,reverse=False):
+		return self.innerTextInfo.find(text,caseSensitive,reverse)
+
 	def copy(self):
 		return BrowseModeWordDocumentTextInfo(self.obj,None,_rangeObj=self.innerTextInfo._rangeObj)
 
@@ -808,12 +818,6 @@ class BrowseModeWordDocumentTextInfo(textInfos.TextInfo):
 
 	def expand(self,unit):
 		return self.innerTextInfo.expand(unit)
-
-	__gestures={
-		# We want to fall back to MS Word's real page up and page down, rather than browseMode's faked 25 lines
-		"kb:pageUp":None,
-		"kb:pageDown":None,
-	}
 
 class WordDocumentTreeInterceptor(CursorManager,BrowseModeTreeInterceptorWithMakeTextInfo):
 
@@ -873,6 +877,14 @@ class WordDocumentTreeInterceptor(CursorManager,BrowseModeTreeInterceptorWithMak
 			return self._iterHeadings(nodeType,direction,rangeObj,includeCurrent)
 		else:
 			raise NotImplementedError
+
+	__gestures={
+		# We want to fall back to MS Word's real page up and page down, rather than browseMode's faked 25 lines
+		"kb:pageUp":None,
+		"kb:pageDown":None,
+		"kb:shift+pageUp":None,
+		"kb:shift+pageDown":None,
+	}
 
 class WordDocument(EditableTextWithoutAutoSelectDetection, Window):
 
