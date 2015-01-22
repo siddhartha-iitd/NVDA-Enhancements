@@ -71,8 +71,9 @@ re_absRC=re.compile(r'^R(\d+)C(\d+)(?::R(\d+)C(\d+))?$')
 
 class ExcelChartQuickNavItem(browseMode.QuickNavItem):
 
-	def __init__( self , nodeType , document , currentObject):
+	def __init__( self , nodeType , document , currentObject , chartCollection ):
 		self.excelChartObject = currentObject
+		self.excelChartCollection = chartCollection 
 		self.chartIndex = currentObject.Index
 
 		if self.excelChartObject.Chart.HasTitle:
@@ -118,7 +119,7 @@ class ExcelChartQuickNavItem(browseMode.QuickNavItem):
 			# let use go inside for sub-objects. Somehow 
 		# calling an COM function on a different object fixes that !
 
-			log.debugWarning(self.excelChartObject.Application.Value)
+			log.debugWarning( self.excelChartCollection.Count )
 
 		except(COMError):
 
@@ -184,7 +185,7 @@ class ExcelQuicknavIterator(object):
 			if self.direction=="previous":
 				index=itemCount-(index-1)
 			collectionItem=items[index]
-			item=self.quickNavItemClass(self.itemType,self.document,collectionItem)
+			item=self.quickNavItemClass(self.itemType,self.document,collectionItem , items )
 			#itemRange=item.rangeObj
 			# Skip over the item we're already on.
 			#if not self.includeCurrent and isFirst and ((self.direction=="next" and itemRange.start<=self.rangeObj.start) or (self.direction=="previous" and itemRange.end>self.rangeObj.end)):
