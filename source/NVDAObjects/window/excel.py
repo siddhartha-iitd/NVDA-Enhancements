@@ -121,7 +121,10 @@ class ExcelChartQuickNavItem(browseMode.QuickNavItem):
 			#return True
 		return False
 
-	def moveTo(self,gesture=None,readUnit=None):
+	def report(self,readUnit=None):
+		pass
+
+	def moveTo(self):
 		pass
 
 	@property
