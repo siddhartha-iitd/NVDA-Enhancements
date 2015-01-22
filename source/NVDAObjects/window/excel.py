@@ -97,24 +97,7 @@ class ExcelChartQuickNavItem(browseMode.QuickNavItem):
 	"""
 
 	def activate(self):
-		try:
-			self.excelChartObject.activate()
-
-			# After activate(), though the chart object is selected, 
-
-			# pressing arrow keys moves the object, rather than 
-
-			# let use go inside for sub-objects. Somehow 
-		# calling an COM function on a different object fixes that !
-
-			#log.debugWarning(self.excelChartObject.Application.Value)
-
-		except(COMError):
-
-			pass
-
-
-
+		pass
 
 	def isChild(self,parent):
 		#if self.rangeObject.Parent ==  parent:
@@ -125,7 +108,24 @@ class ExcelChartQuickNavItem(browseMode.QuickNavItem):
 		pass
 
 	def moveTo(self):
-		pass
+		try:
+			self.excelChartObject.Activate()
+
+			# After activate(), though the chart object is selected, 
+
+			# pressing arrow keys moves the object, rather than 
+
+			# let use go inside for sub-objects. Somehow 
+		# calling an COM function on a different object fixes that !
+
+			log.debugWarning(self.excelChartObject.Application.Value)
+
+		except(COMError):
+
+			pass
+
+
+
 
 	@property
 	def isAfterSelection(self):
@@ -298,6 +298,7 @@ class ExcelBase(Window):
 			obj=ExcelCell(windowHandle=self.windowHandle,excelWindowObject=self.excelWindowObject,excelCellObject=selection)
 		elif isChartActive:
 			selection = self.excelWindowObject.ActiveChart
+			import excelChart
 			obj=excelChart.ExcelChart(windowHandle=self.windowHandle,excelWindowObject=self.excelWindowObject,excelChartObject=selection)
 		return obj
 
@@ -976,3 +977,4 @@ class ExcelMergedCell(ExcelCell):
 
 	def _get_colSpan(self):
 		return self.excelCellObject.mergeArea.columns.count
+
