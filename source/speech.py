@@ -182,17 +182,18 @@ def speakSpelling(text,locale=None,useCharacterDescriptions=False):
 def getCharacterListFromText(text,locale):
 #This method prepares a list of characters, by checking the presence of character descriptions in characterDescriptions.dic of that locale for all possible sequence of characters in the text.
 #This is done to take care of conjunct characters present in several languages.
-	charList = []
+	charDescList = []
 	charDesc=None
 	i = len(text)
 	while i:
-		if characterProcessing.getCharacterDescription(locale,text[:i]) or i == 1:
-			charList.append(text[:i])
+		charDesc = characterProcessing.getCharacterDescription(locale,text[:i])
+		if charDesc or i == 1:
+			charDescList.append([text[:i],charDesc])
 			text = text[i:]
 			i = len(text)
 		else:
 			i = i - 1 
-	return charList
+	return charDescList
 			
 
 def _speakSpellingGen(text,locale,useCharacterDescriptions):
@@ -203,23 +204,23 @@ def _speakSpellingGen(text,locale,useCharacterDescriptions):
 		textLength=len(text)
 		charDesc = None
 		count = 0
-		charList = getCharacterListFromText(text,locale)
-		for ch in charList:
-			uppercase=ch.isupper()
+		charDescList = getCharacterListFromText(text,locale) if locale.startswith("hi") else list(text)
+		for item in charDescList:
+			uppercase=item[0].isupper()
 			if useCharacterDescriptions:
-				charDesc=characterProcessing.getCharacterDescription(locale,ch.lower())
+				charDesc= list(item[1]) if locale.startswith("hi") else characterProcessing.getCharacterDescription(locale,item[0].lower())
 			if charDesc:
 				#Consider changing to multiple synth speech calls
 				char=charDesc[0] if textLength>1 else u"\u3001".join(charDesc)
 			else:
-				char=characterProcessing.processSpeechSymbol(locale,ch)
+				char=characterProcessing.processSpeechSymbol(locale,item[0])
 			if uppercase and synthConfig["sayCapForCapitals"]:
 				# Translators: cap will be spoken before the given letter when it is capitalized.
 				char=_("cap %s")%char
 			if uppercase and synth.isSupported("pitch") and synthConfig["capPitchChange"]:
 				oldPitch=synthConfig["pitch"]
 				synth.pitch=max(0,min(oldPitch+synthConfig["capPitchChange"],100))
-			count = len(ch)
+			count = len(item[0])
 			index=count+1
 			log.io("Speaking character %r"%char)
 			speechSequence=[LangChangeCommand(locale)] if config.conf['speech']['autoLanguageSwitching'] else []
