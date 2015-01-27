@@ -179,9 +179,9 @@ def speakSpelling(text,locale=None,useCharacterDescriptions=False):
 			return
 		queueHandler.registerGeneratorObject(_speakSpellingGenerator)
 		
-def getCharacterListFromText(text,locale):
-#This method prepares a list of characters, by checking the presence of character descriptions in characterDescriptions.dic of that locale for all possible sequence of characters in the text.
-#This is done to take care of conjunct characters present in several languages.
+def getCharDescListFromText(text,locale):
+#This method prepares a list, which contains character and its description for all characters the text is made up of, by checking the presence of character descriptions in characterDescriptions.dic of that locale for all possible combination of consecutive characters in the text.
+#This is done to take care of conjunct characters present in several languages such as Devanagari, Urdu, etc.
 	charDescList = []
 	charDesc=None
 	i = len(text)
@@ -204,7 +204,7 @@ def _speakSpellingGen(text,locale,useCharacterDescriptions):
 		textLength=len(text)
 		charDesc = None
 		count = 0
-		charDescList = getCharacterListFromText(text,locale) if locale.startswith("hi") else list(text)
+		charDescList = getCharDescListFromText(text,locale) if locale.startswith("hi") else list(text)
 		for item in charDescList:
 			uppercase=item[0].isupper()
 			if useCharacterDescriptions:
