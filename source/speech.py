@@ -204,16 +204,19 @@ def _speakSpellingGen(text,locale,useCharacterDescriptions):
 		textLength=len(text)
 		charDesc = None
 		count = 0
-		charDescList = getCharDescListFromText(text,locale) if locale.startswith("hi") else list(text)
+		hiCharDescList = getCharDescListFromText(text,locale) if locale.startswith("hi") else None
+		charDescList = list(text) if hiCharDescList is None else hiCharDescList
 		for item in charDescList:
-			uppercase=item[0].isupper()
+		# item is a list containing character and its description for Hindi locale(s)
+		# For other languages, item represents a constituent character of the text.		
+			uppercase=item[0].isupper() #if (locale.startswith("hi") and item[0]) else item.isupper()
 			if useCharacterDescriptions:
-				charDesc= list(item[1]) if locale.startswith("hi") else characterProcessing.getCharacterDescription(locale,item[0].lower())
+				charDesc= list(item[1]) if (locale.startswith("hi") and item[1]) else characterProcessing.getCharacterDescription(locale,item[0].lower())
 			if charDesc:
 				#Consider changing to multiple synth speech calls
 				char=charDesc[0] if textLength>1 else u"\u3001".join(charDesc)
 			else:
-				char=characterProcessing.processSpeechSymbol(locale,item[0])
+				char=characterProcessing.processSpeechSymbol(locale,item[0]) #if (locale.startswith("hi") and item[0]) else characterProcessing.processSpeechSymbol(locale,item)
 			if uppercase and synthConfig["sayCapForCapitals"]:
 				# Translators: cap will be spoken before the given letter when it is capitalized.
 				char=_("cap %s")%char
