@@ -62,7 +62,6 @@ class ExcelBase(Window):
 
 	@staticmethod
 	def excelWindowObjectFromWindow(windowHandle):
-		#log.io("\nInside ExcelBase->excelWindowObjectFromWindow\n",stack_info = True)
 		try:
 			pDispatch=oleacc.AccessibleObjectFromWindow(windowHandle,winUser.OBJID_NATIVEOM,interface=comtypes.automation.IDispatch)
 		except (COMError,WindowsError):
@@ -71,7 +70,6 @@ class ExcelBase(Window):
 
 	@staticmethod
 	def getCellAddress(cell, external=False,format=xlA1):
-		#log.io("\nInside ExcelBase->getCellAddress\n",stack_info = True)	
 		text=cell.Address(False, False, format, external)
 		textList=text.split(':')
 		if len(textList)==2:
@@ -80,7 +78,6 @@ class ExcelBase(Window):
 		return text
 
 	def _getDropdown(self):
-		#log.io("\nInside ExcelBase->_getDropdown\n",stack_info = True)		
 		w=winUser.getAncestor(self.windowHandle,winUser.GA_ROOT)
 		if not w:
 			log.debugWarning("Could not get ancestor window (GA_ROOT)")
@@ -100,7 +97,6 @@ class ExcelBase(Window):
 		return obj
 
 	def _getSelection(self):
-		#log.io("\nInside ExcelBase-> _getSelection\n",stack_info = True)		
 		selection=self.excelWindowObject.Selection
 		try:
 			isMerged=selection.mergeCells
@@ -552,8 +548,6 @@ class ExcelCell(ExcelBase):
 			comment=None
 		if comment:
 			states.add(controlTypes.STATE_HASCOMMENT)
-			
-########################################################################################################			
 		if self._overlapInfo is not None:
 			if self._overlapInfo['obscuredFromRightBy'] > 0:
 				states.add(controlTypes.STATE_OBSCURED)
@@ -563,66 +557,73 @@ class ExcelCell(ExcelBase):
 		return states
 	
  	def getCellWidthAndTextWidth(self):
- 		# handle to Device Context
+ 		#handle to Device Context
  		hDC = ctypes.windll.user32.GetDC(self.windowHandle)
- 		# Temporary Compatible Bitmap for current Device Context 
- 		tempBMP = ctypes.windll.gdi32.CreateCompatibleBitmap(hDC, 1, 1)  
- 		# handle to the bitmap object
- 		hBMP = ctypes.windll.gdi32.SelectObject(hDC, tempBMP) 
- 		# Pass Device Context and LOGPIXELSX, the horizontal resolution in pixels per unit inch.
-		deviceCaps = ctypes.windll.gdi32.GetDeviceCaps(hDC, 88) 		
-		# Fetching Font Size and Weight information
+ 		tempDC = ctypes.windll.gdi32.CreateCompatibleDC(hDC)
+ 		#Compatible Bitmap for current Device Context 
+ 		hBMP = ctypes.windll.gdi32.CreateCompatibleBitmap(tempDC, 1, 1) 
+ 		#handle to the bitmap object
+ 		tempBMP = ctypes.windll.gdi32.SelectObject(tempDC, hBMP)
+ 		#Pass Device Context and LOGPIXELSX, the horizontal resolution in pixels per unit inch.
+		deviceCaps = ctypes.windll.gdi32.GetDeviceCaps(tempDC, 88)
+		#Fetching Font Size and Weight information
 		iFontSize = self.excelCellObject.Font.Size
 		iFontSize = int(iFontSize)
 		iFontSize = ctypes.c_int(iFontSize)
 		iFontSize = ctypes.windll.kernel32.MulDiv(iFontSize, deviceCaps, 72)
-		
-		# Font  Weight for Bold FOnt is 700 and for normal font it's 400
- 		iFontWeight = 700 if self.excelCellObject.Font.Bold else 400 
-  		# Fetching Font Name and style information 
+		#Font  Weight for Bold FOnt is 700 and for normal font it's 400
+ 		iFontWeight = 700 if self.excelCellObject.Font.Bold else 400
+  		#Fetching Font Name and style information
  		sFontName = self.excelCellObject.Font.Name
  		sFontItalic = self.excelCellObject.Font.Italic
  		sFontUnderline = True if self.excelCellObject.Font.Underline else False
  		sFontStrikeThrough = self.excelCellObject.Font.Strikethrough
- 		#  If FontSize is <0: The font mapper transforms this value into device units 
- 		#  and matches its absolute value against the character height of the available fonts.
-		iFontHeight = iFontSize * -1 
-		
-		# If Font Width is 0, the font mapper chooses a closest match value.
-		iFontWidth = 0 	
+ 		#If FontSize is <0: The font mapper transforms this value into device units 
+ 		#and matches its absolute value against the character height of the available fonts.
+		iFontHeight = iFontSize * -1
+		#If Font Width is 0, the font mapper chooses a closest match value.
+		iFontWidth = 0
 		iEscapement = 0
 		iOrientation = 0
-		iCharSet = 0 # Default CharSet based on System Locale is chosen
-		iOutputPrecision = 0 # Default font mapper behavior
-		iClipPrecision = 0 # Default clipping behavior
-		iOutputQuality = 0 # Default Quality
-		iPitchAndFamily = 0 # Default Pitch and default font family
-		 
-		# Create a font object with the correct size, weight and style 	
+		#Default CharSet based on System Locale is chosen
+		iCharSet = 0 
+		#Default font mapper behavior
+		iOutputPrecision = 0
+		#Default clipping behavior
+		iClipPrecision = 0
+		#Default Quality
+		iOutputQuality = 0
+		#Default Pitch and default font family
+		iPitchAndFamily = 0 
+		#Create a font object with the correct size, weight and style
 		hFont = ctypes.windll.gdi32.CreateFontW(iFontHeight, iFontWidth, iEscapement, iOrientation, iFontWeight, sFontItalic, sFontUnderline, sFontStrikeThrough, iCharSet, iOutputPrecision, iClipPrecision, iOutputQuality, iPitchAndFamily, sFontName)
-		  			
 		#Load the font into the device context, storing the original font object
-		hOldFont = ctypes.windll.gdi32.SelectObject(hDC, hFont) 							
+		hOldFont = ctypes.windll.gdi32.SelectObject(tempDC, hFont)
 		sText = self.excelCellObject.Text
 		textLength = len(sText)
 		class structText(ctypes.Structure):
 			_fields_ = [("width", ctypes.c_int), ("height",ctypes.c_int)]
-		StructText = structText()	
+		StructText = structText()
 		getTextExtentPoint = ctypes.windll.gdi32.GetTextExtentPoint32W
 		getTextExtentPoint.argtypes = [ctypes.c_void_p, ctypes.c_wchar_p, ctypes.c_int, ctypes.POINTER(structText)]
 		getTextExtentPoint.restype = ctypes.c_int
 		sText = unicode(sText)
 		#Get the text dimensions
-		getTextDimensions = ctypes.windll.gdi32.GetTextExtentPoint32W(hDC, sText, textLength,ctypes.byref(StructText))      
+		getTextDimensions = ctypes.windll.gdi32.GetTextExtentPoint32W(tempDC, sText, textLength,ctypes.byref(StructText))
+		#Restore the old Font Object
+		restoreOldFont = ctypes.windll.gdi32.SelectObject(tempDC, hOldFont)
 		#Delete the font object we created
-		delhFont = ctypes.windll.gdi32.DeleteObject(hFont) 
-		#Delete the temporary BitMap Object                      									
+		delhFont = ctypes.windll.gdi32.DeleteObject(hFont)
+		#Restore the old Bitmap Object
+		restoreOldBMP = ctypes.windll.gdi32.SelectObject(tempDC, tempBMP)
+		#Delete the temporary BitMap Object
 		deltempBMP = ctypes.windll.gdi32.DeleteObject(tempBMP)
-		#Release the device context  
-		delhDC = ctypes.windll.user32.ReleaseDC(self.windowHandle, hDC)                     						
-		textWidth = StructText.width  + 5
-		cellWidth  = self.excelCellObject.ColumnWidth * xlCellWidthUnitToPixels	#Conversion factor to convert the cellwidth to pixels				
- 		return (cellWidth, textWidth) 		
+		#Release the device context
+		deltempDC = ctypes.windll.user32.ReleaseDC(self.windowHandle, tempDC)
+		#Retrieve the text width
+		textWidth = StructText.width+5
+		cellWidth  = self.excelCellObject.ColumnWidth * xlCellWidthUnitToPixels	#Conversion factor to convert the cellwidth to pixels
+ 		return (cellWidth,textWidth)
  	
  	def _get__overlapInfo(self):
  		(cellWidth, textWidth) = self.getCellWidthAndTextWidth()
@@ -653,8 +654,6 @@ class ExcelCell(ExcelBase):
 			else:
 				info['obscuredFromRightBy']= textWidth - cellWidth
 				info['overlapsRightBy'] = 0
-# 		else:
-# 			info = None
  		self._overlapInfo = info
  		return self._overlapInfo
  		
@@ -670,7 +669,6 @@ class ExcelCell(ExcelBase):
  		elif obscuredFromRightBy>0:
  			# Translators: A message when text is obscured from right in MS Excel
  			textList.append(_("obscured from right by {distance:.3g} points").format(distance=obscuredFromRightBy))
- 
  		return ", ".join(textList)
  
 	def _get_locationText(self):
@@ -679,8 +677,6 @@ class ExcelCell(ExcelBase):
 		if text:
 			textList.append(text)
 		return ", ".join(textList)
-
-########################################################################################################
 
 	def _get_parent(self):
 		worksheet=self.excelCellObject.Worksheet
@@ -736,8 +732,7 @@ class ExcelCell(ExcelBase):
 		"kb:NVDA+shift+r": "setRowHeader",
 		"kb:shift+f2":"editComment",
 		"kb:alt+downArrow":"openDropdown",
- 		"kb:NVDA+alt+c":"reportComment",
-		
+ 		"kb:NVDA+alt+c":"reportComment",		
 	}
 	
 class ExcelSelection(ExcelBase):
