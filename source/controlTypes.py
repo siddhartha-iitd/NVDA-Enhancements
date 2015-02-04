@@ -187,7 +187,7 @@ STATE_PINNED=0x800000000
 STATE_HASFORMULA=0x1000000000 #Mostly for spreadsheets
 STATE_HASCOMMENT=0X2000000000
 STATE_OBSCURED=0x4000000000
-STATE_OVERLAPPING=0x8000000000
+STATE_OBSCURING=0x8000000000
 
 roleLabels={
 	# Translators: The word for an unknown control type.
@@ -551,8 +551,7 @@ stateLabels={
 	# Translators: a state that denotes that the object is covered partially or fully by another object
 	STATE_OBSCURED:_("obscured"),
 	# Translators: a state that denotes that the object is overlapping onto adjacent object(s)
-	STATE_OVERLAPPING:_("overlapping"),
-	
+	STATE_OBSCURING:_("obscuring"),	
 }
 
 negativeStateLabels={

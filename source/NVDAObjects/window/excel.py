@@ -36,9 +36,7 @@ xlRight=-4152
 xlDistributed=-4117
 xlBottom=-4107
 xlTop=-4160
-
 xlCellWidthUnitToPixels = 7.5919335705812574139976275207592
-
 alignmentLabels={
 	xlCenter:"center",
 	xlJustify:"justify",
@@ -55,7 +53,6 @@ xlRC = 2
 xlUnderlineStyleNone=-4142
 
 re_absRC=re.compile(r'^R(\d+)C(\d+)(?::R(\d+)C(\d+))?$')
-
 
 class ExcelBase(Window):
 	"""A base that all Excel NVDAObjects inherit from, which contains some useful methods."""
@@ -551,9 +548,8 @@ class ExcelCell(ExcelBase):
 		if self._overlapInfo is not None:
 			if self._overlapInfo['obscuredFromRightBy'] > 0:
 				states.add(controlTypes.STATE_OBSCURED)
-			if self._overlapInfo['overlapsRightBy'] > 0:
-				states.add(controlTypes.STATE_OVERLAPPING)
-
+			if self._overlapInfo['obscuringRightBy'] > 0:
+				states.add(controlTypes.STATE_OBSCURING)
 		return states
 	
  	def getCellWidthAndTextWidth(self):
@@ -563,7 +559,7 @@ class ExcelCell(ExcelBase):
  		#Compatible Bitmap for current Device Context 
  		hBMP = ctypes.windll.gdi32.CreateCompatibleBitmap(tempDC, 1, 1) 
  		#handle to the bitmap object
- 		tempBMP = ctypes.windll.gdi32.SelectObject(tempDC, hBMP)
+ 		hOldBMP = ctypes.windll.gdi32.SelectObject(tempDC, hBMP)
  		#Pass Device Context and LOGPIXELSX, the horizontal resolution in pixels per unit inch.
 		deviceCaps = ctypes.windll.gdi32.GetDeviceCaps(tempDC, 88)
 		#Fetching Font Size and Weight information
@@ -609,17 +605,18 @@ class ExcelCell(ExcelBase):
 		getTextExtentPoint.restype = ctypes.c_int
 		sText = unicode(sText)
 		#Get the text dimensions
-		getTextDimensions = ctypes.windll.gdi32.GetTextExtentPoint32W(tempDC, sText, textLength,ctypes.byref(StructText))
+		ctypes.windll.gdi32.GetTextExtentPoint32W(tempDC, sText, textLength,ctypes.byref(StructText))
 		#Restore the old Font Object
-		restoreOldFont = ctypes.windll.gdi32.SelectObject(tempDC, hOldFont)
+		ctypes.windll.gdi32.SelectObject(tempDC, hOldFont)
 		#Delete the font object we created
-		delhFont = ctypes.windll.gdi32.DeleteObject(hFont)
+		ctypes.windll.gdi32.DeleteObject(hFont)
 		#Restore the old Bitmap Object
-		restoreOldBMP = ctypes.windll.gdi32.SelectObject(tempDC, tempBMP)
+		ctypes.windll.gdi32.SelectObject(tempDC, hOldBMP)
 		#Delete the temporary BitMap Object
-		deltempBMP = ctypes.windll.gdi32.DeleteObject(tempBMP)
-		#Release the device context
-		deltempDC = ctypes.windll.user32.ReleaseDC(self.windowHandle, tempDC)
+		ctypes.windll.gdi32.DeleteObject(hBMP)
+		#Release & Delete the device context
+		ctypes.windll.user32.ReleaseDC(self.windowHandle, tempDC)
+		ctypes.windll.gdi32.DeleteObject(tempDC)
 		#Retrieve the text width
 		textWidth = StructText.width+5
 		cellWidth  = self.excelCellObject.ColumnWidth * xlCellWidthUnitToPixels	#Conversion factor to convert the cellwidth to pixels
@@ -649,23 +646,23 @@ class ExcelCell(ExcelBase):
 			info = None
 		else:
 			if isAdjacentCellEmpty:
-				info['overlapsRightBy']= textWidth - cellWidth
+				info['obscuringRightBy']= textWidth - cellWidth
 				info['obscuredFromRightBy'] = 0
 			else:
 				info['obscuredFromRightBy']= textWidth - cellWidth
-				info['overlapsRightBy'] = 0
+				info['obscuringRightBy'] = 0
  		self._overlapInfo = info
  		return self._overlapInfo
  		
   	def _getOverlapText(self):
  		textList=[]
- 		overlapsRightBy=otherInfo['overlapsRightBy']
+ 		obscuringRightBy=otherInfo['obscuringRightBy']
  		obscuredFromRightBy=otherInfo['obscuredFromRightBy']
  		total=True
- 		if overlapsRightBy>0:
+ 		if obscuringRightBy>0:
  			total=False
  			# Translators: A message when text is extending to adjacent cell(s) in MS Excel
- 			textList.append(_("extends right by {distance:.3g} points").format(distance=overlapsRightBy))
+ 			textList.append(_("obscures right by {distance:.3g} points").format(distance=overlapsRightBy))
  		elif obscuredFromRightBy>0:
  			# Translators: A message when text is obscured from right in MS Excel
  			textList.append(_("obscured from right by {distance:.3g} points").format(distance=obscuredFromRightBy))
