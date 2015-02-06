@@ -552,7 +552,7 @@ class ExcelCell(ExcelBase):
 				states.add(controlTypes.STATE_OBSCURING)
 		return states
 
- 	def getCellWidthAndTextWidth(self):
+	def getCellWidthAndTextWidth(self):
 		#handle to Device Context
 		hDC = ctypes.windll.user32.GetDC(self.windowHandle)
 		tempDC = ctypes.windll.gdi32.CreateCompatibleDC(hDC)
@@ -622,14 +622,14 @@ class ExcelCell(ExcelBase):
 		cellWidth  = self.excelCellObject.ColumnWidth * xlCellWidthUnitToPixels	#Conversion factor to convert the cellwidth to pixels
 		return (cellWidth,textWidth)
 
- 	def _get__overlapInfo(self):
- 		(cellWidth, textWidth) = self.getCellWidthAndTextWidth()
- 		isWrapText = self.excelCellObject.WrapText
- 		isShrinkToFit = self.excelCellObject.ShrinkToFit
- 		isMerged = self.excelWindowObject.Selection.MergeCells
- 		adjacentCell = self.excelCellObject.Offset(0,1)
- 		if adjacentCell.Text:
- 			isAdjacentCellEmpty = False
+	def _get__overlapInfo(self):
+		(cellWidth, textWidth) = self.getCellWidthAndTextWidth()
+		isWrapText = self.excelCellObject.WrapText
+		isShrinkToFit = self.excelCellObject.ShrinkToFit
+		isMerged = self.excelWindowObject.Selection.MergeCells
+		adjacentCell = self.excelCellObject.Offset(0,1)
+		if adjacentCell.Text:
+			isAdjacentCellEmpty = False
 		else:
 			isAdjacentCellEmpty = True
 		info = {}
@@ -651,10 +651,10 @@ class ExcelCell(ExcelBase):
 			else:
 				info['obscuredFromRightBy']= textWidth - cellWidth
 				info['obscuringRightBy'] = 0
- 		self._overlapInfo = info
- 		return self._overlapInfo
+		self._overlapInfo = info
+		return self._overlapInfo
 
-  	def _getOverlapText(self):
+ 	def _getOverlapText(self):
 		textList=[]
 		obscuringRightBy=otherInfo['obscuringRightBy']
 		obscuredFromRightBy=otherInfo['obscuredFromRightBy']
