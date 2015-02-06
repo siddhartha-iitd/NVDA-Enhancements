@@ -178,22 +178,19 @@ def speakSpelling(text,locale=None,useCharacterDescriptions=False):
 		except StopIteration:
 			return
 		queueHandler.registerGeneratorObject(_speakSpellingGenerator)
-		
+
 def getCharDescListFromText(text,locale):
 	"""This method prepares a list, which contains character and its description for all characters the text is made up of, by checking the presence of character descriptions in characterDescriptions.dic of that locale for all possible combination of consecutive characters in the text.
-   	   This is done to take care of conjunct characters present in several languages such as Hindi, Urdu, etc.
-	"""   
+	This is done to take care of conjunct characters present in several languages such as Hindi, Urdu, etc.
+	"""
 	charDescList = []
 	charDesc=None
 	i = len(text)
 	while i:
 		subText = text[:i]
 		charDesc = characterProcessing.getCharacterDescription(locale,subText)
-		if charDesc:
-			charDescList.append((subText,charDesc[0]))
-			text = text[i:]
-			i = len(text)
-		elif i == 1:
+		if charDesc or i==1:
+			charDescList.append((subText,charDesc))
 			text = text[i:]
 			i = len(text)
 		else:
@@ -214,7 +211,8 @@ def _speakSpellingGen(text,locale,useCharacterDescriptions):
 			if localeHasConjuncts:
 				# item is a tuple containing character and its description
 				char = item[0]
-				charDesc.insert(0,item[1])
+				if item[1]:
+					charDesc.insert(0,item[1][0])
 			else:
 				# item is just a character.
 				char = item
