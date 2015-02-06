@@ -36,7 +36,8 @@ speechMode_beeps_ms=15
 beenCanceled=True
 isPaused=False
 curWordChars=[]
-
+#Tuple containing locale codes for languages supporting conjunct characters
+LANGS_WITH_CONJUNCT_CHARS = ('hi', 'as', 'bn', 'gu', 'kn', 'kok', 'ml', 'mni', 'mr', 'pa', 'te', 'ur')
 # The REASON_* constants in this module are deprecated and will be removed in a future release.
 # Use controlTypes.REASON_* instead.
 from controlTypes import REASON_FOCUS, REASON_FOCUSENTERED, REASON_MOUSE, REASON_QUERY, REASON_CHANGE, REASON_MESSAGE, REASON_SAYALL, REASON_CARET, REASON_ONLYCACHE
@@ -162,7 +163,6 @@ def speakSpelling(text,locale=None,useCharacterDescriptions=False):
 	defaultLanguage=getCurrentLanguage()
 	if not locale or (not config.conf['speech']['autoDialectSwitching'] and locale.split('_')[0]==defaultLanguage.split('_')[0]):
 		locale=defaultLanguage
-
 	if not text:
 		# Translators: This is spoken when NVDA moves to an empty line.
 		return getSynth().speak((_("blank"),))
@@ -180,21 +180,25 @@ def speakSpelling(text,locale=None,useCharacterDescriptions=False):
 		queueHandler.registerGeneratorObject(_speakSpellingGenerator)
 		
 def getCharDescListFromText(text,locale):
-#This method prepares a list, which contains character and its description for all characters the text is made up of, by checking the presence of character descriptions in characterDescriptions.dic of that locale for all possible combination of consecutive characters in the text.
-#This is done to take care of conjunct characters present in several languages such as Devanagari, Urdu, etc.
+	"""This method prepares a list, which contains character and its description for all characters the text is made up of, by checking the presence of character descriptions in characterDescriptions.dic of that locale for all possible combination of consecutive characters in the text.
+   	   This is done to take care of conjunct characters present in several languages such as Hindi, Urdu, etc.
+	"""   
 	charDescList = []
 	charDesc=None
 	i = len(text)
 	while i:
-		charDesc = characterProcessing.getCharacterDescription(locale,text[:i])
-		if charDesc or i == 1:
-			charDescList.append([text[:i],charDesc])
+		subText = text[:i]
+		charDesc = characterProcessing.getCharacterDescription(locale,subText)
+		if charDesc:
+			charDescList.append((subText,charDesc[0]))
+			text = text[i:]
+			i = len(text)
+		elif i == 1:
 			text = text[i:]
 			i = len(text)
 		else:
-			i = i - 1 
+			i = i - 1
 	return charDescList
-			
 
 def _speakSpellingGen(text,locale,useCharacterDescriptions):
 	synth=getSynth()
@@ -202,28 +206,35 @@ def _speakSpellingGen(text,locale,useCharacterDescriptions):
 	buf=[(text,locale,useCharacterDescriptions)]
 	for text,locale,useCharacterDescriptions in buf:
 		textLength=len(text)
-		charDesc = None
+		charDesc = []
 		count = 0
-		hiCharDescList = getCharDescListFromText(text,locale) if locale.startswith("hi") else None
-		charDescList = list(text) if hiCharDescList is None else hiCharDescList
+		localeHasConjuncts = True if locale.split('_',1)[0] in LANGS_WITH_CONJUNCT_CHARS else False
+		charDescList = getCharDescListFromText(text,locale) if localeHasConjuncts else text
 		for item in charDescList:
-		# item is a list containing character and its description for Hindi locale(s)
-		# For other languages, item represents a constituent character of the text.		
-			uppercase=item[0].isupper() #if (locale.startswith("hi") and item[0]) else item.isupper()
-			if useCharacterDescriptions:
-				charDesc= list(item[1]) if (locale.startswith("hi") and item[1]) else characterProcessing.getCharacterDescription(locale,item[0].lower())
-			if charDesc:
+			if localeHasConjuncts:
+				# item is a tuple containing character and its description
+				char = item[0]
+				charDesc.insert(0,item[1])
+			else:
+				# item is just a character.
+				char = item
+				if useCharacterDescriptions:
+					charDesc=characterProcessing.getCharacterDescription(locale,char.lower())
+				else:
+					charDesc = []
+			uppercase=char.isupper()
+			if useCharacterDescriptions and charDesc:
 				#Consider changing to multiple synth speech calls
 				char=charDesc[0] if textLength>1 else u"\u3001".join(charDesc)
 			else:
-				char=characterProcessing.processSpeechSymbol(locale,item[0]) #if (locale.startswith("hi") and item[0]) else characterProcessing.processSpeechSymbol(locale,item)
+				char=characterProcessing.processSpeechSymbol(locale,char)
 			if uppercase and synthConfig["sayCapForCapitals"]:
 				# Translators: cap will be spoken before the given letter when it is capitalized.
 				char=_("cap %s")%char
 			if uppercase and synth.isSupported("pitch") and synthConfig["capPitchChange"]:
 				oldPitch=synthConfig["pitch"]
 				synth.pitch=max(0,min(oldPitch+synthConfig["capPitchChange"],100))
-			count = len(item[0])
+			count = len(char)
 			index=count+1
 			log.io("Speaking character %r"%char)
 			speechSequence=[LangChangeCommand(locale)] if config.conf['speech']['autoLanguageSwitching'] else []
