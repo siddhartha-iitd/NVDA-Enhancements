@@ -551,7 +551,7 @@ stateLabels={
 	# Translators: a state that denotes that the object is covered partially or fully by another object
 	STATE_OBSCURED:_("obscured"),
 	# Translators: a state that denotes that the object is overlapping onto adjacent object(s)
-	STATE_OBSCURING:_("obscuring"),	
+	STATE_OBSCURING:_("obscuring"),
 }
 
 negativeStateLabels={

@@ -504,7 +504,7 @@ class ExcelCell(ExcelBase):
 		return thisAddr==otherAddr
 
 	def _get_cellCoordsText(self):
- 		return self.getCellAddress(self.excelCellObject)
+		return self.getCellAddress(self.excelCellObject)
 
 	def _get__rowAndColumnNumber(self):
 		rc=self.excelCellObject.address(True,True,xlRC,False)
@@ -551,16 +551,16 @@ class ExcelCell(ExcelBase):
 			if self._overlapInfo['obscuringRightBy'] > 0:
 				states.add(controlTypes.STATE_OBSCURING)
 		return states
-	
+
  	def getCellWidthAndTextWidth(self):
- 		#handle to Device Context
- 		hDC = ctypes.windll.user32.GetDC(self.windowHandle)
- 		tempDC = ctypes.windll.gdi32.CreateCompatibleDC(hDC)
- 		#Compatible Bitmap for current Device Context 
- 		hBMP = ctypes.windll.gdi32.CreateCompatibleBitmap(tempDC, 1, 1) 
- 		#handle to the bitmap object
- 		hOldBMP = ctypes.windll.gdi32.SelectObject(tempDC, hBMP)
- 		#Pass Device Context and LOGPIXELSX, the horizontal resolution in pixels per unit inch.
+		#handle to Device Context
+		hDC = ctypes.windll.user32.GetDC(self.windowHandle)
+		tempDC = ctypes.windll.gdi32.CreateCompatibleDC(hDC)
+		#Compatible Bitmap for current Device Context
+		hBMP = ctypes.windll.gdi32.CreateCompatibleBitmap(tempDC, 1, 1)
+		#handle to the bitmap object
+		hOldBMP = ctypes.windll.gdi32.SelectObject(tempDC, hBMP)
+		#Pass Device Context and LOGPIXELSX, the horizontal resolution in pixels per unit inch
 		deviceCaps = ctypes.windll.gdi32.GetDeviceCaps(tempDC, 88)
 		#Fetching Font Size and Weight information
 		iFontSize = self.excelCellObject.Font.Size
@@ -568,21 +568,21 @@ class ExcelCell(ExcelBase):
 		iFontSize = ctypes.c_int(iFontSize)
 		iFontSize = ctypes.windll.kernel32.MulDiv(iFontSize, deviceCaps, 72)
 		#Font  Weight for Bold FOnt is 700 and for normal font it's 400
- 		iFontWeight = 700 if self.excelCellObject.Font.Bold else 400
-  		#Fetching Font Name and style information
- 		sFontName = self.excelCellObject.Font.Name
- 		sFontItalic = self.excelCellObject.Font.Italic
- 		sFontUnderline = True if self.excelCellObject.Font.Underline else False
- 		sFontStrikeThrough = self.excelCellObject.Font.Strikethrough
- 		#If FontSize is <0: The font mapper transforms this value into device units 
- 		#and matches its absolute value against the character height of the available fonts.
+		iFontWeight = 700 if self.excelCellObject.Font.Bold else 400
+		#Fetching Font Name and style information
+		sFontName = self.excelCellObject.Font.Name
+		sFontItalic = self.excelCellObject.Font.Italic
+		sFontUnderline = True if self.excelCellObject.Font.Underline else False
+		sFontStrikeThrough = self.excelCellObject.Font.Strikethrough
+		#If FontSize is <0: The font mapper transforms this value into device units
+		#and matches its absolute value against the character height of the available fonts.
 		iFontHeight = iFontSize * -1
 		#If Font Width is 0, the font mapper chooses a closest match value.
 		iFontWidth = 0
 		iEscapement = 0
 		iOrientation = 0
 		#Default CharSet based on System Locale is chosen
-		iCharSet = 0 
+		iCharSet = 0
 		#Default font mapper behavior
 		iOutputPrecision = 0
 		#Default clipping behavior
@@ -590,7 +590,7 @@ class ExcelCell(ExcelBase):
 		#Default Quality
 		iOutputQuality = 0
 		#Default Pitch and default font family
-		iPitchAndFamily = 0 
+		iPitchAndFamily = 0
 		#Create a font object with the correct size, weight and style
 		hFont = ctypes.windll.gdi32.CreateFontW(iFontHeight, iFontWidth, iEscapement, iOrientation, iFontWeight, sFontItalic, sFontUnderline, sFontStrikeThrough, iCharSet, iOutputPrecision, iClipPrecision, iOutputQuality, iPitchAndFamily, sFontName)
 		#Load the font into the device context, storing the original font object
@@ -616,12 +616,12 @@ class ExcelCell(ExcelBase):
 		ctypes.windll.gdi32.DeleteObject(hBMP)
 		#Release & Delete the device context
 		ctypes.windll.user32.ReleaseDC(self.windowHandle, tempDC)
-		ctypes.windll.gdi32.DeleteObject(tempDC)
+		ctypes.windll.gdi32.DeleteDC(tempDC)
 		#Retrieve the text width
 		textWidth = StructText.width+5
 		cellWidth  = self.excelCellObject.ColumnWidth * xlCellWidthUnitToPixels	#Conversion factor to convert the cellwidth to pixels
- 		return (cellWidth,textWidth)
- 	
+		return (cellWidth,textWidth)
+
  	def _get__overlapInfo(self):
  		(cellWidth, textWidth) = self.getCellWidthAndTextWidth()
  		isWrapText = self.excelCellObject.WrapText
@@ -630,8 +630,8 @@ class ExcelCell(ExcelBase):
  		adjacentCell = self.excelCellObject.Offset(0,1)
  		if adjacentCell.Text:
  			isAdjacentCellEmpty = False
- 		else:
- 			isAdjacentCellEmpty = True
+		else:
+			isAdjacentCellEmpty = True
 		info = {}
 		if isMerged:
 			columnCountInMergeArea = self.excelCellObject.MergeArea.Columns.Count
@@ -641,7 +641,7 @@ class ExcelCell(ExcelBase):
 			for x in xrange(columnCountInMergeArea):
 				cellWidth += self.excelCellObject.Cells(curRow, curCol).ColumnWidth
 				curCol += 1
- 			cellWidth = cellWidth * xlCellWidthUnitToPixels #Conversion factor to convert the cellwidth to pixels
+			cellWidth = cellWidth * xlCellWidthUnitToPixels #Conversion factor to convert the cellwidth to pixels
 		if isWrapText or isShrinkToFit or textWidth <= cellWidth:
 			info = None
 		else:
@@ -653,21 +653,21 @@ class ExcelCell(ExcelBase):
 				info['obscuringRightBy'] = 0
  		self._overlapInfo = info
  		return self._overlapInfo
- 		
+
   	def _getOverlapText(self):
- 		textList=[]
- 		obscuringRightBy=otherInfo['obscuringRightBy']
- 		obscuredFromRightBy=otherInfo['obscuredFromRightBy']
- 		total=True
- 		if obscuringRightBy>0:
- 			total=False
- 			# Translators: A message when text is extending to adjacent cell(s) in MS Excel
- 			textList.append(_("obscures right by {distance:.3g} points").format(distance=overlapsRightBy))
- 		elif obscuredFromRightBy>0:
- 			# Translators: A message when text is obscured from right in MS Excel
- 			textList.append(_("obscured from right by {distance:.3g} points").format(distance=obscuredFromRightBy))
- 		return ", ".join(textList)
- 
+		textList=[]
+		obscuringRightBy=otherInfo['obscuringRightBy']
+		obscuredFromRightBy=otherInfo['obscuredFromRightBy']
+		total=True
+		if obscuringRightBy>0:
+			total=False
+			# Translators: A message when text is extending to adjacent cell(s) in MS Excel
+			textList.append(_("obscures right by {distance:.3g} points").format(distance=overlapsRightBy))
+		elif obscuredFromRightBy>0:
+			# Translators: A message when text is obscured from right in MS Excel
+			textList.append(_("obscured from right by {distance:.3g} points").format(distance=obscuredFromRightBy))
+		return ", ".join(textList)
+
 	def _get_locationText(self):
 		textList=[]
 		text=self._getOverlapText()
@@ -723,15 +723,15 @@ class ExcelCell(ExcelBase):
 				else:
 					self.excelCellObject.addComment(d.Value)
 		gui.runScriptModalDialog(d, callback)
-		
+
 	__gestures = {
 		"kb:NVDA+shift+c": "setColumnHeader",
 		"kb:NVDA+shift+r": "setRowHeader",
 		"kb:shift+f2":"editComment",
 		"kb:alt+downArrow":"openDropdown",
- 		"kb:NVDA+alt+c":"reportComment",		
+		"kb:NVDA+alt+c":"reportComment",
 	}
-	
+
 class ExcelSelection(ExcelBase):
 
 	role=controlTypes.ROLE_TABLECELL
