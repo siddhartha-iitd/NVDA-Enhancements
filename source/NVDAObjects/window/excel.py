@@ -654,7 +654,7 @@ class ExcelCell(ExcelBase):
 		self._overlapInfo = info
 		return self._overlapInfo
 
- 	def _getOverlapText(self):
+	def _getOverlapText(self):
 		textList=[]
 		obscuringRightBy=otherInfo['obscuringRightBy']
 		obscuredFromRightBy=otherInfo['obscuredFromRightBy']
