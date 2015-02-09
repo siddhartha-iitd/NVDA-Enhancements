@@ -259,7 +259,7 @@ class ExcelBrowseModeTreeInterceptor(browseMode.BrowseModeTreeInterceptor):
 
 
 	def _set_selection(self,info):
-		super(WordDocumentTreeInterceptor,self)._set_selection(info)
+		super(ExcelBrowseModeTreeInterceptor,self)._set_selection(info)
 		#review.handleCaretMove(info)
 
 	def _get_ElementsListDialog(self):
