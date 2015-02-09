@@ -132,64 +132,41 @@ class ExcelChartQuickNavItem(ExcelQuickNavItem):
 			return False
 		return True
 
+class ExcelRangeBasedQuickNavItem(ExcelQuickNavItem):
 
-class ExcelCommentQuickNavItem(ExcelQuickNavItem):
+	def __lt__(self,other):
+		if self.excelItemObject.row == other.excelItemObject.row:
+			return self.excelItemObject.column < other.excelItemObject.column
+		else:
+			return self.excelItemObject.row < other.excelItemObject.row
+
+	def moveTo(self):
+		self.excelItemObject.Activate()
+
+
+	@property
+	def isAfterSelection(self):
+		activeCell = self.document.Application.ActiveCell
+		log.debugWarning("active row: {} active column: {} current row: {} current column: {}".format ( activeCell.row , activeCell.column , self.excelItemObject.row , self.excelItemObject.column   ) )
+
+		if self.excelItemObject.row == activeCell.row:
+			if self.excelItemObject.column > activeCell.column:
+				return False
+		elif self.excelItemObject.row > activeCell.row:
+			return False
+		return True
+
+class ExcelCommentQuickNavItem(ExcelRangeBasedQuickNavItem):
 
 	def __init__( self , nodeType , document , commentObject , commentCollection ):
 		self.label = commentObject.address(False,False,1,False) + " " + commentObject.Comment.Text()
 		super( ExcelCommentQuickNavItem , self).__init__( nodeType , document , commentObject , commentCollection )
 
-	def __lt__(self,other):
-		if self.excelItemObject.row == other.excelItemObject.row:
-			return self.excelItemObject.column < other.excelItemObject.column
-		else:
-			return self.excelItemObject.row < other.excelItemObject.row
-
-	def moveTo(self):
-		self.excelItemObject.Activate()
-
-
-	@property
-	def isAfterSelection(self):
-		activeCell = self.document.Application.ActiveCell
-		log.debugWarning("active row: {} active column: {} current row: {} current column: {}".format ( activeCell.row , activeCell.column , self.excelItemObject.row , self.excelItemObject.column   ) )
-
-		if self.excelItemObject.row == activeCell.row:
-			if self.excelItemObject.column > activeCell.column:
-				return False
-		elif self.excelItemObject.row > activeCell.row:
-			return False
-		return True
-
-
-class ExcelFormulaQuickNavItem(ExcelQuickNavItem):
+class ExcelFormulaQuickNavItem(ExcelRangeBasedQuickNavItem):
 
 	def __init__( self , nodeType , document , formulaObject , formulaCollection ):
 		self.label = formulaObject.address(False,False,1,False) + " " + formulaObject.Formula
 		super( ExcelFormulaQuickNavItem , self).__init__( nodeType , document , formulaObject , formulaCollection )
-
-	def __lt__(self,other):
-		if self.excelItemObject.row == other.excelItemObject.row:
-			return self.excelItemObject.column < other.excelItemObject.column
-		else:
-			return self.excelItemObject.row < other.excelItemObject.row
-
-	def moveTo(self):
-		self.excelItemObject.Activate()
-
-
-
-	@property
-	def isAfterSelection(self):
-		activeCell = self.document.Application.ActiveCell
-		log.debugWarning("active row: {} active column: {} current row: {} current column: {}".format ( activeCell.row , activeCell.column , self.excelItemObject.row , self.excelItemObject.column   ) )
-
-		if self.excelItemObject.row == activeCell.row:
-			if self.excelItemObject.column > activeCell.column:
-				return False
-		elif self.excelItemObject.row > activeCell.row:
-			return False
-		return True
 
 class ExcelQuicknavIterator(object):
 	"""
@@ -206,18 +183,18 @@ class ExcelQuicknavIterator(object):
 		self.direction=direction if direction else "next"
 		self.includeCurrent=includeCurrent
 
-	def collectionFromRange(self,worksheetObject):
+	def collectionFromWorksheet(self,worksheetObject):
 		"""
-		Fetches a Microsoft Word collection object from a Microsoft Word range object. E.g. HyperLinks from a range.
-		@param rangeObj: a Microsoft Word range object.
-		@return: a Microsoft Word collection object.
+		Fetches a Microsoft Excel collection object from a Microsoft excel worksheet object. E.g. charts, comments, or formula.
+		@param worksheetObject: a Microsoft excel worksheet object.
+		@return: a Microsoft excel collection object.
 		"""
 		raise NotImplementedError
 
 	def filter(self,item):
 		"""
-		Only allows certain items fom a collection to be emitted. E.g. a table who's borders are enabled.
-		@param item: an item from a Microsoft Word collection (e.g. HyperLink object).
+		Only allows certain items fom a collection to be emitted. E.g. a chart .
+		@param item: an item from a Microsoft excel collection (e.g. chart object).
 		@return True if this item should be allowd, false otherwise.
 		@rtype: bool
 		"""
@@ -227,7 +204,7 @@ class ExcelQuicknavIterator(object):
 		"""
 		returns a generator that emits L{QuickNavItem} objects for this collection.
 		"""
-		items=self.collectionFromRange(self.document)
+		items=self.collectionFromWorksheet(self.document)
 		if items:
 			itemCount=items.count
 			log.debugWarning("item count {}".format( itemCount ) ) 
@@ -248,12 +225,12 @@ class ExcelQuicknavIterator(object):
 
 class ChartExcelCollectionQuicknavIterator(ExcelQuicknavIterator):
 	quickNavItemClass=ExcelChartQuickNavItem#: the QuickNavItem class that should be instanciated and emitted. 
-	def collectionFromRange( self , worksheetObject ):
+	def collectionFromWorksheet( self , worksheetObject ):
 		return worksheetObject.ChartObjects() 
 
 class CommentExcelCollectionQuicknavIterator(ExcelQuicknavIterator):
 	quickNavItemClass=ExcelCommentQuickNavItem#: the QuickNavItem class that should be instanciated and emitted. 
-	def collectionFromRange( self , worksheetObject ):
+	def collectionFromWorksheet( self , worksheetObject ):
 		try:
 			return  worksheetObject.cells.SpecialCells( xlCellTypeComments )
 		except(COMError):
@@ -262,17 +239,15 @@ class CommentExcelCollectionQuicknavIterator(ExcelQuicknavIterator):
 
 class FormulaExcelCollectionQuicknavIterator(ExcelQuicknavIterator):
 	quickNavItemClass=ExcelFormulaQuickNavItem#: the QuickNavItem class that should be instanciated and emitted. 
-	def collectionFromRange( self , worksheetObject ):
+	def collectionFromWorksheet( self , worksheetObject ):
 		try:
 			return  worksheetObject.cells.SpecialCells( xlCellTypeFormulas )
 		except(COMError):
 
 			return None
 
-
 class ExcelBrowseModeTreeInterceptor(browseMode.BrowseModeTreeInterceptor):
 
-	#TextInfo=BrowseModeWordDocumentTextInfo
 	needsReviewCursorTextInfoWrapper=False
 
 	def _get_isAlive(self):
