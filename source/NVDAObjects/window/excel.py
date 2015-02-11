@@ -556,6 +556,8 @@ class ExcelCell(ExcelBase):
 		#handle to Device Context
 		hDC = ctypes.windll.user32.GetDC(self.windowHandle)
 		tempDC = ctypes.windll.gdi32.CreateCompatibleDC(hDC)
+		#Release the device context
+		ctypes.windll.user32.ReleaseDC(self.windowHandle, hDC)
 		#Compatible Bitmap for current Device Context
 		hBMP = ctypes.windll.gdi32.CreateCompatibleBitmap(tempDC, 1, 1)
 		#handle to the bitmap object
@@ -615,7 +617,6 @@ class ExcelCell(ExcelBase):
 		#Delete the temporary BitMap Object
 		ctypes.windll.gdi32.DeleteObject(hBMP)
 		#Release & Delete the device context
-		ctypes.windll.user32.ReleaseDC(self.windowHandle, tempDC)
 		ctypes.windll.gdi32.DeleteDC(tempDC)
 		#Retrieve the text width
 		textWidth = StructText.width+5
@@ -653,27 +654,6 @@ class ExcelCell(ExcelBase):
 				info['obscuringRightBy'] = 0
 		self._overlapInfo = info
 		return self._overlapInfo
-
-	def _getOverlapText(self):
-		textList=[]
-		obscuringRightBy=otherInfo['obscuringRightBy']
-		obscuredFromRightBy=otherInfo['obscuredFromRightBy']
-		total=True
-		if obscuringRightBy>0:
-			total=False
-			# Translators: A message when text is extending to adjacent cell(s) in MS Excel
-			textList.append(_("obscures right by {distance:.3g} points").format(distance=overlapsRightBy))
-		elif obscuredFromRightBy>0:
-			# Translators: A message when text is obscured from right in MS Excel
-			textList.append(_("obscured from right by {distance:.3g} points").format(distance=obscuredFromRightBy))
-		return ", ".join(textList)
-
-	def _get_locationText(self):
-		textList=[]
-		text=self._getOverlapText()
-		if text:
-			textList.append(text)
-		return ", ".join(textList)
 
 	def _get_parent(self):
 		worksheet=self.excelCellObject.Worksheet
