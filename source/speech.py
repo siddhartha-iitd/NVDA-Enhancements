@@ -36,8 +36,9 @@ speechMode_beeps_ms=15
 beenCanceled=True
 isPaused=False
 curWordChars=[]
-#Tuple containing locale codes for languages supporting conjunct characters
-LANGS_WITH_CONJUNCT_CHARS = ('hi', 'as', 'bn', 'gu', 'kn', 'kok', 'ml', 'mni', 'mr', 'pa', 'te', 'ur')
+
+#Set containing locale codes for languages supporting conjunct characters
+LANGS_WITH_CONJUNCT_CHARS = {'hi', 'as', 'bn', 'gu', 'kn', 'kok', 'ml', 'mni', 'mr', 'pa', 'te', 'ur'}
 # The REASON_* constants in this module are deprecated and will be removed in a future release.
 # Use controlTypes.REASON_* instead.
 from controlTypes import REASON_FOCUS, REASON_FOCUSENTERED, REASON_MOUSE, REASON_QUERY, REASON_CHANGE, REASON_MESSAGE, REASON_SAYALL, REASON_CARET, REASON_ONLYCACHE
@@ -163,6 +164,7 @@ def speakSpelling(text,locale=None,useCharacterDescriptions=False):
 	defaultLanguage=getCurrentLanguage()
 	if not locale or (not config.conf['speech']['autoDialectSwitching'] and locale.split('_')[0]==defaultLanguage.split('_')[0]):
 		locale=defaultLanguage
+
 	if not text:
 		# Translators: This is spoken when NVDA moves to an empty line.
 		return getSynth().speak((_("blank"),))
@@ -212,7 +214,7 @@ def _speakSpellingGen(text,locale,useCharacterDescriptions):
 				# item is a tuple containing character and its description
 				char = item[0]
 				if item[1]:
-					charDesc.insert(0,item[1][0])
+					charDesc = item[1]
 			else:
 				# item is just a character.
 				char = item
