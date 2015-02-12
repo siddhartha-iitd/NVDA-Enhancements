@@ -1,0 +1,43 @@
+
+<!doctype html>
+<!-- saved from url=(0016)http://localhost -->
+
+<HTML style="width : 350; height: 300">
+<HEAD>
+<TITLE>Message</TITLE>
+
+<SCRIPT ID=clientEventHandlersJS LANGUAGE=javascript>
+<!--
+
+
+function window_onload() 
+{
+	var strArgs = window.dialogArguments;
+
+	var args = new Array();
+	if (strArgs)
+		args = strArgs.split(";");
+	
+	if (args.length >= 2)
+	{
+
+		document.title= args[0];
+		message_id.innerText= args[1];
+
+	}
+
+}
+
+function window_onunload() 
+{
+
+
+}
+
+//-->
+</SCRIPT>
+</HEAD>
+<BODY LANGUAGE=javascript onload="return window_onload()" onunload="return window_onunload()" >
+<span id=message_id></span>
+</body>
+</html>

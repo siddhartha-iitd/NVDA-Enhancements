@@ -1,4 +1,4 @@
-# -*- coding: UTF-8 -*-
+﻿# -*- coding: UTF-8 -*-
 #globalCommands.py
 #A part of NonVisual Desktop Access (NVDA)
 #This file is covered by the GNU General Public License.
@@ -885,10 +885,17 @@ class GlobalCommands(ScriptableObject):
 
 		if not textList:
 			# Translators: Reported when trying to obtain formatting information (such as font name, indentation and so on) but there is no formatting information for the text under cursor.
-			ui.message(_("No formatting information"))
+			noFormattingInformation = _("No formatting information")
+			if scriptHandler.getLastScriptRepeatCount()==0:
+				ui.message(noFormattingInformation )
+			else:
+				ui.HTMLMessage( noFormattingInformation )
 			return
 
-		ui.message(" ".join(textList))
+		if scriptHandler.getLastScriptRepeatCount()==0:
+			ui.message(" ".join(textList))
+		else:
+			ui.HTMLMessage(" ".join(textList))
 	# Translators: Input help mode message for report formatting command.
 	script_reportFormatting.__doc__ = _("Reports formatting info for the current review cursor position within a document")
 	script_reportFormatting.category=SCRCAT_TEXTREVIEW
