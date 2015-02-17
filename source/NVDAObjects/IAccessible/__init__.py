@@ -1704,7 +1704,7 @@ class ReBarWindow32Client(IAccessible):
 	def _get_lastChild(self):
 		return super(IAccessible,self).lastChild
 
-#A class for the listview window class, found sof ar only in the Cygwin Setup program.
+#A class for the listview window class, found so far only in the Cygwin Setup program.
 #Makes sure its available in simple review mode, and uses display model
 class ListviewPane(IAccessible):
 	presentationType=IAccessible.presType_content
@@ -1733,6 +1733,14 @@ class IENotificationBar(Dialog,IAccessible):
 				speech.speakObject(child,reason=controlTypes.REASON_FOCUS)
 			child=child.simpleNext
 
+class Color(IAccessible):
+	def _get_name(self):
+		name = super(Color,self).name
+		patternRGB = r'RGB\(\d+, \d+, \d+\)'
+		if re.match(patternRGB, name):
+			return colors.RGB.fromString(name).name
+		else:
+			return name
 ###class mappings
 
 _staticMap={
@@ -1803,4 +1811,5 @@ _staticMap={
 	("listview",oleacc.ROLE_SYSTEM_CLIENT):"ListviewPane",
 	("NUIDialog",oleacc.ROLE_SYSTEM_CLIENT):"NUIDialogClient",
 	("_WwB",oleacc.ROLE_SYSTEM_CLIENT):"winword.ProtectedDocumentPane",
+    ("MsoCommandBar",None):"Color",
 }
