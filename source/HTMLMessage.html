@@ -6,9 +6,20 @@
 <HEAD>
 <TITLE>Message</TITLE>
 
-<SCRIPT ID=clientEventHandlersJS LANGUAGE=javascript>
+<SCRIPT LANGUAGE=javascript>
 <!--
 
+function focus_away() {
+//window.close();
+}
+
+function escape_keypress(e) {
+    e = e || window.event;
+if(e.keyCode == 27) // code for escape
+{
+window.close();
+}
+};
 
 function window_onload() 
 {
@@ -23,21 +34,16 @@ function window_onload()
 
 		document.title= args[0];
 		message_id.innerText= args[1];
+//setfocus('main_body'); 
 
 	}
-
-}
-
-function window_onunload() 
-{
-
 
 }
 
 //-->
 </SCRIPT>
 </HEAD>
-<BODY LANGUAGE=javascript onload="return window_onload()" onunload="return window_onunload()" >
+<BODY tabindex=-1 id='main_body' LANGUAGE=javascript onload="return window_onload()" onkeypress="return escape_keypress()" onfocusout="return focus_away()" >
 <span id=message_id></span>
 </body>
 </html>
