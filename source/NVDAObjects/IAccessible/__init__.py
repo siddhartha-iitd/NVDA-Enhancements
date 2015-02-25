@@ -1733,14 +1733,6 @@ class IENotificationBar(Dialog,IAccessible):
 				speech.speakObject(child,reason=controlTypes.REASON_FOCUS)
 			child=child.simpleNext
 
-class Color(IAccessible):
-	def _get_name(self):
-		name = super(Color,self).name
-		patternRGB = r'RGB\(\d+, \d+, \d+\)'
-		if re.match(patternRGB, name):
-			return colors.RGB.fromString(name).name
-		else:
-			return name
 ###class mappings
 
 _staticMap={
@@ -1811,5 +1803,5 @@ _staticMap={
 	("listview",oleacc.ROLE_SYSTEM_CLIENT):"ListviewPane",
 	("NUIDialog",oleacc.ROLE_SYSTEM_CLIENT):"NUIDialogClient",
 	("_WwB",oleacc.ROLE_SYSTEM_CLIENT):"winword.ProtectedDocumentPane",
-    ("MsoCommandBar",None):"Color",
+    ("MsoCommandBar",oleacc.ROLE_SYSTEM_LISTITEM):"msOffice.Color",
 }
