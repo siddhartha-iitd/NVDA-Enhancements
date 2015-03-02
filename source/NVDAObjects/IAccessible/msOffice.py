@@ -129,7 +129,7 @@ class Color(IAccessible):
 		name, matchRGB = self.getRGBNameAndMatch()
 		if matchRGB:
 			import colors
-			return ('red '+ str(colors.RGB.fromString(name).red) + 'green ' + str(colors.RGB.fromString(name).green) + 'blue ' + str(colors.RGB.fromString(name).blue))
+			return ('red '+ str(colors.RGB.fromString(name).red) + ', green ' + str(colors.RGB.fromString(name).green) + ', blue ' + str(colors.RGB.fromString(name).blue))
 		else:
 			return super(Color,self).description
 
