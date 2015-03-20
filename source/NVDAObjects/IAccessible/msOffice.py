@@ -106,11 +106,11 @@ class BrokenMsoCommandBar(IAccessible):
 			return None
 		return name
 
-class Color(IAccessible):
+class CommandBarListItem(IAccessible):
 
 	COMPILED_RE = re.compile(r'RGB\(\d+, \d+, \d+\)',re.I)
-	def getRGBNameAndMatch(self):
-		name = super(Color,self).name
+	def _get_rgbNameAndMatch(self):
+		name = super(CommandBarListItem,self).name
 		if self.COMPILED_RE.match(name):
 			matchRGB = True
 		else:
@@ -118,7 +118,7 @@ class Color(IAccessible):
 		return name, matchRGB
 
 	def _get_name(self):
-		name, matchRGB = self.getRGBNameAndMatch()
+		name, matchRGB = self.rgbNameAndMatch
 		if matchRGB:
 			import colors
 			return colors.RGB.fromString(name).name
@@ -126,12 +126,12 @@ class Color(IAccessible):
 			return name
 
 	def _get_description(self):
-		name, matchRGB = self.getRGBNameAndMatch()
+		name, matchRGB = self.rgbNameAndMatch
 		if matchRGB:
 			import colors
 			return (', red '+ str(colors.RGB.fromString(name).red) + ', green ' + str(colors.RGB.fromString(name).green) + ', blue ' + str(colors.RGB.fromString(name).blue))
 		else:
-			return super(Color,self).description
+			return super(CommandBarListItem,self).description
 
 class SDMSymbols(SDM):
 
