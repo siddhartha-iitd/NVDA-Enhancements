@@ -288,6 +288,64 @@ class ExcelBrowseModeTreeInterceptor(browseMode.BrowseModeTreeInterceptor):
 	script_elementsList.__doc__ = _("Presents a list of links, headings or landmarks")
 	script_elementsList.ignoreTreeInterceptorPassThrough=True
 
+	def scriptHelper(self,direction):
+		self.excelApplicationObject = self.rootNVDAObject.excelWorksheetObject.Application
+		try:
+			getattr(self, 'cellPosition')
+		except AttributeError:
+			log.io("\nInside except block\n")
+			self.cellPosition = self.excelApplicationObject.ActiveCell
+
+		if   direction == 0:
+			self.cellPosition = self.cellPosition.Offset(0,-1)
+		elif direction == 1:
+			self.cellPosition = self.cellPosition.Offset(0,1)
+		elif direction == 2:
+			self.cellPosition = self.cellPosition.Offset(-1,0)
+		elif direction == 3:
+			self.cellPosition = self.cellPosition.Offset(1,0)
+			
+		if self.cellPosition.MergeCells:
+			self.cellPosition = self.cellPosition.MergeArea.Cells(1)
+			cellLocationText = self.cellPosition.MergeArea.Address().replace('$','')
+			log.io("\nINSIDE MERGE AREA\t"+str(self.cellPosition.MergeArea.Address())+"\n")
+		else:
+			cellLocationText = self.cellPosition.Address().replace('$','')
+		
+		cellValueText = self.cellPosition.Text
+		if cellValueText:
+			log.io("\nCELLVALUETEXT\t"+cellValueText)
+			ui.message(cellValueText)
+		ui.message(cellLocationText)
+		
+		if not self.cellPosition.Locked :
+			ui.message("Editable")
+		
+		log.io("\ncellPosition\t"+str(self.cellPosition.Address())+"\n")
+	
+	def script_moveLeft(self,gesture):
+		self.scriptHelper(0)
+		log.io("\nInside script move left\n")
+	
+	def script_moveRight(self,gesture):
+		self.scriptHelper(1)
+		log.io("\nInside script move right\n")
+
+	def script_moveUp(self,gesture):
+		self.scriptHelper(2)
+		log.io("\nInside script move up\n")
+
+	def script_moveDown(self,gesture):
+		self.scriptHelper(3)
+		log.io("\nInside script move down\n")
+	
+	__gestures = {
+		"kb:upArrow": "moveUp",
+		"kb:downArrow":"moveDown",
+		"kb:leftArrow":"moveLeft",
+		"kb:rightArrow":"moveRight",
+	}
+
 class ElementsListDialog(browseMode.ElementsListDialog):
 
 	ELEMENT_TYPES=(
