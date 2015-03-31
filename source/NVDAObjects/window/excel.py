@@ -37,6 +37,12 @@ xlRight=-4152
 xlDistributed=-4117
 xlBottom=-4107
 xlTop=-4160
+xlToLeft=-4159
+xlFormulas=-4123
+xlPart=2
+xlByColumns=2
+xlPrevious=2
+xlUp=-4162
 
 alignmentLabels={
 	xlCenter:"center",
@@ -304,6 +310,8 @@ class ExcelBrowseModeTreeInterceptor(browseMode.BrowseModeTreeInterceptor):
 			self.cellPosition = self.cellPosition.Offset(-1,0)
 		elif direction == 3:
 			self.cellPosition = self.cellPosition.Offset(1,0)
+		else:
+			return
 			
 		if self.cellPosition.MergeCells:
 			self.cellPosition = self.cellPosition.MergeArea.Cells(1)
@@ -339,11 +347,73 @@ class ExcelBrowseModeTreeInterceptor(browseMode.BrowseModeTreeInterceptor):
 		self.scriptHelper(3)
 		log.io("\nInside script move down\n")
 	
+	def getColumnNameFromNumber(self,colNum):
+		colList = (self.rootNVDAObject.excelWorksheetObject.Cells(1, colNum).Address(True, False)).split('$')
+# 		for item in colList:
+# 			log.io("\nITEM IN colList\t"+str(item))
+		return ''.join(colList)[:-1]
+
+	def script_readRow(self,gesture):
+		self.scriptHelper(-1)
+		ws = self.rootNVDAObject.excelWorksheetObject
+		currentRow = self.cellPosition.Row
+		ui.message("Reading Row "+str(currentRow))
+# 		lastColumn = self.cellPosition.End(xlToLeft).Column
+		lastColumn = ws.Cells(currentRow, ws.Columns.Count).End(xlToLeft).Column
+# 		lastColumn = self.cellPosition.Find('*',self.cellPosition.Cells(currentRow, 1), xlFormulas, xlPart, xlByColumns, xlPrevious, False).Column
+		log.io("\nCURRENT ROW IS\t"+str(currentRow)+"\n")		
+		log.io("\nLAST COLUMN IS\t"+str(lastColumn)+"\n")
+		col = 1
+		while col <= lastColumn:
+			if ws.Cells(currentRow,col).MergeCells:
+				mergedAreaColumnCount = ws.Cells(currentRow,col).MergeArea.columns.count
+# 				locationText = "Column "+str(col) + " to "+ str(col+mergedAreaColumnCount) if mergedAreaColumnCount > 1 else "Column "+str(col)
+				locationText = "Column "+self.getColumnNameFromNumber(col) + " to "+ self.getColumnNameFromNumber(col+mergedAreaColumnCount-1) if mergedAreaColumnCount > 1 else "Column "+self.getColumnNameFromNumber(col)				
+				cellValueText = ws.Cells(currentRow,col).Text
+				col += mergedAreaColumnCount
+			else:
+# 				locationText = "Column "+str(col)
+				locationText = "Column "+self.getColumnNameFromNumber(col)
+				cellValueText = ws.Cells(currentRow,col).Text
+				col += 1
+			log.io("\nCELL VALUE TEXT\t"+str(cellValueText)+"\n")
+			log.io("\nLOCATION TEXT\t"+str(locationText)+"\n")
+			ui.message(locationText)
+			ui.message(cellValueText)
+
+	def script_readColumn(self,gesture):
+		self.scriptHelper(-1)
+		ws = self.rootNVDAObject.excelWorksheetObject
+		currentCol = self.cellPosition.Column
+		ui.message("Reading Column "+self.getColumnNameFromNumber(currentCol))
+# 		lastColumn = self.cellPosition.End(xlToLeft).Column
+		lastRow = ws.Cells(ws.Rows.Count, currentCol).End(xlUp).Row
+# 		lastColumn = self.cellPosition.Find('*',self.cellPosition.Cells(currentRow, 1), xlFormulas, xlPart, xlByColumns, xlPrevious, False).Column
+		log.io("\nCURRENT COLUMN IS\t"+str(currentCol)+"\n")		
+		log.io("\nLAST ROW IS\t"+str(lastRow)+"\n")
+		row = 1
+		while row <= lastRow:
+			if ws.Cells(row,currentCol).MergeCells:
+				mergedAreaRowCount = ws.Cells(row,currentCol).MergeArea.rows.count
+				locationText = "Row "+str(row) + " to "+ str(row+mergedAreaRowCount-1) if mergedAreaRowCount > 1 else "Row "+str(row) 
+				cellValueText = ws.Cells(row,currentCol).Text
+				row += mergedAreaRowCount
+			else:
+				locationText = "Row "+str(row) 
+				cellValueText = ws.Cells(row,currentCol).Text
+				row += 1
+			log.io("\nCELL VALUE TEXT\t"+str(cellValueText)+"\n")
+			log.io("\nLOCATION TEXT\t"+str(locationText)+"\n")
+			ui.message(locationText)
+			ui.message(cellValueText)
+
 	__gestures = {
 		"kb:upArrow": "moveUp",
 		"kb:downArrow":"moveDown",
 		"kb:leftArrow":"moveLeft",
 		"kb:rightArrow":"moveRight",
+		"kb:NVDA+r":"readRow",
+		"kb:NVDA+c":"readColumn",
 	}
 
 class ElementsListDialog(browseMode.ElementsListDialog):
