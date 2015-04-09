@@ -17,6 +17,7 @@ from comtypes import automation
 from logHandler import log
 import os
 import sys
+import gui
 
 # From urlmon.h
 URL_MK_UNIFORM = 1
@@ -38,7 +39,9 @@ def HTMLMessage(text):
 	moniker = POINTER(IUnknown)()
 	windll.urlmon.CreateURLMonikerEx(0, unicode(dialogTemplatePath) , byref(moniker), URL_MK_UNIFORM)
 	DLG_args = automation.VARIANT("NVDA Message;{}".format( text ) )
-	error_result = windll.mshtml.ShowHTMLDialogEx( None , moniker , HTMLDLG_MODELESS , addressof( DLG_args ) , unicode(DLG_OPTIONS ), None)
+	gui.mainFrame.prePopup() 
+	error_result = windll.mshtml.ShowHTMLDialogEx( gui.mainFrame.Handle , moniker , HTMLDLG_MODELESS , addressof( DLG_args ) , unicode(DLG_OPTIONS ), None)
+	gui.mainFrame.postPopup() 
 
 def message(text):
 	"""Present a message to the user.
