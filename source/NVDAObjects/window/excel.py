@@ -229,12 +229,12 @@ class ExcelQuicknavIterator(object):
 			yield item
 
 class ChartExcelCollectionQuicknavIterator(ExcelQuicknavIterator):
-	quickNavItemClass=ExcelChartQuickNavItem#: the QuickNavItem class that should be instanciated and emitted. 
+	quickNavItemClass=ExcelChartQuickNavItem#: the QuickNavItem class that should be instantiated and emitted. 
 	def collectionFromWorksheet( self , worksheetObject ):
 		return worksheetObject.ChartObjects() 
 
 class CommentExcelCollectionQuicknavIterator(ExcelQuicknavIterator):
-	quickNavItemClass=ExcelCommentQuickNavItem#: the QuickNavItem class that should be instanciated and emitted. 
+	quickNavItemClass=ExcelCommentQuickNavItem#: the QuickNavItem class that should be instantiated and emitted. 
 	def collectionFromWorksheet( self , worksheetObject ):
 		try:
 			return  worksheetObject.cells.SpecialCells( xlCellTypeComments )
@@ -243,7 +243,7 @@ class CommentExcelCollectionQuicknavIterator(ExcelQuicknavIterator):
 			return None
 
 class FormulaExcelCollectionQuicknavIterator(ExcelQuicknavIterator):
-	quickNavItemClass=ExcelFormulaQuickNavItem#: the QuickNavItem class that should be instanciated and emitted. 
+	quickNavItemClass=ExcelFormulaQuickNavItem#: the QuickNavItem class that should be instantiated and emitted. 
 	def collectionFromWorksheet( self , worksheetObject ):
 		try:
 			return  worksheetObject.cells.SpecialCells( xlCellTypeFormulas )
@@ -296,11 +296,16 @@ class ExcelBrowseModeTreeInterceptor(browseMode.BrowseModeTreeInterceptor):
 
 	def scriptHelper(self,direction):
 		self.excelApplicationObject = self.rootNVDAObject.excelWorksheetObject.Application
+		ws = self.rootNVDAObject.excelWorksheetObject
 		try:
 			getattr(self, 'cellPosition')
 		except AttributeError:
-			log.io("\nInside except block\n")
 			self.cellPosition = self.excelApplicationObject.ActiveCell
+
+		currentColumn = self.cellPosition.Column
+		currentRow = self.cellPosition.Row
+		lastRow = ws.Cells(ws.Rows.Count, currentColumn).End(xlUp).Row
+		lastColumn = ws.Cells(currentRow, ws.Columns.Count).End(xlToLeft).Column 
 
 		if   direction == 0:
 			self.cellPosition = self.cellPosition.Offset(0,-1)
@@ -310,74 +315,72 @@ class ExcelBrowseModeTreeInterceptor(browseMode.BrowseModeTreeInterceptor):
 			self.cellPosition = self.cellPosition.Offset(-1,0)
 		elif direction == 3:
 			self.cellPosition = self.cellPosition.Offset(1,0)
+		#Start-of-Column
+		elif direction == 4:
+			rowOffset = 1- currentRow
+			self.cellPosition = self.cellPosition.Offset(rowOffset,0)
+		#Start-of-Row
+		elif direction == 5:
+			columnOffset = 1 - currentColumn
+			self.cellPosition = self.cellPosition.Offset(0,columnOffset)
+		#End-of-Row
+		elif direction == 6:
+			columnOffset = lastColumn - currentColumn
+			self.cellPosition = self.cellPosition.Offset(0,columnOffset)
+		#End-of-Column
+		elif direction == 7:
+			rowOffset = lastRow - currentRow
+			self.cellPosition = self.cellPosition.Offset(rowOffset,0)
 		else:
 			return
-			
+		
 		if self.cellPosition.MergeCells:
 			self.cellPosition = self.cellPosition.MergeArea.Cells(1)
 			cellLocationText = self.cellPosition.MergeArea.Address().replace('$','')
-			log.io("\nINSIDE MERGE AREA\t"+str(self.cellPosition.MergeArea.Address())+"\n")
 		else:
 			cellLocationText = self.cellPosition.Address().replace('$','')
 		
 		cellValueText = self.cellPosition.Text
 		if cellValueText:
-			log.io("\nCELLVALUETEXT\t"+cellValueText)
 			ui.message(cellValueText)
 		ui.message(cellLocationText)
 		
 		if not self.cellPosition.Locked :
 			ui.message("Editable")
 		
-		log.io("\ncellPosition\t"+str(self.cellPosition.Address())+"\n")
-	
 	def script_moveLeft(self,gesture):
 		self.scriptHelper(0)
-		log.io("\nInside script move left\n")
 	
 	def script_moveRight(self,gesture):
 		self.scriptHelper(1)
-		log.io("\nInside script move right\n")
 
 	def script_moveUp(self,gesture):
 		self.scriptHelper(2)
-		log.io("\nInside script move up\n")
 
 	def script_moveDown(self,gesture):
 		self.scriptHelper(3)
-		log.io("\nInside script move down\n")
 	
 	def getColumnNameFromNumber(self,colNum):
 		colList = (self.rootNVDAObject.excelWorksheetObject.Cells(1, colNum).Address(True, False)).split('$')
-# 		for item in colList:
-# 			log.io("\nITEM IN colList\t"+str(item))
 		return ''.join(colList)[:-1]
 
 	def script_readRow(self,gesture):
 		self.scriptHelper(-1)
 		ws = self.rootNVDAObject.excelWorksheetObject
 		currentRow = self.cellPosition.Row
-		ui.message("Reading Row "+str(currentRow))
-# 		lastColumn = self.cellPosition.End(xlToLeft).Column
+		ui.message(_("Reading Row {0}".format(currentRow)))
 		lastColumn = ws.Cells(currentRow, ws.Columns.Count).End(xlToLeft).Column
-# 		lastColumn = self.cellPosition.Find('*',self.cellPosition.Cells(currentRow, 1), xlFormulas, xlPart, xlByColumns, xlPrevious, False).Column
-		log.io("\nCURRENT ROW IS\t"+str(currentRow)+"\n")		
-		log.io("\nLAST COLUMN IS\t"+str(lastColumn)+"\n")
 		col = 1
 		while col <= lastColumn:
 			if ws.Cells(currentRow,col).MergeCells:
 				mergedAreaColumnCount = ws.Cells(currentRow,col).MergeArea.columns.count
-# 				locationText = "Column "+str(col) + " to "+ str(col+mergedAreaColumnCount) if mergedAreaColumnCount > 1 else "Column "+str(col)
-				locationText = "Column "+self.getColumnNameFromNumber(col) + " to "+ self.getColumnNameFromNumber(col+mergedAreaColumnCount-1) if mergedAreaColumnCount > 1 else "Column "+self.getColumnNameFromNumber(col)				
+				locationText = _("Column {0} to {1}".format(self.getColumnNameFromNumber(col),self.getColumnNameFromNumber(col+mergedAreaColumnCount-1))) if mergedAreaColumnCount > 1 else _("Column {0}".format(self.getColumnNameFromNumber(col)))				
 				cellValueText = ws.Cells(currentRow,col).Text
 				col += mergedAreaColumnCount
 			else:
-# 				locationText = "Column "+str(col)
-				locationText = "Column "+self.getColumnNameFromNumber(col)
+				locationText = _("Column {0}".format(self.getColumnNameFromNumber(col)))
 				cellValueText = ws.Cells(currentRow,col).Text
 				col += 1
-			log.io("\nCELL VALUE TEXT\t"+str(cellValueText)+"\n")
-			log.io("\nLOCATION TEXT\t"+str(locationText)+"\n")
 			ui.message(locationText)
 			ui.message(cellValueText)
 
@@ -385,27 +388,33 @@ class ExcelBrowseModeTreeInterceptor(browseMode.BrowseModeTreeInterceptor):
 		self.scriptHelper(-1)
 		ws = self.rootNVDAObject.excelWorksheetObject
 		currentCol = self.cellPosition.Column
-		ui.message("Reading Column "+self.getColumnNameFromNumber(currentCol))
-# 		lastColumn = self.cellPosition.End(xlToLeft).Column
+		ui.message(_("Reading Column {0}".format(self.getColumnNameFromNumber(currentCol))))
 		lastRow = ws.Cells(ws.Rows.Count, currentCol).End(xlUp).Row
-# 		lastColumn = self.cellPosition.Find('*',self.cellPosition.Cells(currentRow, 1), xlFormulas, xlPart, xlByColumns, xlPrevious, False).Column
-		log.io("\nCURRENT COLUMN IS\t"+str(currentCol)+"\n")		
-		log.io("\nLAST ROW IS\t"+str(lastRow)+"\n")
 		row = 1
 		while row <= lastRow:
 			if ws.Cells(row,currentCol).MergeCells:
 				mergedAreaRowCount = ws.Cells(row,currentCol).MergeArea.rows.count
-				locationText = "Row "+str(row) + " to "+ str(row+mergedAreaRowCount-1) if mergedAreaRowCount > 1 else "Row "+str(row) 
+				locationText = _("Row {0} to {1}".format(row,row+mergedAreaRowCount-1)) if mergedAreaRowCount > 1 else _("Row {0}".format(row)) 
 				cellValueText = ws.Cells(row,currentCol).Text
 				row += mergedAreaRowCount
 			else:
-				locationText = "Row "+str(row) 
+				locationText = _("Row {0}".format(row)) 
 				cellValueText = ws.Cells(row,currentCol).Text
 				row += 1
-			log.io("\nCELL VALUE TEXT\t"+str(cellValueText)+"\n")
-			log.io("\nLOCATION TEXT\t"+str(locationText)+"\n")
 			ui.message(locationText)
 			ui.message(cellValueText)
+
+	def script_startOfColumn(self,gesture):
+		self.scriptHelper(4)
+
+	def script_startOfRow(self,gesture):
+		self.scriptHelper(5)
+
+	def script_endOfRow(self,gesture):
+		self.scriptHelper(6)
+
+	def script_endOfColumn(self,gesture):
+		self.scriptHelper(7)
 
 	__gestures = {
 		"kb:upArrow": "moveUp",
@@ -414,6 +423,10 @@ class ExcelBrowseModeTreeInterceptor(browseMode.BrowseModeTreeInterceptor):
 		"kb:rightArrow":"moveRight",
 		"kb:NVDA+r":"readRow",
 		"kb:NVDA+c":"readColumn",
+		"kb:control+upArrow":"startOfColumn",
+		"kb:control+downArrow":"endOfColumn",
+		"kb:control+leftArrow":"startOfRow",
+		"kb:control+rightArrow":"endOfRow",
 	}
 
 class ElementsListDialog(browseMode.ElementsListDialog):
