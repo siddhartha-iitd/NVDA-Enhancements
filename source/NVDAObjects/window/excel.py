@@ -233,7 +233,6 @@ class CommentExcelCollectionQuicknavIterator(ExcelQuicknavIterator):
 		try:
 			return  worksheetObject.cells.SpecialCells( xlCellTypeComments )
 		except(COMError):
-
 			return None
 
 class FormulaExcelCollectionQuicknavIterator(ExcelQuicknavIterator):
@@ -242,9 +241,73 @@ class FormulaExcelCollectionQuicknavIterator(ExcelQuicknavIterator):
 		try:
 			return  worksheetObject.cells.SpecialCells( xlCellTypeFormulas )
 		except(COMError):
-
 			return None
 
+class ExcelFormControlQuickNavItem(ExcelQuickNavItem):
+  
+	def __init__( self , nodeType , document , chartObject , chartCollection ):
+# 		self.chartIndex = chartObject.Index
+# 		if chartObject.Chart.HasTitle:
+#  
+# 			self.label = chartObject.Chart.ChartTitle.Text + " " + chartObject.TopLeftCell.address(False,False,1,False) + "-" + chartObject.BottomRightCell.address(False,False,1,False) 
+#  
+# 		else:
+#  
+# 			self.label = chartObject.Name + " " + chartObject.TopLeftCell.address(False,False,1,False) + "-" + chartObject.BottomRightCell.address(False,False,1,False) 
+  
+		super( ExcelChartQuickNavItem ,self).__init__( nodeType , document , chartObject , chartCollection )
+  
+	def __lt__(self,other):
+		return self.chartIndex < other.chartIndex
+  
+	def moveTo(self):
+		try:
+			self.excelItemObject.Activate()
+  
+			# After activate(), though the chart object is selected, 
+  
+			# pressing arrow keys moves the object, rather than 
+  
+			# let use go inside for sub-objects. Somehow 
+		# calling an COM function on a different object fixes that !
+  
+			log.debugWarning( self.excelItemCollection.Count )
+  
+		except(COMError):
+  
+			pass
+		focus=api.getDesktopObject().objectWithFocus()
+		if not focus or not isinstance(focus,ExcelBase):
+			return
+		# Charts are not yet automatically detected with objectFromFocus, so therefore use selection
+		sel=focus._getSelection()
+		if not sel:
+			return
+		eventHandler.queueEvent("gainFocus",sel)
+  
+  
+	@property
+	def isAfterSelection(self):
+		activeCell = self.document.Application.ActiveCell
+		#log.debugWarning("active row: {} active column: {} current row: {} current column: {}".format ( activeCell.row , activeCell.column , self.excelCommentObject.row , self.excelCommentObject.column   ) )
+  
+		if self.excelItemObject.TopLeftCell.row == activeCell.row:
+			if self.excelItemObject.TopLeftCell.column > activeCell.column:
+				return False
+		elif self.excelItemObject.TopLeftCell.row > activeCell.row:
+			return False
+		return True
+
+class FormControlExcelCollectionQuicknavIterator(ExcelQuicknavIterator):
+	quickNavItemClass=ExcelFormControlQuickNavItem
+	def collectionFromWorksheet( self , worksheetObject ):
+# 		try:
+		return  worksheetObject.Shapes
+# 		except(COMError):
+# 			return None
+# 
+
+	
 class ExcelBrowseModeTreeInterceptor(browseMode.BrowseModeTreeInterceptor):
 
 	needsReviewCursorTextInfoWrapper=False
@@ -279,6 +342,8 @@ class ExcelBrowseModeTreeInterceptor(browseMode.BrowseModeTreeInterceptor):
 			return CommentExcelCollectionQuicknavIterator( nodeType , self.rootNVDAObject.excelWorksheetObject , direction , None ).iterate()
 		elif nodeType=="formula":
 			return FormulaExcelCollectionQuicknavIterator( nodeType , self.rootNVDAObject.excelWorksheetObject , direction , None ).iterate()
+		elif nodeType=="formcontrols":
+			return FormControlExcelCollectionQuicknavIterator( nodeType , self.rootNVDAObject.excelWorksheetObject , direction , None ).iterate()
 		else:
 			raise NotImplementedError
 
@@ -300,6 +365,10 @@ class ElementsListDialog(browseMode.ElementsListDialog):
 		# Translators: The label of a radio button to select the type of element
 		# in the browse mode Elements List dialog.
 		("formula", _("&Formula")),
+		# Translators: The label of a radio button to select the type of element
+		# in the browse mode Elements List dialog.
+		("formcontrols", _("&FormControls")),
+		
 	)
 
 class ExcelBase(Window):
@@ -329,7 +398,7 @@ class ExcelBase(Window):
 			return
 		obj=Window(windowHandle=w,chooseBestAPI=False)
 		if not obj:
-			log.debugWarning("Could not instnaciate NVDAObject for ancestor window")
+			log.debugWarning("Could not instantiate NVDAObject for ancestor window")
 			return
 		threadID=obj.windowThreadID
 		while not eventHandler.isPendingEvents("gainFocus"):
