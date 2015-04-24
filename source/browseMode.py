@@ -186,13 +186,16 @@ class BrowseModeTreeInterceptor(treeInterceptorHandler.TreeInterceptor):
 		@type itemType: string
 		@param direction: the direction in which to search (next, previous, up)
 		@ type direction: string
-		@param pos: the position in the document from where to seart the search.
+		@param pos: the position in the document from where to start the search.
 		@type pos: Usually an L{textInfos.TextInfo} 
 		"""
 		return iter(())
 
 	def _quickNavScript(self,gesture, itemType, direction, errorMessage, readUnit):
-		info=self.selection
+		try:
+			info=self.selection
+		except AttributeError:
+			info = None
 		try:
 			item = next(self._iterNodesByType(itemType, direction, info))
 		except NotImplementedError:

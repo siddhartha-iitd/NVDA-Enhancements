@@ -179,7 +179,6 @@ class ExcelQuicknavIterator(object):
 	"""
 	Allows iterating over an MS excel collection (e.g. Comments, Formulas or charts) emitting L{QuickNavItem} objects.
 	"""
-
 	def __init__(self, itemType , document , direction , includeCurrent):
 		"""
 		See L{QuickNavItemIterator} for itemType, document and direction definitions.
@@ -200,9 +199,9 @@ class ExcelQuicknavIterator(object):
 
 	def filter(self,item):
 		"""
-		Only allows certain items fom a collection to be emitted. E.g. a chart .
+		Only allows certain items from a collection to be emitted. E.g. a chart .
 		@param item: an item from a Microsoft excel collection (e.g. chart object).
-		@return True if this item should be allowd, false otherwise.
+		@return True if this item should be allowed, false otherwise.
 		@rtype: bool
 		"""
 		return True
@@ -223,12 +222,12 @@ class ExcelQuicknavIterator(object):
 			yield item
 
 class ChartExcelCollectionQuicknavIterator(ExcelQuicknavIterator):
-	quickNavItemClass=ExcelChartQuickNavItem#: the QuickNavItem class that should be instanciated and emitted. 
+	quickNavItemClass=ExcelChartQuickNavItem#: the QuickNavItem class that should be instantiated and emitted. 
 	def collectionFromWorksheet( self , worksheetObject ):
 		return worksheetObject.ChartObjects() 
 
 class CommentExcelCollectionQuicknavIterator(ExcelQuicknavIterator):
-	quickNavItemClass=ExcelCommentQuickNavItem#: the QuickNavItem class that should be instanciated and emitted. 
+	quickNavItemClass=ExcelCommentQuickNavItem#: the QuickNavItem class that should be instantiated and emitted. 
 	def collectionFromWorksheet( self , worksheetObject ):
 		try:
 			return  worksheetObject.cells.SpecialCells( xlCellTypeComments )
@@ -236,7 +235,7 @@ class CommentExcelCollectionQuicknavIterator(ExcelQuicknavIterator):
 			return None
 
 class FormulaExcelCollectionQuicknavIterator(ExcelQuicknavIterator):
-	quickNavItemClass=ExcelFormulaQuickNavItem#: the QuickNavItem class that should be instanciated and emitted. 
+	quickNavItemClass=ExcelFormulaQuickNavItem#: the QuickNavItem class that should be instantiated and emitted. 
 	def collectionFromWorksheet( self , worksheetObject ):
 		try:
 			return  worksheetObject.cells.SpecialCells( xlCellTypeFormulas )
@@ -245,46 +244,28 @@ class FormulaExcelCollectionQuicknavIterator(ExcelQuicknavIterator):
 
 class ExcelFormControlQuickNavItem(ExcelQuickNavItem):
   
-	def __init__( self , nodeType , document , chartObject , chartCollection ):
-# 		self.chartIndex = chartObject.Index
-# 		if chartObject.Chart.HasTitle:
-#  
-# 			self.label = chartObject.Chart.ChartTitle.Text + " " + chartObject.TopLeftCell.address(False,False,1,False) + "-" + chartObject.BottomRightCell.address(False,False,1,False) 
-#  
-# 		else:
-#  
-# 			self.label = chartObject.Name + " " + chartObject.TopLeftCell.address(False,False,1,False) + "-" + chartObject.BottomRightCell.address(False,False,1,False) 
-  
-		super( ExcelChartQuickNavItem ,self).__init__( nodeType , document , chartObject , chartCollection )
+	def __init__( self , nodeType , document , formControlObject , formControlCollection ):
+		self.formControlObjectIndex = formControlObject.ZOrderPosition
+		if formControlObject.name:
+			self.label = formControlObject.name + " " + formControlObject.TopLeftCell.address(False,False,1,False) + "-" + formControlObject.BottomRightCell.address(False,False,1,False) 
+		super( ExcelFormControlQuickNavItem ,self).__init__( nodeType , document , formControlObject , formControlCollection )
   
 	def __lt__(self,other):
-		return self.chartIndex < other.chartIndex
+		return self.formControlObjectIndex < other.formControlObjectIndex
   
 	def moveTo(self):
 		try:
-			self.excelItemObject.Activate()
-  
-			# After activate(), though the chart object is selected, 
-  
-			# pressing arrow keys moves the object, rather than 
-  
-			# let use go inside for sub-objects. Somehow 
-		# calling an COM function on a different object fixes that !
-  
-			log.debugWarning( self.excelItemCollection.Count )
+			self.excelItemObject.Select(True)
+  			
+			# After Select(), though the form control is selected, 
+			# pressing arrow keys moves the object
   
 		except(COMError):
-  
 			pass
-		focus=api.getDesktopObject().objectWithFocus()
-		if not focus or not isinstance(focus,ExcelBase):
-			return
-		# Charts are not yet automatically detected with objectFromFocus, so therefore use selection
-		sel=focus._getSelection()
-		if not sel:
-			return
-		eventHandler.queueEvent("gainFocus",sel)
-  
+		eventHandler.queueEvent("gainFocus",api.getDesktopObject().objectWithFocus())
+
+	def name(self):
+		return self.excelItemObject.name  
   
 	@property
 	def isAfterSelection(self):
@@ -301,10 +282,10 @@ class ExcelFormControlQuickNavItem(ExcelQuickNavItem):
 class FormControlExcelCollectionQuicknavIterator(ExcelQuicknavIterator):
 	quickNavItemClass=ExcelFormControlQuickNavItem
 	def collectionFromWorksheet( self , worksheetObject ):
-# 		try:
-		return  worksheetObject.Shapes
-# 		except(COMError):
-# 			return None
+		try:
+			return worksheetObject.Shapes
+		except(COMError):
+			return None
 # 
 
 	
@@ -319,7 +300,7 @@ class ExcelBrowseModeTreeInterceptor(browseMode.BrowseModeTreeInterceptor):
 		try:
 			return self.rootNVDAObject.excelWorksheetObject.name==self.rootNVDAObject.excelApplicationObject.activeSheet.name
 		except (COMError,AttributeError,NameError):
-			log.debugWarning("could not compair sheet names",exc_info=True)
+			log.debugWarning("could not compare sheet names",exc_info=True)
 			return False
 
 
@@ -342,8 +323,8 @@ class ExcelBrowseModeTreeInterceptor(browseMode.BrowseModeTreeInterceptor):
 			return CommentExcelCollectionQuicknavIterator( nodeType , self.rootNVDAObject.excelWorksheetObject , direction , None ).iterate()
 		elif nodeType=="formula":
 			return FormulaExcelCollectionQuicknavIterator( nodeType , self.rootNVDAObject.excelWorksheetObject , direction , None ).iterate()
-		elif nodeType=="formcontrols":
-			return FormControlExcelCollectionQuicknavIterator( nodeType , self.rootNVDAObject.excelWorksheetObject , direction , None ).iterate()
+		elif nodeType=="formField":
+			FormControlExcelCollectionQuicknavIterator( nodeType , self.rootNVDAObject.excelWorksheetObject , direction , None ).iterate()
 		else:
 			raise NotImplementedError
 
@@ -367,7 +348,7 @@ class ElementsListDialog(browseMode.ElementsListDialog):
 		("formula", _("&Formula")),
 		# Translators: The label of a radio button to select the type of element
 		# in the browse mode Elements List dialog.
-		("formcontrols", _("&FormControls")),
+		("formField", _("&FormFields")),
 		
 	)
 
