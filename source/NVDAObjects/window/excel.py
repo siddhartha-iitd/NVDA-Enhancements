@@ -27,7 +27,8 @@ import controlTypes
 from . import Window
 from .. import NVDAObjectTextInfo
 import scriptHandler
-
+import inputCore
+import virtualBuffers
 import browseMode
 
 xlCenter=-4108
@@ -206,9 +207,9 @@ class ExcelQuicknavIterator(object):
 
 	def filter(self,item):
 		"""
-		Only allows certain items fom a collection to be emitted. E.g. a chart .
+		Only allows certain items from a collection to be emitted. E.g. a chart .
 		@param item: an item from a Microsoft excel collection (e.g. chart object).
-		@return True if this item should be allowd, false otherwise.
+		@return True if this item should be allowed, false otherwise.
 		@rtype: bool
 		"""
 		return True
@@ -262,7 +263,7 @@ class ExcelBrowseModeTreeInterceptor(browseMode.BrowseModeTreeInterceptor):
 		try:
 			return self.rootNVDAObject.excelWorksheetObject.name==self.rootNVDAObject.excelApplicationObject.activeSheet.name
 		except (COMError,AttributeError,NameError):
-			log.debugWarning("could not compair sheet names",exc_info=True)
+			log.debugWarning("could not compare sheet names",exc_info=True)
 			return False
 
 
@@ -307,28 +308,28 @@ class ExcelBrowseModeTreeInterceptor(browseMode.BrowseModeTreeInterceptor):
 		lastRow = ws.Cells(ws.Rows.Count, currentColumn).End(xlUp).Row
 		lastColumn = ws.Cells(currentRow, ws.Columns.Count).End(xlToLeft).Column 
 
-		if   direction == 0:
+		if   direction == "left":
 			self.cellPosition = self.cellPosition.Offset(0,-1)
-		elif direction == 1:
+		elif direction == "right":
 			self.cellPosition = self.cellPosition.Offset(0,1)
-		elif direction == 2:
+		elif direction == "up":
 			self.cellPosition = self.cellPosition.Offset(-1,0)
-		elif direction == 3:
+		elif direction == "down":
 			self.cellPosition = self.cellPosition.Offset(1,0)
 		#Start-of-Column
-		elif direction == 4:
+		elif direction == "startcol":
 			rowOffset = 1- currentRow
 			self.cellPosition = self.cellPosition.Offset(rowOffset,0)
 		#Start-of-Row
-		elif direction == 5:
+		elif direction == "startrow":
 			columnOffset = 1 - currentColumn
 			self.cellPosition = self.cellPosition.Offset(0,columnOffset)
 		#End-of-Row
-		elif direction == 6:
+		elif direction == "endrow":
 			columnOffset = lastColumn - currentColumn
 			self.cellPosition = self.cellPosition.Offset(0,columnOffset)
 		#End-of-Column
-		elif direction == 7:
+		elif direction == "endcol":
 			rowOffset = lastRow - currentRow
 			self.cellPosition = self.cellPosition.Offset(rowOffset,0)
 		else:
@@ -349,16 +350,16 @@ class ExcelBrowseModeTreeInterceptor(browseMode.BrowseModeTreeInterceptor):
 			ui.message("Editable")
 		
 	def script_moveLeft(self,gesture):
-		self.scriptHelper(0)
+		self.scriptHelper("left")
 	
 	def script_moveRight(self,gesture):
-		self.scriptHelper(1)
+		self.scriptHelper("right")
 
 	def script_moveUp(self,gesture):
-		self.scriptHelper(2)
+		self.scriptHelper("up")
 
 	def script_moveDown(self,gesture):
-		self.scriptHelper(3)
+		self.scriptHelper("down")
 	
 	def getColumnNameFromNumber(self,colNum):
 		colList = (self.rootNVDAObject.excelWorksheetObject.Cells(1, colNum).Address(True, False)).split('$')
@@ -405,16 +406,74 @@ class ExcelBrowseModeTreeInterceptor(browseMode.BrowseModeTreeInterceptor):
 			ui.message(cellValueText)
 
 	def script_startOfColumn(self,gesture):
-		self.scriptHelper(4)
+		self.scriptHelper("startcol")
 
 	def script_startOfRow(self,gesture):
-		self.scriptHelper(5)
+		self.scriptHelper("startrow")
 
 	def script_endOfRow(self,gesture):
-		self.scriptHelper(6)
+		self.scriptHelper("endrow")
 
 	def script_endOfColumn(self,gesture):
-		self.scriptHelper(7)
+		self.scriptHelper("endcol")
+
+	def script_activatePosition(self,gesture):
+		rowNum = self.cellPosition.Row
+		colNum = self.cellPosition.Column
+		log.io("\nRow is " + str(rowNum) + "\n")
+		log.io("\nColumn is " + str(colNum) + "\n")
+		focus = api.getFocusObject()
+		vbuf = focus.treeInterceptor
+		if not vbuf:
+			# #2023: Search the focus and its ancestors for an object for which browse mode is optional.
+			for obj in itertools.chain((api.getFocusObject(),), reversed(api.getFocusAncestors())):
+				if obj.shouldCreateTreeInterceptor:
+					continue
+				try:
+					obj.treeInterceptorClass
+				except:
+					continue
+				break
+			else:
+				return
+			# Force the tree interceptor to be created.
+			obj.shouldCreateTreeInterceptor = True
+			ti = treeInterceptorHandler.update(obj)
+			if not ti:
+				return
+			if focus in ti:
+				# Update the focus, as it will have cached that there is no tree interceptor.
+				focus.treeInterceptor = ti
+				# If we just happened to create a browse mode TreeInterceptor
+				# Then ensure that browse mode is reported here. From the users point of view, browse mode was turned on.
+				if isinstance(ti,browseMode.BrowseModeTreeInterceptor) and not ti.passThrough:
+					browseMode.reportPassThrough(ti,False)
+					braille.handler.handleGainFocus(ti)
+			return
+
+		if not isinstance(vbuf, browseMode.BrowseModeTreeInterceptor):
+			return
+		# Toggle browse mode pass-through.
+		vbuf.passThrough = not vbuf.passThrough
+		if isinstance(vbuf,virtualBuffers.VirtualBuffer):
+			# If we are enabling pass-through, the user has explicitly chosen to do so, so disable auto-pass-through.
+			# If we're disabling pass-through, re-enable auto-pass-through.
+			vbuf.disableAutoPassThrough = vbuf.passThrough
+		browseMode.reportPassThrough(vbuf)
+# 		activeSheet = self.excelApplicationObject.ActiveSheet
+# 		newFocusObject = self.excelApplicationObject.Cells(rowNum,colNum) 
+# 		self.excelApplicationObject.Cells(rowNum,colNum).Select
+		self.excelCellObject = self.excelApplicationObject.Cells(rowNum,colNum)
+		eventHandler.queueEvent("gainFocus",ExcelCell(windowHandle=self.rootNVDAObject.windowHandle,excelWindowObject=self.rootNVDAObject.excelWindowObject,excelCellObject=self.excelCellObject) )
+# 		newFocus = posn.Activate
+# 		api.setFocusObject(newFocusObject)
+# 		newFocus=self.excelApplicationObject.ActiveCell
+# 		if eventHandler.lastQueuedFocusObject is newFocus: return
+# 		eventHandler.queueEvent("gainFocus",newFocus)
+
+	# Translators: Input help mode message for toggle focus and browse mode command in web browsing and other situations.
+	script_activatePosition.__doc__=_("Toggles between browse mode and focus mode. When in focus mode, keys will pass straight through to the application, allowing you to interact directly with a control. When in browse mode, you can navigate the document with the cursor, quick navigation keys, etc.")
+	script_activatePosition.category=inputCore.SCRCAT_BROWSEMODE
 
 	__gestures = {
 		"kb:upArrow": "moveUp",
@@ -427,6 +486,8 @@ class ExcelBrowseModeTreeInterceptor(browseMode.BrowseModeTreeInterceptor):
 		"kb:control+downArrow":"endOfColumn",
 		"kb:control+leftArrow":"startOfRow",
 		"kb:control+rightArrow":"endOfRow",
+		"kb:enter": "activatePosition",
+		"kb:space": "activatePosition",
 	}
 
 class ElementsListDialog(browseMode.ElementsListDialog):
