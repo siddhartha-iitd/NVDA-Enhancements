@@ -347,7 +347,7 @@ class ExcelBrowseModeTreeInterceptor(browseMode.BrowseModeTreeInterceptor):
 		ui.message(cellLocationText)
 		
 		if not self.cellPosition.Locked :
-			ui.message("Editable")
+			ui.message(_("Editable"))
 		
 	def script_moveLeft(self,gesture):
 		self.scriptHelper("left")
@@ -420,8 +420,9 @@ class ExcelBrowseModeTreeInterceptor(browseMode.BrowseModeTreeInterceptor):
 	def script_activatePosition(self,gesture):
 		rowNum = self.cellPosition.Row
 		colNum = self.cellPosition.Column
-		log.io("\nRow is " + str(rowNum) + "\n")
-		log.io("\nColumn is " + str(colNum) + "\n")
+		if self.excelApplicationObject.Cells(rowNum,colNum).Locked:
+			ui.message(_("This cell is non-editable"))
+			return		
 		focus = api.getFocusObject()
 		vbuf = focus.treeInterceptor
 		if not vbuf:
@@ -460,16 +461,8 @@ class ExcelBrowseModeTreeInterceptor(browseMode.BrowseModeTreeInterceptor):
 			# If we're disabling pass-through, re-enable auto-pass-through.
 			vbuf.disableAutoPassThrough = vbuf.passThrough
 		browseMode.reportPassThrough(vbuf)
-# 		activeSheet = self.excelApplicationObject.ActiveSheet
-# 		newFocusObject = self.excelApplicationObject.Cells(rowNum,colNum) 
-# 		self.excelApplicationObject.Cells(rowNum,colNum).Select
-		self.excelCellObject = self.excelApplicationObject.Cells(rowNum,colNum)
-		eventHandler.queueEvent("gainFocus",ExcelCell(windowHandle=self.rootNVDAObject.windowHandle,excelWindowObject=self.rootNVDAObject.excelWindowObject,excelCellObject=self.excelCellObject) )
-# 		newFocus = posn.Activate
-# 		api.setFocusObject(newFocusObject)
-# 		newFocus=self.excelApplicationObject.ActiveCell
-# 		if eventHandler.lastQueuedFocusObject is newFocus: return
-# 		eventHandler.queueEvent("gainFocus",newFocus)
+		self.excelApplicationObject.Cells(rowNum,colNum).Select
+		self.excelApplicationObject.Cells(rowNum,colNum).Activate()
 
 	# Translators: Input help mode message for toggle focus and browse mode command in web browsing and other situations.
 	script_activatePosition.__doc__=_("Toggles between browse mode and focus mode. When in focus mode, keys will pass straight through to the application, allowing you to interact directly with a control. When in browse mode, you can navigate the document with the cursor, quick navigation keys, etc.")
