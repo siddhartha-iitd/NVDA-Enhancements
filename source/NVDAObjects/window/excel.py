@@ -307,33 +307,35 @@ class ExcelBrowseModeTreeInterceptor(browseMode.BrowseModeTreeInterceptor):
 		currentRow = self.cellPosition.Row
 		lastRow = ws.Cells(ws.Rows.Count, currentColumn).End(xlUp).Row
 		lastColumn = ws.Cells(currentRow, ws.Columns.Count).End(xlToLeft).Column 
-
-		if   direction == "left":
-			self.cellPosition = self.cellPosition.Offset(0,-1)
-		elif direction == "right":
-			self.cellPosition = self.cellPosition.Offset(0,1)
-		elif direction == "up":
-			self.cellPosition = self.cellPosition.Offset(-1,0)
-		elif direction == "down":
-			self.cellPosition = self.cellPosition.Offset(1,0)
-		#Start-of-Column
-		elif direction == "startcol":
-			rowOffset = 1- currentRow
-			self.cellPosition = self.cellPosition.Offset(rowOffset,0)
-		#Start-of-Row
-		elif direction == "startrow":
-			columnOffset = 1 - currentColumn
-			self.cellPosition = self.cellPosition.Offset(0,columnOffset)
-		#End-of-Row
-		elif direction == "endrow":
-			columnOffset = lastColumn - currentColumn
-			self.cellPosition = self.cellPosition.Offset(0,columnOffset)
-		#End-of-Column
-		elif direction == "endcol":
-			rowOffset = lastRow - currentRow
-			self.cellPosition = self.cellPosition.Offset(rowOffset,0)
-		else:
-			return
+		try:
+			if   direction == "left":
+				self.cellPosition = self.cellPosition.Offset(0,-1)
+			elif direction == "right":
+				self.cellPosition = self.cellPosition.Offset(0,1)
+			elif direction == "up":
+				self.cellPosition = self.cellPosition.Offset(-1,0)
+			elif direction == "down":
+				self.cellPosition = self.cellPosition.Offset(1,0)
+			#Start-of-Column
+			elif direction == "startcol":
+				rowOffset = 1- currentRow
+				self.cellPosition = self.cellPosition.Offset(rowOffset,0)
+			#Start-of-Row
+			elif direction == "startrow":
+				columnOffset = 1 - currentColumn
+				self.cellPosition = self.cellPosition.Offset(0,columnOffset)
+					#End-of-Row
+			elif direction == "endrow":
+				columnOffset = lastColumn - currentColumn
+				self.cellPosition = self.cellPosition.Offset(0,columnOffset)
+			#End-of-Column
+			elif direction == "endcol":
+				rowOffset = lastRow - currentRow
+				self.cellPosition = self.cellPosition.Offset(rowOffset,0)
+			else:
+				return
+		except COMError:
+			pass
 		
 		if self.cellPosition.MergeCells:
 			self.cellPosition = self.cellPosition.MergeArea.Cells(1)
