@@ -350,6 +350,7 @@ class ExcelBrowseModeTreeInterceptor(browseMode.BrowseModeTreeInterceptor):
 		
 		if not self.cellPosition.Locked :
 			ui.message(_("Editable"))
+		self.excelApplicationObject.Cells(currentRow, currentColumn).Activate()
 		
 	def script_moveLeft(self,gesture):
 		self.scriptHelper("left")
