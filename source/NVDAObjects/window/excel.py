@@ -306,7 +306,7 @@ class ExcelBrowseModeTreeInterceptor(browseMode.BrowseModeTreeInterceptor):
 		currentColumn = self.cellPosition.Column
 		currentRow = self.cellPosition.Row
 		lastRow = ws.Cells(ws.Rows.Count, currentColumn).End(xlUp).Row
-		lastColumn = ws.Cells(currentRow, ws.Columns.Count).End(xlToLeft).Column 
+		lastColumn = ws.Cells(currentRow, ws.Columns.Count).End(xlToLeft).Column
 		try:
 			if   direction == "left":
 				self.cellPosition = self.cellPosition.Offset(0,-1)
@@ -350,7 +350,8 @@ class ExcelBrowseModeTreeInterceptor(browseMode.BrowseModeTreeInterceptor):
 		
 		if not self.cellPosition.Locked :
 			ui.message(_("Editable"))
-		self.excelApplicationObject.Cells(currentRow, currentColumn).Activate()
+		self.cellPosition.Select
+		self.cellPosition.Activate()
 		
 	def script_moveLeft(self,gesture):
 		self.scriptHelper("left")
@@ -421,8 +422,8 @@ class ExcelBrowseModeTreeInterceptor(browseMode.BrowseModeTreeInterceptor):
 		self.scriptHelper("endcol")
 
 	def script_activatePosition(self,gesture):
-		rowNum = self.cellPosition.Row
-		colNum = self.cellPosition.Column
+		rowNum = self.excelApplicationObject.ActiveCell.Row
+		colNum = self.excelApplicationObject.ActiveCell.Column
 		if self.excelApplicationObject.Cells(rowNum,colNum).Locked:
 			ui.message(_("This cell is non-editable"))
 			return		
@@ -476,8 +477,8 @@ class ExcelBrowseModeTreeInterceptor(browseMode.BrowseModeTreeInterceptor):
 		"kb:downArrow":"moveDown",
 		"kb:leftArrow":"moveLeft",
 		"kb:rightArrow":"moveRight",
-		"kb:NVDA+r":"readRow",
-		"kb:NVDA+c":"readColumn",
+		"kb:control+alt+r":"readRow",
+		"kb:control+alt+c":"readColumn",
 		"kb:control+upArrow":"startOfColumn",
 		"kb:control+downArrow":"endOfColumn",
 		"kb:control+leftArrow":"startOfRow",
