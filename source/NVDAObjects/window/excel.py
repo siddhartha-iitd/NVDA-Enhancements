@@ -348,7 +348,7 @@ class ExcelBrowseModeTreeInterceptor(browseMode.BrowseModeTreeInterceptor):
 			ui.message(cellValueText)
 		ui.message(cellLocationText)
 		
-		if not self.cellPosition.Locked :
+		if self.excelApplicationObject.ActiveSheet.ProtectContents and (not self.cellPosition.Locked) :
 			ui.message(_("Editable"))
 		self.cellPosition.Select
 		self.cellPosition.Activate()
@@ -422,9 +422,11 @@ class ExcelBrowseModeTreeInterceptor(browseMode.BrowseModeTreeInterceptor):
 		self.scriptHelper("endcol")
 
 	def script_activatePosition(self,gesture):
-		rowNum = self.excelApplicationObject.ActiveCell.Row
-		colNum = self.excelApplicationObject.ActiveCell.Column
-		if self.excelApplicationObject.Cells(rowNum,colNum).Locked:
+		excelApplicationObject = self.rootNVDAObject.excelWorksheetObject.Application
+		rowNum = excelApplicationObject.ActiveCell.Row
+		colNum = excelApplicationObject.ActiveCell.Column
+		excelRangeObject = excelApplicationObject.Cells(rowNum,colNum)
+		if excelApplicationObject.ActiveSheet.ProtectContents and excelRangeObject.Locked:
 			ui.message(_("This cell is non-editable"))
 			return		
 		focus = api.getFocusObject()
@@ -441,13 +443,13 @@ class ExcelBrowseModeTreeInterceptor(browseMode.BrowseModeTreeInterceptor):
 				break
 			else:
 				return
-			# Force the tree interceptor to be created.
+			# Force the tree intercepter to be created.
 			obj.shouldCreateTreeInterceptor = True
 			ti = treeInterceptorHandler.update(obj)
 			if not ti:
 				return
 			if focus in ti:
-				# Update the focus, as it will have cached that there is no tree interceptor.
+				# Update the focus, as it will have cached that there is no tree intercepter.
 				focus.treeInterceptor = ti
 				# If we just happened to create a browse mode TreeInterceptor
 				# Then ensure that browse mode is reported here. From the users point of view, browse mode was turned on.
@@ -465,8 +467,8 @@ class ExcelBrowseModeTreeInterceptor(browseMode.BrowseModeTreeInterceptor):
 			# If we're disabling pass-through, re-enable auto-pass-through.
 			vbuf.disableAutoPassThrough = vbuf.passThrough
 		browseMode.reportPassThrough(vbuf)
-		self.excelApplicationObject.Cells(rowNum,colNum).Select
-		self.excelApplicationObject.Cells(rowNum,colNum).Activate()
+		excelRangeObject.Select
+		excelRangeObject.Activate()
 
 	# Translators: Input help mode message for toggle focus and browse mode command in web browsing and other situations.
 	script_activatePosition.__doc__=_("Toggles between browse mode and focus mode. When in focus mode, keys will pass straight through to the application, allowing you to interact directly with a control. When in browse mode, you can navigate the document with the cursor, quick navigation keys, etc.")
@@ -477,8 +479,8 @@ class ExcelBrowseModeTreeInterceptor(browseMode.BrowseModeTreeInterceptor):
 		"kb:downArrow":"moveDown",
 		"kb:leftArrow":"moveLeft",
 		"kb:rightArrow":"moveRight",
-		"kb:control+alt+r":"readRow",
-		"kb:control+alt+c":"readColumn",
+		"kb:control+alt+,":"readRow",
+		"kb:control+alt+.":"readColumn",
 		"kb:control+upArrow":"startOfColumn",
 		"kb:control+downArrow":"endOfColumn",
 		"kb:control+leftArrow":"startOfRow",
