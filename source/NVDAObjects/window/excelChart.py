@@ -267,85 +267,6 @@ chartTypeDict = {
 	xlXYScatterSmoothNoMarkers : _( "Scatter with Smoothed Lines and No Data Markers")
 }
 
-# Dictionary for the segments of different chart types.
-chartSegmentDict = {
-	xl3DArea : "3D Area",
-	xl3DAreaStacked : "3D Stacked Area",
-	xl3DAreaStacked100 : "100 percent Stacked Area",
-	xl3DBarClustered : "3D Clustered Bar",
-	xl3DBarStacked : "3D Stacked Bar",
-	xl3DBarStacked100 : "3D 100 percent Stacked Bar",
-	xl3DColumn : "Column",
-	xl3DColumnClustered : "Column",
-	xl3DColumnStacked : "Column",
-	xl3DColumnStacked100 : "Column",
-	xl3DLine : "Line",
-	xl3DPie : "Slice",
-	xl3DPieExploded : "Slice",
-	xlArea : "Area",
-	xlAreaStacked : "Stacked Area",
-	xlAreaStacked100 : "100 percent Stacked Area",
-	xlBarClustered : "Clustered Bar",
-	xlBarOfPie : "Bar of Pie",
-	xlBarStacked : "Stacked Bar",
-	xlBarStacked100 : "100 percent Stacked Bar",
-	xlBubble : "Bubble",
-	xlBubble3DEffect : "Bubble with 3D effects",
-	xlColumnClustered : "Column",
-	xlColumnStacked : "Column",
-	xlColumnStacked100 : "Column",
-	xlConeBarClustered : "Clustered Cone Bar",
-	xlConeBarStacked : "Stacked Cone Bar",
-	xlConeBarStacked100 : "100 percent Stacked Cone Bar",
-	xlConeCol : "3D Cone Column",
-	xlConeColClustered : "Clustered Cone Column",
-	xlConeColStacked : "Stacked Cone Column",
-	xlConeColStacked100 : "100 percent Stacked Cone Column",
-	xlCylinderBarClustered : "Clustered Cylinder Bar",
-	xlCylinderBarStacked : "Stacked Cylinder Bar",
-	xlCylinderBarStacked100 : "100 percent Stacked Cylinder Bar",
-	xlCylinderCol : "3D Cylinder Column",
-	xlCylinderColClustered : "Clustered Cone Column",
-	xlCylinderColStacked : "Stacked Cone Column",
-	xlCylinderColStacked100 : "100 percent Stacked Cylinder Column",
-	xlDoughnut : "Doughnut",
-	xlDoughnutExploded : "Exploded Doughnut",
-	xlLine : "Line",
-	xlLineMarkers : "Line",
-	xlLineMarkersStacked : "Line",
-	xlLineMarkersStacked100 : "Line",
-	xlLineStacked : "Line",
-	xlLineStacked100 : "Line",
-	xlPie : "slice",
-	xlPieExploded : "Exploded Pie",
-	xlPieOfPie : "Pie of Pie",
-	xlPyramidBarClustered : "Clustered Pyramid Bar",
-	xlPyramidBarStacked : "Stacked Pyramid Bar",
-	xlPyramidBarStacked100 : "100 percent Stacked Pyramid Bar",
-	xlPyramidCol : "3D Pyramid Column",
-	xlPyramidColClustered : "Clustered Pyramid Column",
-	xlPyramidColStacked : "Stacked Pyramid Column",
-	xlPyramidColStacked100 : "100 percent Stacked Pyramid Column",
-	xlRadar : "Radar",
-	xlRadarFilled : "Filled Radar",
-	xlRadarMarkers : "Radar with Data Markers",
-	xlStockHLC : "High-Low-Close",
-	xlStockOHLC : "Open-High-Low-Close",
-	xlStockVHLC : "Volume-High-Low-Close",
-	xlStockVOHLC : "Volume-Open-High-Low-Close",
-	xlSurface : "3D Surface",
-	xlSurfaceTopView : "Surface (Top View)",
-	xlSurfaceTopViewWireframe : "Surface (Top View wireframe)",
-	xlSurfaceWireframe : "3D Surface (wireframe)",
-	xlXYScatter : "Scatter",
-	xlXYScatterLines : "Scatter with Lines",
-	xlXYScatterLinesNoMarkers : "Scatter with Lines and No Data Markers",
-	xlXYScatterSmooth : "Scatter with Smoothed Lines",
-	xlXYScatterSmoothNoMarkers : "Scatter with Smoothed Lines and No Data Markers"
-}
-
-
-
 # Axis types in chart
 xlCategory = 1
 xlValue = 2
@@ -601,10 +522,17 @@ class ExcelChartElementBase(Window):
 
 	def GetChartSegment(self):
 		chartType = self.excelChartObject.ChartType
-		if chartType in chartSegmentDict.keys():
-			text= chartSegmentDict[chartType]
+		if chartType == xl3DPie or chartType == xl3DPieExploded or chartType == xlPie or chartType == xlPieExploded or chartType == xlPieOfPie: 
+			# Translators: Chart segment name to be reported such as slice 1 of 3 for  pie charts 
+			text=_("slice")
+		elif chartType == xl3DColumn or chartType == xl3DColumnClustered or chartType == xl3DColumnStacked or chartType == xl3DColumnStacked100 or chartType == xlColumnClustered or chartType == xlColumnStacked100 or chartType == xlColumnStacked: 
+			# Translators: Chart segment name to be reported such as column 1 of 3 for  column charts 
+			text=_("column")
+		elif chartType == xl3DLine or chartType == xlLine or chartType == xlLineMarkers or chartType == xlLineMarkersStacked or chartType == xlLineMarkersStacked100 or chartType == xlLineStacked or chartType == xlLineStacked100: 
+			# Translators: Chart segment name to be reported such as data point 1 of 3 for  line charts 
+			text=_("data point")
 		else:
-			# Translators: Chart segment such as slice for  pie chart etc this is reported when there is no segment available.
+			# Translators: Chart segment name to be reported such as item 1 of 3 for  the chart types that do not have specific description.
 			text=_("item")
 		return text
 
@@ -624,87 +552,87 @@ class ExcelChartElementBase(Window):
 
 	def _getChartElementText(self, ElementID ,arg1,arg2 , reportExtraInfo=False ):
 		if ElementID == xlDisplayUnitLabel:  
-			# Translators: prompt for xlDisplayUnitLabel
+			# Translators: excel chart element name to be announced when the focus moves to this element. For more information see the description of ElementID at the following URL: https://msdn.microsoft.com/en-us/library/office/ff197223.aspx
 			return  _( "Display Unit Label") 
 
 		elif ElementID == xlMajorGridlines:  
-			# Translators: prompt for xlMajorGridlines
+			# Translators: excel chart element name to be announced when the focus moves to this element. For more information see the description of ElementID at the following URL: https://msdn.microsoft.com/en-us/library/office/ff197223.aspx
 			return  _( "Major Gridlines" ) 
 
 		elif ElementID == xlMinorGridlines:  
-			# Translators: prompt for xlMinorGridlines
+			# Translators: excel chart element name to be announced when the focus moves to this element. For more information see the description of ElementID at the following URL: https://msdn.microsoft.com/en-us/library/office/ff197223.aspx
 			return _( "Minor Gridlines" ) 
 
 		elif ElementID == xlPivotChartDropZone:  
-			# Translators: prompt for xlPivotChartDropZone
+			# Translators: excel chart element name to be announced when the focus moves to this element. For more information see the description of ElementID at the following URL: https://msdn.microsoft.com/en-us/library/office/ff197223.aspx
 			return _( "Pivot Chart Drop Zone" ) 
 
 		elif ElementID == xlPivotChartFieldButton:
-			# Translators: prompt for xlPivotChartFieldButton
+			# Translators: excel chart element name to be announced when the focus moves to this element. For more information see the description of ElementID at the following URL: https://msdn.microsoft.com/en-us/library/office/ff197223.aspx
 			return _( "Pivot Chart Field Button" ) 
 
 		elif ElementID == xlDownBars:
-			# Translators: prompt for xlDownBars
+			# Translators: excel chart element name to be announced when the focus moves to this element. For more information see the description of ElementID at the following URL: https://msdn.microsoft.com/en-us/library/office/ff197223.aspx
 			return _( "Down Bars" ) 
 
 		elif ElementID == xlDropLines:
-			# Translators: prompt for xlDropLines
+			# Translators: excel chart element name to be announced when the focus moves to this element. For more information see the description of ElementID at the following URL: https://msdn.microsoft.com/en-us/library/office/ff197223.aspx
 			return _( "Drop Lines" )
 
 		elif ElementID == xlHiLoLines:
-			# Translators: prompt for xlHiLoLines
+			# Translators: excel chart element name to be announced when the focus moves to this element. For more information see the description of ElementID at the following URL: https://msdn.microsoft.com/en-us/library/office/ff197223.aspx
 			return  _( "Hi Lo Lines" )
 
 		elif ElementID == xlRadarAxisLabels:
-			# Translators: prompt for xlRadarAxisLabels
+			# Translators: excel chart element name to be announced when the focus moves to this element. For more information see the description of ElementID at the following URL: https://msdn.microsoft.com/en-us/library/office/ff197223.aspx
 			return _( "Radar Axis Labels" )
 
 		elif ElementID == xlSeriesLines:
-			# Translators: prompt for xlSeriesLines
+			# Translators: excel chart element name to be announced when the focus moves to this element. For more information see the description of ElementID at the following URL: https://msdn.microsoft.com/en-us/library/office/ff197223.aspx
 			return _( "Series Lines" )
 
 		elif ElementID == xlUpBars:
-			# Translators: prompt for xlUpBars
+			# Translators: excel chart element name to be announced when the focus moves to this element. For more information see the description of ElementID at the following URL: https://msdn.microsoft.com/en-us/library/office/ff197223.aspx
 			return _( "Up Bars" )
 
 		elif ElementID == xlCorners:
-			# Translators: prompt for xlCorners
+			# Translators: excel chart element name to be announced when the focus moves to this element. For more information see the description of ElementID at the following URL: https://msdn.microsoft.com/en-us/library/office/ff197223.aspx
 			return _( "Corners" )
 
 		elif ElementID == xlDataTable:
-			# Translators: prompt for xlDataTable
+			# Translators: excel chart element name to be announced when the focus moves to this element. For more information see the description of ElementID at the following URL: https://msdn.microsoft.com/en-us/library/office/ff197223.aspx
 			return _( "Data Table" )
 
 		elif ElementID == xlFloor:
-			# Translators: prompt for xlFloor
+			# Translators: excel chart element name to be announced when the focus moves to this element. For more information see the description of ElementID at the following URL: https://msdn.microsoft.com/en-us/library/office/ff197223.aspx
 			return  _( "Floor" )
 
 		elif ElementID == xlNothing:
-			# Translators: prompt for xlNothing
-			return _( "xlNothing" )
+			# Translators: excel chart element name to be announced when the focus moves to this element. For more information see the description of ElementID at the following URL: https://msdn.microsoft.com/en-us/library/office/ff197223.aspx
+			return _( "Unknown" )
 
 		elif ElementID == xlWalls:
-			# Translators: prompt for xlWalls
+			# Translators: excel chart element name to be announced when the focus moves to this element. For more information see the description of ElementID at the following URL: https://msdn.microsoft.com/en-us/library/office/ff197223.aspx
 			return _( "Walls" )
 
 		elif ElementID == xlDataLabel:
-			# Translators: prompt for xlDataLabel
+			# Translators: excel chart element name to be announced when the focus moves to this element. For more information see the description of ElementID at the following URL: https://msdn.microsoft.com/en-us/library/office/ff197223.aspx
 			return _( "Data Label" )
 
 		elif ElementID == xlErrorBars:
-			# Translators: prompt for xlErrorBars
+			# Translators: excel chart element name to be announced when the focus moves to this element. For more information see the description of ElementID at the following URL: https://msdn.microsoft.com/en-us/library/office/ff197223.aspx
 			return _( "Error Bars" )
 
 		elif ElementID == xlXErrorBars:
-			# Translators: prompt for xlXErrorBars
+			# Translators: excel chart element name to be announced when the focus moves to this element. For more information see the description of ElementID at the following URL: https://msdn.microsoft.com/en-us/library/office/ff197223.aspx
 			return _( "X Error Bars" )
 
 		elif ElementID == xlYErrorBars:
-			# Translators: prompt for xlYErrorBars
+			# Translators: excel chart element name to be announced when the focus moves to this element. For more information see the description of ElementID at the following URL: https://msdn.microsoft.com/en-us/library/office/ff197223.aspx
 			return _( "Y Error Bars" )
 
 		elif ElementID == xlShape:
-			# Translators: prompt for xlShape
+			# Translators: excel chart element name to be announced when the focus moves to this element. For more information see the description of ElementID at the following URL: https://msdn.microsoft.com/en-us/library/office/ff197223.aspx
 			return _( "Shape" )
 
 	#end def _Select
@@ -741,14 +669,14 @@ class ExcelChartElementSeries(ExcelChartElementBase):
 					if arg2 > 1:
 
 						if self.excelChartObject.SeriesCollection(arg1).Values[arg2 - 1] == self.excelChartObject.SeriesCollection(arg1).Values[arg2 - 2]: 
-							# Translators: for line charts, no change from the previous element
-							output += _( "no change from point {previousIndex}, ").format( previousIndex = arg2 - 1 )
+							# Translators: for line charts, no change from the previous data point on the left
+							output += _( "no change from {segmentName} {previousIndex}, ").format( segmentName =  self.GetChartSegment() , previousIndex = arg2 - 1 )
 						elif self.excelChartObject.SeriesCollection(arg1).Values[arg2 - 1] > self.excelChartObject.SeriesCollection(arg1).Values[arg2 - 2]: 
-							# Translators: for line charts, increase from the previous element
-							output += _( "Increased by {incrementValue} from point {previousIndex}, ").format( incrementValue = self.excelChartObject.SeriesCollection(arg1).Values[arg2 - 1] - self.excelChartObject.SeriesCollection(arg1).Values[arg2 - 2] , previousIndex = arg2 - 1 ) 
+							# Translators: for line charts, increase from the previous data point on the left
+							output += _( "Increased by {incrementValue} from {segmentName} {previousIndex}, ").format( incrementValue = self.excelChartObject.SeriesCollection(arg1).Values[arg2 - 1] - self.excelChartObject.SeriesCollection(arg1).Values[arg2 - 2] , segmentName =  self.GetChartSegment() , previousIndex = arg2 - 1 ) 
 						else:
-							# Translators: for line charts, decrease from the previous element
-							output += _( "decreased by {decrementValue} from point {previousIndex}, ").format( decrementValue = self.excelChartObject.SeriesCollection(arg1).Values[arg2 - 2] - self.excelChartObject.SeriesCollection(arg1).Values[arg2 - 1] , previousIndex = arg2 - 1 ) 
+							# Translators: for line charts, decrease from the previous data point on the left
+							output += _( "decreased by {decrementValue} from {segmentName} {previousIndex}, ").format( decrementValue = self.excelChartObject.SeriesCollection(arg1).Values[arg2 - 2] - self.excelChartObject.SeriesCollection(arg1).Values[arg2 - 1] , segmentName =  self.GetChartSegment() , previousIndex = arg2 - 1 ) 
 
 				if self.excelChartObject.HasAxis(xlCategory) and self.excelChartObject.Axes(xlCategory).HasTitle:
 					# Translators: report category axis title if available in the format title value
