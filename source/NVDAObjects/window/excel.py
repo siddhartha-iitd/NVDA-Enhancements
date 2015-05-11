@@ -345,10 +345,13 @@ class ExcelBrowseModeTreeInterceptor(browseMode.BrowseModeTreeInterceptor):
 		
 		cellValueText = self.cellPosition.Text
 		if cellValueText:
-			ui.message(cellValueText)
-		ui.message(cellLocationText)
+			# Translators: the description for the Cell Value in  excel in Browse Mode
+			ui.message(_(cellValueText))
+		# Translators: the description for the Cell Address in excel in Browse Mode
+		ui.message(_(cellLocationText))
 		
 		if self.excelApplicationObject.ActiveSheet.ProtectContents and (not self.cellPosition.Locked) :
+			# Translators: the description for Locked cells in excel sheet in BrowseMode
 			ui.message(_("Editable"))
 		self.cellPosition.Select
 		self.cellPosition.Activate()
@@ -373,17 +376,20 @@ class ExcelBrowseModeTreeInterceptor(browseMode.BrowseModeTreeInterceptor):
 		self.scriptHelper(-1)
 		ws = self.rootNVDAObject.excelWorksheetObject
 		currentRow = self.cellPosition.Row
-		ui.message(_("Reading Row {0}".format(currentRow)))
+		# Translators: the description for the Row Number of current row in excel Browse Mode.
+		ui.message(_("Reading Row {rowNumber}".format(rowNumber=currentRow)))
 		lastColumn = ws.Cells(currentRow, ws.Columns.Count).End(xlToLeft).Column
 		col = 1
 		while col <= lastColumn:
 			if ws.Cells(currentRow,col).MergeCells:
 				mergedAreaColumnCount = ws.Cells(currentRow,col).MergeArea.columns.count
-				locationText = _("Column {0} to {1}".format(self.getColumnNameFromNumber(col),self.getColumnNameFromNumber(col+mergedAreaColumnCount-1))) if mergedAreaColumnCount > 1 else _("Column {0}".format(self.getColumnNameFromNumber(col)))				
+				# Translators: the description for the Column Span of a Merged Area in excel Browse Mode
+				locationText = _("Column {fromCol} to {toCol}".format(fromCol=self.getColumnNameFromNumber(col),toCol=self.getColumnNameFromNumber(col+mergedAreaColumnCount-1))) if mergedAreaColumnCount > 1 else _("Column {singleCol}".format(singleCol=self.getColumnNameFromNumber(col)))				
 				cellValueText = ws.Cells(currentRow,col).Text
 				col += mergedAreaColumnCount
 			else:
-				locationText = _("Column {0}".format(self.getColumnNameFromNumber(col)))
+				# Translators: the description for the Column Name of current cell in a row in excel Browse Mode
+				locationText = _("Column {colName}".format(colName=self.getColumnNameFromNumber(col)))
 				cellValueText = ws.Cells(currentRow,col).Text
 				col += 1
 			ui.message(locationText)
@@ -393,17 +399,20 @@ class ExcelBrowseModeTreeInterceptor(browseMode.BrowseModeTreeInterceptor):
 		self.scriptHelper(-1)
 		ws = self.rootNVDAObject.excelWorksheetObject
 		currentCol = self.cellPosition.Column
-		ui.message(_("Reading Column {0}".format(self.getColumnNameFromNumber(currentCol))))
+		# Translators: the description for the Column Number of current column in excel Browse Mode
+		ui.message(_("Reading Column {colNum}".format(colNum=self.getColumnNameFromNumber(currentCol))))
 		lastRow = ws.Cells(ws.Rows.Count, currentCol).End(xlUp).Row
 		row = 1
 		while row <= lastRow:
 			if ws.Cells(row,currentCol).MergeCells:
 				mergedAreaRowCount = ws.Cells(row,currentCol).MergeArea.rows.count
-				locationText = _("Row {0} to {1}".format(row,row+mergedAreaRowCount-1)) if mergedAreaRowCount > 1 else _("Row {0}".format(row)) 
+				# Translators: the description for the Row Span of a Merged Area in excel Browse Mode
+				locationText = _("Row {fromRow} to {toRow}".format(fromRow=row,toRow=row+mergedAreaRowCount-1)) if mergedAreaRowCount > 1 else _("Row {rowNum}".format(rowNum=row)) 
 				cellValueText = ws.Cells(row,currentCol).Text
 				row += mergedAreaRowCount
 			else:
-				locationText = _("Row {0}".format(row)) 
+				# Translators: the description for the row number in excel Browse Mode
+				locationText = _("Row {rowNum}".format(rowNum=row)) 
 				cellValueText = ws.Cells(row,currentCol).Text
 				row += 1
 			ui.message(locationText)
@@ -427,6 +436,7 @@ class ExcelBrowseModeTreeInterceptor(browseMode.BrowseModeTreeInterceptor):
 		colNum = excelApplicationObject.ActiveCell.Column
 		excelRangeObject = excelApplicationObject.Cells(rowNum,colNum)
 		if excelApplicationObject.ActiveSheet.ProtectContents and excelRangeObject.Locked:
+			# Translators: the description for the Locked cells in excel Browse Mode, if focused for editing
 			ui.message(_("This cell is non-editable"))
 			return		
 		focus = api.getFocusObject()
