@@ -27,7 +27,8 @@ import controlTypes
 from . import Window
 from .. import NVDAObjectTextInfo
 import scriptHandler
-
+import inputCore
+import virtualBuffers
 import browseMode
 
 xlCenter=-4108
@@ -37,6 +38,12 @@ xlRight=-4152
 xlDistributed=-4117
 xlBottom=-4107
 xlTop=-4160
+xlToLeft=-4159
+xlFormulas=-4123
+xlPart=2
+xlByColumns=2
+xlPrevious=2
+xlUp=-4162
 
 alignmentLabels={
 	xlCenter:"center",
@@ -175,6 +182,21 @@ class ExcelFormulaQuickNavItem(ExcelRangeBasedQuickNavItem):
 		self.label = formulaObject.address(False,False,1,False) + " " + formulaObject.Formula
 		super( ExcelFormulaQuickNavItem , self).__init__( nodeType , document , formulaObject , formulaCollection )
 
+class ExcelSheetQuickNavItem(ExcelQuickNavItem):
+	def __init__( self , nodeType , document , sheetObject , sheetCollection ):
+		self.label = sheetObject.Name
+		self.sheetIndex = sheetObject.Index
+		self.sheetObject = sheetObject
+		super( ExcelSheetQuickNavItem , self).__init__( nodeType , document , sheetObject , sheetCollection )
+	
+	def __lt__(self,other):
+		return self.sheetIndex < other.sheetIndex
+
+	def moveTo(self):
+		self.sheetObject.Activate()
+		eventHandler.queueEvent("gainFocus",api.getDesktopObject().objectWithFocus())
+	
+	
 class ExcelQuicknavIterator(object):
 	"""
 	Allows iterating over an MS excel collection (e.g. Comments, Formulas or charts) emitting L{QuickNavItem} objects.
@@ -200,9 +222,9 @@ class ExcelQuicknavIterator(object):
 
 	def filter(self,item):
 		"""
-		Only allows certain items fom a collection to be emitted. E.g. a chart .
+		Only allows certain items from a collection to be emitted. E.g. a chart .
 		@param item: an item from a Microsoft excel collection (e.g. chart object).
-		@return True if this item should be allowd, false otherwise.
+		@return True if this item should be allowed, false otherwise.
 		@rtype: bool
 		"""
 		return True
@@ -223,12 +245,12 @@ class ExcelQuicknavIterator(object):
 			yield item
 
 class ChartExcelCollectionQuicknavIterator(ExcelQuicknavIterator):
-	quickNavItemClass=ExcelChartQuickNavItem#: the QuickNavItem class that should be instanciated and emitted. 
+	quickNavItemClass=ExcelChartQuickNavItem#: the QuickNavItem class that should be instantiated and emitted. 
 	def collectionFromWorksheet( self , worksheetObject ):
 		return worksheetObject.ChartObjects() 
 
 class CommentExcelCollectionQuicknavIterator(ExcelQuicknavIterator):
-	quickNavItemClass=ExcelCommentQuickNavItem#: the QuickNavItem class that should be instanciated and emitted. 
+	quickNavItemClass=ExcelCommentQuickNavItem#: the QuickNavItem class that should be instantiated and emitted. 
 	def collectionFromWorksheet( self , worksheetObject ):
 		try:
 			return  worksheetObject.cells.SpecialCells( xlCellTypeComments )
@@ -237,12 +259,20 @@ class CommentExcelCollectionQuicknavIterator(ExcelQuicknavIterator):
 			return None
 
 class FormulaExcelCollectionQuicknavIterator(ExcelQuicknavIterator):
-	quickNavItemClass=ExcelFormulaQuickNavItem#: the QuickNavItem class that should be instanciated and emitted. 
+	quickNavItemClass=ExcelFormulaQuickNavItem#: the QuickNavItem class that should be instantiated and emitted. 
 	def collectionFromWorksheet( self , worksheetObject ):
 		try:
 			return  worksheetObject.cells.SpecialCells( xlCellTypeFormulas )
 		except(COMError):
 
+			return None
+
+class SheetsExcelCollectionQuicknavIterator(ExcelQuicknavIterator):
+	quickNavItemClass=ExcelSheetQuickNavItem#: the QuickNavItem class that should be instantiated and emitted. 
+	def collectionFromWorksheet( self , worksheetObject ):
+		try:
+			return  worksheetObject.Application.ActiveWorkbook.Worksheets
+		except(COMError):
 			return None
 
 class ExcelBrowseModeTreeInterceptor(browseMode.BrowseModeTreeInterceptor):
@@ -256,7 +286,7 @@ class ExcelBrowseModeTreeInterceptor(browseMode.BrowseModeTreeInterceptor):
 		try:
 			return self.rootNVDAObject.excelWorksheetObject.name==self.rootNVDAObject.excelApplicationObject.activeSheet.name
 		except (COMError,AttributeError,NameError):
-			log.debugWarning("could not compair sheet names",exc_info=True)
+			log.debugWarning("could not compare sheet names",exc_info=True)
 			return False
 
 
@@ -279,6 +309,8 @@ class ExcelBrowseModeTreeInterceptor(browseMode.BrowseModeTreeInterceptor):
 			return CommentExcelCollectionQuicknavIterator( nodeType , self.rootNVDAObject.excelWorksheetObject , direction , None ).iterate()
 		elif nodeType=="formula":
 			return FormulaExcelCollectionQuicknavIterator( nodeType , self.rootNVDAObject.excelWorksheetObject , direction , None ).iterate()
+		elif nodeType=="sheet":
+			return SheetsExcelCollectionQuicknavIterator( nodeType , self.rootNVDAObject.excelWorksheetObject , direction , None ).iterate()
 		else:
 			raise NotImplementedError
 
@@ -287,6 +319,210 @@ class ExcelBrowseModeTreeInterceptor(browseMode.BrowseModeTreeInterceptor):
 	# Translators: the description for the elements list dialog script on virtualBuffers.
 	script_elementsList.__doc__ = _("Presents a list of links, headings or landmarks")
 	script_elementsList.ignoreTreeInterceptorPassThrough=True
+
+	def scriptHelper(self,direction):
+		self.excelApplicationObject = self.rootNVDAObject.excelWorksheetObject.Application
+		ws = self.rootNVDAObject.excelWorksheetObject
+		try:
+			getattr(self, 'cellPosition')
+		except AttributeError:
+			self.cellPosition = self.excelApplicationObject.ActiveCell
+
+		currentColumn = self.cellPosition.Column
+		currentRow = self.cellPosition.Row
+		lastRow = ws.Cells(ws.Rows.Count, currentColumn).End(xlUp).Row
+		lastColumn = ws.Cells(currentRow, ws.Columns.Count).End(xlToLeft).Column
+		try:
+			if   direction == "left":
+				self.cellPosition = self.cellPosition.Offset(0,-1)
+			elif direction == "right":
+				self.cellPosition = self.cellPosition.Offset(0,1)
+			elif direction == "up":
+				self.cellPosition = self.cellPosition.Offset(-1,0)
+			elif direction == "down":
+				self.cellPosition = self.cellPosition.Offset(1,0)
+			#Start-of-Column
+			elif direction == "startcol":
+				rowOffset = 1- currentRow
+				self.cellPosition = self.cellPosition.Offset(rowOffset,0)
+			#Start-of-Row
+			elif direction == "startrow":
+				columnOffset = 1 - currentColumn
+				self.cellPosition = self.cellPosition.Offset(0,columnOffset)
+					#End-of-Row
+			elif direction == "endrow":
+				columnOffset = lastColumn - currentColumn
+				self.cellPosition = self.cellPosition.Offset(0,columnOffset)
+			#End-of-Column
+			elif direction == "endcol":
+				rowOffset = lastRow - currentRow
+				self.cellPosition = self.cellPosition.Offset(rowOffset,0)
+			else:
+				return
+		except COMError:
+			pass
+		
+		if self.cellPosition.MergeCells:
+			self.cellPosition = self.cellPosition.MergeArea.Cells(1)
+			cellLocationText = self.cellPosition.MergeArea.Address().replace('$','')
+		else:
+			cellLocationText = self.cellPosition.Address().replace('$','')
+		
+		cellValueText = self.cellPosition.Text
+		if cellValueText:
+			# Translators: the description for the Cell Value in  excel in Browse Mode
+			ui.message(_(cellValueText))
+		# Translators: the description for the Cell Address in excel in Browse Mode
+		ui.message(_(cellLocationText))
+		
+		if self.excelApplicationObject.ActiveSheet.ProtectContents and (not self.cellPosition.Locked) :
+			# Translators: the description for Locked cells in excel sheet in BrowseMode
+			ui.message(_("Editable"))
+		self.cellPosition.Select
+		self.cellPosition.Activate()
+		
+	def script_moveLeft(self,gesture):
+		self.scriptHelper("left")
+	
+	def script_moveRight(self,gesture):
+		self.scriptHelper("right")
+
+	def script_moveUp(self,gesture):
+		self.scriptHelper("up")
+
+	def script_moveDown(self,gesture):
+		self.scriptHelper("down")
+	
+	def getColumnNameFromNumber(self,colNum):
+		colList = (self.rootNVDAObject.excelWorksheetObject.Cells(1, colNum).Address(True, False)).split('$')
+		return ''.join(colList)[:-1]
+
+	def script_readRow(self,gesture):
+		self.scriptHelper(-1)
+		ws = self.rootNVDAObject.excelWorksheetObject
+		currentRow = self.cellPosition.Row
+		# Translators: the description for the Row Number of current row in excel Browse Mode.
+		ui.message(_("Reading Row {rowNumber}".format(rowNumber=currentRow)))
+		lastColumn = ws.Cells(currentRow, ws.Columns.Count).End(xlToLeft).Column
+		col = 1
+		while col <= lastColumn:
+			if ws.Cells(currentRow,col).MergeCells:
+				mergedAreaColumnCount = ws.Cells(currentRow,col).MergeArea.columns.count
+				# Translators: the description for the Column Span of a Merged Area in excel Browse Mode
+				locationText = _("Column {fromCol} to {toCol}".format(fromCol=self.getColumnNameFromNumber(col),toCol=self.getColumnNameFromNumber(col+mergedAreaColumnCount-1))) if mergedAreaColumnCount > 1 else _("Column {singleCol}".format(singleCol=self.getColumnNameFromNumber(col)))				
+				cellValueText = ws.Cells(currentRow,col).Text
+				col += mergedAreaColumnCount
+			else:
+				# Translators: the description for the Column Name of current cell in a row in excel Browse Mode
+				locationText = _("Column {colName}".format(colName=self.getColumnNameFromNumber(col)))
+				cellValueText = ws.Cells(currentRow,col).Text
+				col += 1
+			ui.message(locationText)
+			ui.message(cellValueText)
+
+	def script_readColumn(self,gesture):
+		self.scriptHelper(-1)
+		ws = self.rootNVDAObject.excelWorksheetObject
+		currentCol = self.cellPosition.Column
+		# Translators: the description for the Column Number of current column in excel Browse Mode
+		ui.message(_("Reading Column {colNum}".format(colNum=self.getColumnNameFromNumber(currentCol))))
+		lastRow = ws.Cells(ws.Rows.Count, currentCol).End(xlUp).Row
+		row = 1
+		while row <= lastRow:
+			if ws.Cells(row,currentCol).MergeCells:
+				mergedAreaRowCount = ws.Cells(row,currentCol).MergeArea.rows.count
+				# Translators: the description for the Row Span of a Merged Area in excel Browse Mode
+				locationText = _("Row {fromRow} to {toRow}".format(fromRow=row,toRow=row+mergedAreaRowCount-1)) if mergedAreaRowCount > 1 else _("Row {rowNum}".format(rowNum=row)) 
+				cellValueText = ws.Cells(row,currentCol).Text
+				row += mergedAreaRowCount
+			else:
+				# Translators: the description for the row number in excel Browse Mode
+				locationText = _("Row {rowNum}".format(rowNum=row)) 
+				cellValueText = ws.Cells(row,currentCol).Text
+				row += 1
+			ui.message(locationText)
+			ui.message(cellValueText)
+
+	def script_startOfColumn(self,gesture):
+		self.scriptHelper("startcol")
+
+	def script_startOfRow(self,gesture):
+		self.scriptHelper("startrow")
+
+	def script_endOfRow(self,gesture):
+		self.scriptHelper("endrow")
+
+	def script_endOfColumn(self,gesture):
+		self.scriptHelper("endcol")
+
+	def script_activatePosition(self,gesture):
+		excelApplicationObject = self.rootNVDAObject.excelWorksheetObject.Application
+		rowNum = excelApplicationObject.ActiveCell.Row
+		colNum = excelApplicationObject.ActiveCell.Column
+		excelRangeObject = excelApplicationObject.Cells(rowNum,colNum)
+		if excelApplicationObject.ActiveSheet.ProtectContents and excelRangeObject.Locked:
+			# Translators: the description for the Locked cells in excel Browse Mode, if focused for editing
+			ui.message(_("This cell is non-editable"))
+			return		
+		focus = api.getFocusObject()
+		vbuf = focus.treeInterceptor
+		if not vbuf:
+			# #2023: Search the focus and its ancestors for an object for which browse mode is optional.
+			for obj in itertools.chain((api.getFocusObject(),), reversed(api.getFocusAncestors())):
+				if obj.shouldCreateTreeInterceptor:
+					continue
+				try:
+					obj.treeInterceptorClass
+				except:
+					continue
+				break
+			else:
+				return
+			# Force the tree intercepter to be created.
+			obj.shouldCreateTreeInterceptor = True
+			ti = treeInterceptorHandler.update(obj)
+			if not ti:
+				return
+			if focus in ti:
+				# Update the focus, as it will have cached that there is no tree intercepter.
+				focus.treeInterceptor = ti
+				# If we just happened to create a browse mode TreeInterceptor
+				# Then ensure that browse mode is reported here. From the users point of view, browse mode was turned on.
+				if isinstance(ti,browseMode.BrowseModeTreeInterceptor) and not ti.passThrough:
+					browseMode.reportPassThrough(ti,False)
+					braille.handler.handleGainFocus(ti)
+			return
+
+		if not isinstance(vbuf, browseMode.BrowseModeTreeInterceptor):
+			return
+		# Toggle browse mode pass-through.
+		vbuf.passThrough = not vbuf.passThrough
+		if isinstance(vbuf,virtualBuffers.VirtualBuffer):
+			# If we are enabling pass-through, the user has explicitly chosen to do so, so disable auto-pass-through.
+			# If we're disabling pass-through, re-enable auto-pass-through.
+			vbuf.disableAutoPassThrough = vbuf.passThrough
+		browseMode.reportPassThrough(vbuf)
+		excelRangeObject.Select
+		excelRangeObject.Activate()
+
+	# Translators: Input help mode message for toggle focus and browse mode command in web browsing and other situations.
+	script_activatePosition.__doc__=_("Toggles between browse mode and focus mode. When in focus mode, keys will pass straight through to the application, allowing you to interact directly with a control. When in browse mode, you can navigate the document with the cursor, quick navigation keys, etc.")
+	script_activatePosition.category=inputCore.SCRCAT_BROWSEMODE
+
+	__gestures = {
+		"kb:upArrow": "moveUp",
+		"kb:downArrow":"moveDown",
+		"kb:leftArrow":"moveLeft",
+		"kb:rightArrow":"moveRight",
+		"kb:control+alt+,":"readRow",
+		"kb:control+alt+.":"readColumn",
+		"kb:control+upArrow":"startOfColumn",
+		"kb:control+downArrow":"endOfColumn",
+		"kb:control+leftArrow":"startOfRow",
+		"kb:control+rightArrow":"endOfRow",
+		"kb:enter": "activatePosition",
+		"kb:space": "activatePosition",
+	}
 
 class ElementsListDialog(browseMode.ElementsListDialog):
 
@@ -300,6 +536,10 @@ class ElementsListDialog(browseMode.ElementsListDialog):
 		# Translators: The label of a radio button to select the type of element
 		# in the browse mode Elements List dialog.
 		("formula", _("&Formula")),
+		# Translators: The label of a radio button to select the Sheets
+		# in the browse mode Elements List dialog.
+		("sheet", _("&Sheets")),
+		
 	)
 
 class ExcelBase(Window):
