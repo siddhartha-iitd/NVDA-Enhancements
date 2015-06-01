@@ -496,6 +496,7 @@ class ExcelBrowseModeTreeInterceptor(browseMode.BrowseModeTreeInterceptor):
 		"kb:control+leftArrow":"startOfRow",
 		"kb:control+rightArrow":"endOfRow",
 		"kb:enter": "activatePosition",
+		"kb(desktop):numpadEnter":"activatePosition",
 		"kb:space": "activatePosition",
 	}
 
