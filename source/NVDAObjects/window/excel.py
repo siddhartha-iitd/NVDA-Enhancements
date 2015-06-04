@@ -268,6 +268,10 @@ class FormulaExcelCollectionQuicknavIterator(ExcelQuicknavIterator):
 			return None
 
 class SheetsExcelCollectionQuicknavIterator(ExcelQuicknavIterator):
+	"""
+	Allows iterating over an MS excel Sheets collection emitting L{QuickNavItem} object.
+	"""
+	
 	quickNavItemClass=ExcelSheetQuickNavItem#: the QuickNavItem class that should be instantiated and emitted. 
 	def collectionFromWorksheet( self , worksheetObject ):
 		try:
