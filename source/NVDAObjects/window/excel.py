@@ -266,11 +266,8 @@ class ExcelBrowseModeTreeInterceptor(browseMode.BrowseModeTreeInterceptor):
 			log.debugWarning("could not compare sheet names",exc_info=True)
 			return False
 
-
 	def __contains__(self,obj):
 		return winUser.isDescendantWindow(self.rootNVDAObject.windowHandle,obj.windowHandle)
-
-
 
 	def _set_selection(self,info):
 		super(ExcelBrowseModeTreeInterceptor,self)._set_selection(info)
@@ -296,6 +293,9 @@ class ExcelBrowseModeTreeInterceptor(browseMode.BrowseModeTreeInterceptor):
 	script_elementsList.ignoreTreeInterceptorPassThrough=True
 
 	def scriptHelper(self,direction):
+		"""
+		A helper method to implement common functionalities for navigation in a sheet
+		"""
 		self.excelApplicationObject = self.rootNVDAObject.excelWorksheetObject.Application
 		ws = self.rootNVDAObject.excelWorksheetObject
 		try:
@@ -324,7 +324,7 @@ class ExcelBrowseModeTreeInterceptor(browseMode.BrowseModeTreeInterceptor):
 			elif direction == "startrow":
 				columnOffset = 1 - currentColumn
 				self.cellPosition = self.cellPosition.Offset(0,columnOffset)
-					#End-of-Row
+			#End-of-Row
 			elif direction == "endrow":
 				columnOffset = lastColumn - currentColumn
 				self.cellPosition = self.cellPosition.Offset(0,columnOffset)
