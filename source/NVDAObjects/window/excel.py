@@ -661,6 +661,7 @@ class ExcelCellTextInfo(NVDAObjectTextInfo):
 				pass
 			try:
 				formatField['background-color']=colors.RGB.fromCOLORREF(int(self.obj.excelCellObject.DisplayFormat.interior.color))
+                                log.info(colors.RGB.fromCOLORREF(int(self.obj.excelCellObject.DisplayFormat.interior.color)))
 			except COMError:
 				pass
                     else:
