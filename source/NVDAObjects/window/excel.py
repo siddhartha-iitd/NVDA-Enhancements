@@ -654,7 +654,7 @@ class ExcelCellTextInfo(NVDAObjectTextInfo):
 			if styleName:
 				formatField['style']=styleName
 		if formatConfig['reportColor']:
-                        if (self.obj.excelCellObject.Application.Version > "12.0"):
+                    if (self.obj.excelCellObject.Application.Version > "12.0"):
                         try:
 				formatField['color']=colors.RGB.fromCOLORREF(int(self.obj.excelCellObject.DisplayFormat.font.color))
 			except COMError:
