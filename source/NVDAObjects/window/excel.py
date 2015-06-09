@@ -654,7 +654,6 @@ class ExcelCellTextInfo(NVDAObjectTextInfo):
 			if styleName:
 				formatField['style']=styleName
 		if formatConfig['reportColor']:
-                    if (Application.Version > "12.0"):
                         try:
 				formatField['color']=colors.RGB.fromCOLORREF(int(fontObj.DisplayFormat.color))
 			except COMError:
@@ -662,15 +661,6 @@ class ExcelCellTextInfo(NVDAObjectTextInfo):
 			try:
 				formatField['background-color']=colors.RGB.fromCOLORREF(int(self.obj.excelCellObject.DisplayFormat.interior.color))
                                 log.info(colors.RGB.fromCOLORREF(int(self.obj.excelCellObject.DisplayFormat.interior.color)))
-			except COMError:
-				pass
-                    else:
-			try:
-				formatField['color']=colors.RGB.fromCOLORREF(int(fontObj.color))
-			except COMError:
-				pass
-			try:
-				formatField['background-color']=colors.RGB.fromCOLORREF(int(self.obj.excelCellObject.interior.color))
 			except COMError:
 				pass
 		return formatField,(self._startOffset,self._endOffset)
