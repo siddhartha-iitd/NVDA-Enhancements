@@ -656,7 +656,7 @@ class ExcelCellTextInfo(NVDAObjectTextInfo):
 		if formatConfig['reportColor']:
                     if (Application.Version > "12.0"):
                         try:
-				formatField['color']=colors.RGB.fromCOLORREF(int(fontObj.DisplayObject.color))
+				formatField['color']=colors.RGB.fromCOLORREF(int(fontObj.DisplayFormat.color))
 			except COMError:
 				pass
 			try:
