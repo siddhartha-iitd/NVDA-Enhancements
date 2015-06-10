@@ -629,7 +629,10 @@ class ExcelCellTextInfo(NVDAObjectTextInfo):
 
 	def _getFormatFieldAndOffsets(self,offset,formatConfig,calculateOffsets=True):
 		formatField=textInfos.FormatField()
-		fontObj=self.obj.excelCellObject.font
+                if (self.obj.excelCellObject.Application.Version > "12.0"):
+                    fontObj=self.obj.excelCellObject.DisplayFormat.font
+                else:
+                    fontObj=self.obj.excelCellObject.font
 		if formatConfig['reportAlignment']:
 			value=alignmentLabels.get(self.obj.excelCellObject.horizontalAlignment)
 			if value:
@@ -654,22 +657,14 @@ class ExcelCellTextInfo(NVDAObjectTextInfo):
 			if styleName:
 				formatField['style']=styleName
 		if formatConfig['reportColor']:
-                    if (self.obj.excelCellObject.Application.Version > "12.0"):
-                        try:
-				formatField['color']=colors.RGB.fromCOLORREF(int(self.obj.excelCellObject.DisplayFormat.font.color))
-			except COMError:
-				pass
-			try:
-				formatField['background-color']=colors.RGB.fromCOLORREF(int(self.obj.excelCellObject.DisplayFormat.interior.color))
-                                log.info(colors.RGB.fromCOLORREF(int(self.obj.excelCellObject.DisplayFormat.interior.color)))
-			except COMError:
-				pass
-                    else:
 			try:
 				formatField['color']=colors.RGB.fromCOLORREF(int(fontObj.color))
 			except COMError:
 				pass
 			try:
+                            if (self.obj.excelCellObject.Application.Version > "12.0"):
+                                formatField['background-color']=colors.RGB.fromCOLORREF(int(self.obj.excelCellObject.DispalyFormat.interior.color))
+                            else: 
 				formatField['background-color']=colors.RGB.fromCOLORREF(int(self.obj.excelCellObject.interior.color))
 			except COMError:
 				pass
