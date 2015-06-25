@@ -837,6 +837,8 @@ class ExcelCell(ExcelBase):
 				states.add(controlTypes.STATE_CROPPED)
 			if self._overlapInfo['obscuringRightBy'] > 0:
 				states.add(controlTypes.STATE_OVERFLOWING)
+                if config.conf["documentFormatting"]["reportShading"] and self.excelCellObject.displayformat.Interior.Color<>16777215:
+                        states.add(controlTypes.STATE_SHADED)
 		return states
 
 	def getCellWidthAndTextWidth(self):
