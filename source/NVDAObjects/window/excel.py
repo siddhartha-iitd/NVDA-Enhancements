@@ -292,21 +292,25 @@ class ExcelBrowseModeTreeInterceptor(browseMode.BrowseModeTreeInterceptor):
 	script_elementsList.__doc__ = _("Presents a list of links, headings or landmarks")
 	script_elementsList.ignoreTreeInterceptorPassThrough=True
 
-	def scriptHelper(self,direction):
-		"""
-		A helper method to implement common functionalities for navigation in a sheet
-		"""
+	def initializeCellPositions(self):
+		
 		self.excelApplicationObject = self.rootNVDAObject.excelWorksheetObject.Application
-		ws = self.rootNVDAObject.excelWorksheetObject
+		self.ws = self.rootNVDAObject.excelWorksheetObject
 		try:
 			getattr(self, 'cellPosition')
 		except AttributeError:
 			self.cellPosition = self.excelApplicationObject.ActiveCell
 
-		currentColumn = self.cellPosition.Column
-		currentRow = self.cellPosition.Row
-		lastRow = ws.Cells(ws.Rows.Count, currentColumn).End(xlUp).Row
-		lastColumn = ws.Cells(currentRow, ws.Columns.Count).End(xlToLeft).Column
+		self.currentColumn = self.cellPosition.Column
+		self.currentRow = self.cellPosition.Row
+		self.lastRow = self.ws.Cells(self.ws.Rows.Count, self.currentColumn).End(xlUp).Row
+		self.lastColumn = self.ws.Cells(self.currentRow, self.ws.Columns.Count).End(xlToLeft).Column
+	
+	def scriptHelper(self,direction):
+		"""
+		A helper method to implement common functionalities for navigation in a sheet
+		"""
+		self.initializeCellPositions();
 		try:
 			if   direction == "left":
 				self.cellPosition = self.cellPosition.Offset(0,-1)
@@ -318,19 +322,19 @@ class ExcelBrowseModeTreeInterceptor(browseMode.BrowseModeTreeInterceptor):
 				self.cellPosition = self.cellPosition.Offset(1,0)
 			#Start-of-Column
 			elif direction == "startcol":
-				rowOffset = 1- currentRow
+				rowOffset = 1-self.currentRow
 				self.cellPosition = self.cellPosition.Offset(rowOffset,0)
 			#Start-of-Row
 			elif direction == "startrow":
-				columnOffset = 1 - currentColumn
+				columnOffset = 1-self.currentColumn
 				self.cellPosition = self.cellPosition.Offset(0,columnOffset)
 			#End-of-Row
 			elif direction == "endrow":
-				columnOffset = lastColumn - currentColumn
+				columnOffset = self.lastColumn - self.currentColumn
 				self.cellPosition = self.cellPosition.Offset(0,columnOffset)
 			#End-of-Column
 			elif direction == "endcol":
-				rowOffset = lastRow - currentRow
+				rowOffset = self.lastRow - self.currentRow
 				self.cellPosition = self.cellPosition.Offset(rowOffset,0)
 			else:
 				return
@@ -342,14 +346,10 @@ class ExcelBrowseModeTreeInterceptor(browseMode.BrowseModeTreeInterceptor):
 			cellLocationText = self.cellPosition.MergeArea.Address().replace('$','')
 		else:
 			cellLocationText = self.cellPosition.Address().replace('$','')
-		
 		cellValueText = self.cellPosition.Text
 		if cellValueText:
-			# Translators: the description for the Cell Value in  excel in Browse Mode
 			ui.message(_(cellValueText))
-		# Translators: the description for the Cell Address in excel in Browse Mode
 		ui.message(_(cellLocationText))
-		
 		if self.excelApplicationObject.ActiveSheet.ProtectContents and (not self.cellPosition.Locked) :
 			# Translators: the description for Locked cells in excel sheet in BrowseMode
 			ui.message(_("Editable"))
@@ -373,7 +373,7 @@ class ExcelBrowseModeTreeInterceptor(browseMode.BrowseModeTreeInterceptor):
 		return ''.join(colList)[:-1]
 
 	def script_readRow(self,gesture):
-		self.scriptHelper(-1)
+		self.initializeCellPositions()
 		ws = self.rootNVDAObject.excelWorksheetObject
 		currentRow = self.cellPosition.Row
 		# Translators: the description for the Row Number of current row in excel Browse Mode.
@@ -396,7 +396,7 @@ class ExcelBrowseModeTreeInterceptor(browseMode.BrowseModeTreeInterceptor):
 			ui.message(cellValueText)
 
 	def script_readColumn(self,gesture):
-		self.scriptHelper(-1)
+		self.initializeCellPositions()
 		ws = self.rootNVDAObject.excelWorksheetObject
 		currentCol = self.cellPosition.Column
 		# Translators: the description for the Column Number of current column in excel Browse Mode
