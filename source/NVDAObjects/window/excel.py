@@ -292,7 +292,7 @@ class ExcelBrowseModeTreeInterceptor(browseMode.BrowseModeTreeInterceptor):
 	script_elementsList.__doc__ = _("Presents a list of links, headings or landmarks")
 	script_elementsList.ignoreTreeInterceptorPassThrough=True
 
-	def initializeCellPositions(self):
+	def updateCellPositions(self):
 		
 		self.excelApplicationObject = self.rootNVDAObject.excelWorksheetObject.Application
 		self.ws = self.rootNVDAObject.excelWorksheetObject
@@ -310,7 +310,7 @@ class ExcelBrowseModeTreeInterceptor(browseMode.BrowseModeTreeInterceptor):
 		"""
 		A helper method to implement common functionalities for navigation in a sheet
 		"""
-		self.initializeCellPositions();
+		self.updateCellPositions();
 		try:
 			if   direction == "left":
 				self.cellPosition = self.cellPosition.Offset(0,-1)
@@ -373,7 +373,7 @@ class ExcelBrowseModeTreeInterceptor(browseMode.BrowseModeTreeInterceptor):
 		return ''.join(colList)[:-1]
 
 	def script_readRow(self,gesture):
-		self.initializeCellPositions()
+		self.updateCellPositions()
 		ws = self.rootNVDAObject.excelWorksheetObject
 		currentRow = self.cellPosition.Row
 		# Translators: the description for the Row Number of current row in excel Browse Mode.
@@ -396,7 +396,7 @@ class ExcelBrowseModeTreeInterceptor(browseMode.BrowseModeTreeInterceptor):
 			ui.message(cellValueText)
 
 	def script_readColumn(self,gesture):
-		self.initializeCellPositions()
+		self.updateCellPositions()
 		ws = self.rootNVDAObject.excelWorksheetObject
 		currentCol = self.cellPosition.Column
 		# Translators: the description for the Column Number of current column in excel Browse Mode
