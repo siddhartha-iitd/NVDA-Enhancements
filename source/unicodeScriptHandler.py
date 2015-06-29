@@ -2,6 +2,7 @@
 import profile
 from speech import LangChangeCommand
 import languageHandler
+import config
 
 # generated from _compile_scripts_txt
 
@@ -1935,6 +1936,8 @@ unicodeScriptNamesToISO15924Dictionary = {
 	"Unknown":999,
 }
 
+ISO15924ToUnicodeScriptNamesDictionary = {}
+
 langIDToScriptID= {
 	'af_ZA':215, # south african
 	'am':230, # Armenian 
@@ -2101,6 +2104,37 @@ scriptIDToLangID = {
 	#"Unknown":999,
 }
 
+languagePriorityListSpec = []
+
+def initialize():
+	# initializing reverse dictionary ISO15924ToUnicodeScriptNamesDictionary
+	for scriptName in unicodeScriptNamesToISO15924Dictionary.keys():
+		ISO15924ToUnicodeScriptNamesDictionary.setdefault( unicodeScriptNamesToISO15924Dictionary[scriptName] , scriptName )
+	#reading string from config and convert it to list
+	languageList = config.conf["writingScriptsToLanguage"]["languagePriorityList"].split(",")
+	for language in languageList: 
+		languagePriorityListSpec.append( [ language , getScriptName(language) , getLanguageDescription( language ) ]) 
+
+def getAvailableLanguages():
+	"""generates a list of locale names, plus their full localized language and country names.
+	@rtype: list of tuples
+	"""
+	#Make a list of all the locales found in NVDA's locale dir
+	allLanguages  = langIDToScriptID.keys()
+	allLanguages.sort()
+	languageCodes = [] 
+	languageDescriptions = []
+	for language in allLanguages:  
+		if language in [j for i in languagePriorityListSpec for j in i]:
+			continue
+		else:
+			languageCodes.append(language )
+			desc=languageHandler.getLanguageDescription(language )
+			label="%s, %s"%(desc,language ) if desc else language 
+			languageDescriptions.append(label)
+	return zip(languageCodes , languageDescriptions)
+
+
 
 def getScriptCode(chr):
 	mStart = 0
@@ -2117,6 +2151,11 @@ def getScriptCode(chr):
 	return 0
 
 def getLangID(scriptCode):
+	scriptName = ISO15924ToUnicodeScriptNamesDictionary[ scriptCode ] 
+	for index in xrange( len( languagePriorityListSpec) ) :
+		if scriptName == languagePriorityListSpec[index][1]: 
+			return languagePriorityListSpec[index][0] 
+	#language not found in the priority list, so look up in the default mapping
 	langID = scriptIDToLangID.get (scriptCode )
 	if langID:
 		if isinstance( langID , tuple) and len(langID) > 0:
@@ -2124,6 +2163,10 @@ def getLangID(scriptCode):
 		else:
 			return langID
 
+def getLanguageDescription(language ):
+	desc=languageHandler.getLanguageDescription(language )
+	label="%s, %s"%(desc,language ) if desc else language 
+	return label
 
 def getScriptIDFromLangID(langID ):
 	scriptID = langIDToScriptID.get (langID )
@@ -2133,6 +2176,11 @@ def getScriptIDFromLangID(langID ):
 		else:
 			return scriptID 
 
+
+def getScriptName(languageID ):
+	scriptID = getScriptIDFromLangID( languageID )
+	if scriptID:
+		return ISO15924ToUnicodeScriptNamesDictionary[ scriptID ]  
 
 
 def detectScript(text):

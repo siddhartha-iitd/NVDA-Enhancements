@@ -241,6 +241,9 @@ class MainFrame(wx.Frame):
 	def onInputGesturesCommand(self, evt):
 		self._popupSettingsDialog(InputGesturesDialog)
 
+	def onWritingScriptsCommand(self, evt):
+		self._popupSettingsDialog(WritingScriptsDialog)
+
 	def onAboutCommand(self,evt):
 		# Translators: The title of the dialog to show about info for NVDA.
 		messageBox(versionInfo.aboutMessage, _("About NVDA"), wx.OK)
@@ -369,6 +372,9 @@ class SysTrayIcon(wx.TaskBarIcon):
 			# Translators: The label for the menu item to open the Input Gestures dialog.
 			item = menu_preferences.Append(wx.ID_ANY, _("I&nput gestures..."))
 			self.Bind(wx.EVT_MENU, frame.onInputGesturesCommand, item)
+			# Translators: The label for the menu item to open the Writing Scripts dialog.
+			item = menu_preferences.Append(wx.ID_ANY, _("&Writing  Scripts..."))
+			self.Bind(wx.EVT_MENU, frame.onWritingScriptsCommand , item)
 		# Translators: The label for Preferences submenu in NVDA menu.
 		self.menu.AppendMenu(wx.ID_ANY,_("&Preferences"),menu_preferences)
 

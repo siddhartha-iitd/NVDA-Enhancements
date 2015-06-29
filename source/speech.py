@@ -1,4 +1,4 @@
-﻿# -*- coding: UTF-8 -*-
+# -*- coding: UTF-8 -*-
 #speech.py
 #A part of NonVisual Desktop Access (NVDA)
 #This file is covered by the GNU General Public License.
@@ -466,7 +466,14 @@ def speak(speechSequence,symbolLevel=None):
 			if autoLanguageSwitching:
 				import unicodeScriptHandler
 				detectedLanguageSequence = unicodeScriptHandler.detectLanguage(item)
+				for index in xrange(len( detectedLanguageSequence )):
+					item= detectedLanguageSequence [index]
+					if isinstance(item,LangChangeCommand):
+						log.debugWarning("Detected language {}".format( item.lang ) )
+					if isinstance(item,basestring ):
+						log.debugWarning("Detected text {}".format( "item" ) )
 				speechSequence.extend(detectedLanguageSequence )
+
 		else:
 			speechSequence.append(item)
 	if not speechSequence:
