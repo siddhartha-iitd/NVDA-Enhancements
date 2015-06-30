@@ -1139,7 +1139,7 @@ class DocumentFormattingDialog(SettingsDialog):
 		settingsSizer.Add(item,border=10,flag=wx.BOTTOM)
                 # Translators: This is the label for a checkbox in the
 		# document formatting settings dialog.
-		item=self.clickableCheckBox=wx.CheckBox(self,label=_("Report shadin&g"))
+		item=self.clickableCheckBox=wx.CheckBox(self,label=_("Report cell shadin&g"))
 		item.Value=config.conf["documentFormatting"]["reportShading"]
 		settingsSizer.Add(item,border=10,flag=wx.BOTTOM)
 
