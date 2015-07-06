@@ -308,15 +308,10 @@ class FormControlExcelCollectionQuicknavIterator(ExcelQuicknavIterator):
 		col = position.Column
 		self.lastPosition=0
 		for i in range(length):
-			if (self.direction=="next") and ((items[i].TopLeftCell.Row==row and items[i].TopLeftCell.Column>col) or (items[i].TopLeftCell.Row>row)):
+			if (items[i].TopLeftCell.Row==row and items[i].TopLeftCell.Column>col) or (items[i].TopLeftCell.Row>row):
 				self.lastPosition=i
 				item=self.quickNavItemClass(self.itemType,self.document,items[self.lastPosition],items )
 				yield item
-			elif (self.direction=="previous") and ((items[i].TopLeftCell.Row==row and items[i].TopLeftCell.Column<col) or (items[i].TopLeftCell.Row<row)):
-				self.lastPosition=i
-				item=self.quickNavItemClass(self.itemType,self.document,items[self.lastPosition],items )
-				yield item
-
 	
 class ExcelBrowseModeTreeInterceptor(browseMode.BrowseModeTreeInterceptor):
 
