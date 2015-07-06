@@ -242,6 +242,7 @@ class FormulaExcelCollectionQuicknavIterator(ExcelQuicknavIterator):
 		except(COMError):
 			return None
 
+
 class ExcelFormControlQuickNavItem(ExcelQuickNavItem):
   
 	def __init__( self , nodeType , document , formControlObject , formControlCollection ):
@@ -262,11 +263,9 @@ class ExcelFormControlQuickNavItem(ExcelQuickNavItem):
   
 		except(COMError):
 			pass
+		ui.message(self.label)
 		eventHandler.queueEvent("gainFocus",api.getDesktopObject().objectWithFocus())
-
-	def name(self):
-		return self.excelItemObject.name  
-  
+ 
 	@property
 	def isAfterSelection(self):
 		activeCell = self.document.Application.ActiveCell
@@ -286,7 +285,37 @@ class FormControlExcelCollectionQuicknavIterator(ExcelQuicknavIterator):
 			return worksheetObject.Shapes
 		except(COMError):
 			return None
-# 
+
+	def iterate(self, position):
+		"""
+		returns a generator that emits L{QuickNavItem} objects for this collection.
+		@param position: an excelRangeObject representing either the TopLeftCell of the currently selected form control 
+						 or ActiveCell in a worksheet
+		"""
+		# Returns the Row containing TopLeftCell of an item
+		def topLeftCellRow(item):
+			row=item.TopLeftCell.Row
+			return row
+		
+		items=self.collectionFromWorksheet(self.document)
+		if not items:
+			return
+		items=sorted(items,key=topLeftCellRow)
+		if self.direction=="previous":
+			items=reversed(items)
+		length=len(items)
+		row = position.Row
+		col = position.Column
+		self.lastPosition=0
+		for i in range(length):
+			if (self.direction=="next") and ((items[i].TopLeftCell.Row==row and items[i].TopLeftCell.Column>col) or (items[i].TopLeftCell.Row>row)):
+				self.lastPosition=i
+				item=self.quickNavItemClass(self.itemType,self.document,items[self.lastPosition],items )
+				yield item
+			elif (self.direction=="previous") and ((items[i].TopLeftCell.Row==row and items[i].TopLeftCell.Column<col) or (items[i].TopLeftCell.Row<row)):
+				self.lastPosition=i
+				item=self.quickNavItemClass(self.itemType,self.document,items[self.lastPosition],items )
+				yield item
 
 	
 class ExcelBrowseModeTreeInterceptor(browseMode.BrowseModeTreeInterceptor):
@@ -303,11 +332,8 @@ class ExcelBrowseModeTreeInterceptor(browseMode.BrowseModeTreeInterceptor):
 			log.debugWarning("could not compare sheet names",exc_info=True)
 			return False
 
-
 	def __contains__(self,obj):
 		return winUser.isDescendantWindow(self.rootNVDAObject.windowHandle,obj.windowHandle)
-
-
 
 	def _set_selection(self,info):
 		super(ExcelBrowseModeTreeInterceptor,self)._set_selection(info)
@@ -324,7 +350,16 @@ class ExcelBrowseModeTreeInterceptor(browseMode.BrowseModeTreeInterceptor):
 		elif nodeType=="formula":
 			return FormulaExcelCollectionQuicknavIterator( nodeType , self.rootNVDAObject.excelWorksheetObject , direction , None ).iterate()
 		elif nodeType=="formField":
-			return FormControlExcelCollectionQuicknavIterator( nodeType , self.rootNVDAObject.excelWorksheetObject , direction , None ).iterate()
+			seln = self.rootNVDAObject.excelApplicationObject.Selection
+			try:
+				#cell(Range Type Object) is selected
+				if seln.Row:
+					isShapeActive = False
+					position=seln
+			except(COMError):
+				#form control object is selected
+				position=seln.TopLeftCell
+			return FormControlExcelCollectionQuicknavIterator( nodeType , self.rootNVDAObject.excelWorksheetObject , direction , None ).iterate(position)
 		else:
 			raise NotImplementedError
 
