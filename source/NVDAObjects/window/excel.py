@@ -52,6 +52,7 @@ alignmentLabels={
 xlA1 = 1
 xlRC = 2
 xlUnderlineStyleNone=-4142
+xlColorIndexNone=-4142
 
 #Excel cell types
 xlCellTypeAllFormatConditions =-4172      # from enum XlCellType
