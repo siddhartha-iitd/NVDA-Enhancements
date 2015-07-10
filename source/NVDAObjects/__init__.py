@@ -577,6 +577,12 @@ class NVDAObject(baseObject.ScriptableObject):
 		even if the user moves to a cell in the same row/column.
 		"""
 		raise NotImplementedError
+            
+        def _get_stateInfoText(self):
+		"""The text of the states for this cell.
+		@rtype: str
+		"""
+		raise NotImplementedError
 		
 	def _get_recursiveDescendants(self):
 		"""Recursively traverse and return the descendants of this object.
