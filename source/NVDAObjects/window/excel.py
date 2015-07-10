@@ -837,8 +837,19 @@ class ExcelCell(ExcelBase):
 				states.add(controlTypes.STATE_CROPPED)
 			if self._overlapInfo['obscuringRightBy'] > 0:
 				states.add(controlTypes.STATE_OVERFLOWING)
-                if config.conf["documentFormatting"]["reportShading"] and self.excelCellObject.displayformat.Interior.Color<>16777215:
-                        states.add(controlTypes.STATE_SHADED)
+                #if config.conf["documentFormatting"]["reportShading"] and self.excelCellObject.displayformat.Interior.Color<>16777215:
+                        #states.add(controlTypes.STATE_SHADED)
+                if config.conf["documentFormatting"]["reportShading"]:
+                    if (self.excelCellObject.Application.Version > "12.0"):
+                        if self.excelCellObject.DisplayFormat.Interior.ColorIndex<>xlColorIndexNone:   
+                            states.add(controlTypes.STATE_SHADED)
+                    else:
+                        cellObj= self.excelCellObject
+                        if cellObj.formatconditions.count==0:
+                            if cellObj.Interior.ColorIndex<>xlColorIndexNone:   
+                                states.add(controlTypes.STATE_SHADED)
+                        else:
+                            ui.message("For Excel version 2007 and below if conditional formatting is applied,cell shading information is not available.")
 		return states
 
 	def getCellWidthAndTextWidth(self):
@@ -945,6 +956,26 @@ class ExcelCell(ExcelBase):
 				info['obscuringRightBy'] = 0
 		self._overlapInfo = info
 		return self._overlapInfo
+            
+        def _get_stateInfoText(self):
+                if (self.excelCellObject.Application.Version > "12.0"):
+                    cellObj=self.excelCellObject.DisplayFormat
+                else:
+                    cellObj=self.excelCellObject
+                #backgroundPattern=backgroundPatternLabels.get(self.excelCellObject.displayformat.Interior.Pattern)
+                backgroundPattern=backgroundPatternLabels.get(cellObj.Interior.Pattern)
+                if backgroundPattern == "linear gradient" or backgroundPattern == "rectangular gradient":
+                    backgroundColorOne=(colors.RGB.fromCOLORREF(int(cellObj.Interior.Gradient.ColorStops(1).Color)))
+                    backgroundColorOne=("{backgroundColorOne}").format(backgroundColorOne=backgroundColorOne.name if isinstance(backgroundColorOne,colors.RGB) else unicode(backgroundColorOne))
+                    backgroundColorTwo=(colors.RGB.fromCOLORREF(int(cellObj.Interior.Gradient.ColorStops(2).Color)))
+                    backgroundColorTwo=("{backgroundColorTwo}").format(backgroundColorTwo=backgroundColorTwo.name if isinstance(backgroundColorTwo,colors.RGB) else unicode(backgroundColorTwo))
+                    backgroundColor="%s and %s"%(backgroundColorOne,backgroundColorTwo)
+                else:
+                    #backgroundColor=(colors.RGB.fromCOLORREF(int(self.excelCellObject.displayformat.Interior.Color)))
+                    backgroundColor=(colors.RGB.fromCOLORREF(int(cellObj.Interior.Color)))
+                    backgroundColor=("{backgroundColor}").format(backgroundColor=backgroundColor.name if isinstance(backgroundColor,colors.RGB) else unicode(backgroundColor))
+                shadingInfo="%s %s"%(backgroundColor,backgroundPattern)
+		return shadingInfo
 
 	def _get_parent(self):
 		worksheet=self.excelCellObject.Worksheet

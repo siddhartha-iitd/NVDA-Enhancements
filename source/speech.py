@@ -313,7 +313,7 @@ def speakObject(obj,reason=controlTypes.REASON_QUERY,index=None):
 	from NVDAObjects import NVDAObjectTextInfo
 	role=obj.role
 	isEditable=(reason!=controlTypes.REASON_FOCUSENTERED and obj.TextInfo!=NVDAObjectTextInfo and (role in (controlTypes.ROLE_EDITABLETEXT,controlTypes.ROLE_TERMINAL) or controlTypes.STATE_EDITABLE in obj.states))
-	allowProperties={'name':True,'role':True,'states':True,'value':True,'description':True,'keyboardShortcut':True,'positionInfo_level':True,'positionInfo_indexInGroup':True,'positionInfo_similarItemsInGroup':True,"cellCoordsText":True,"rowNumber":True,"columnNumber":True,"includeTableCellCoords":True,"columnCount":True,"rowCount":True,"rowHeaderText":True,"columnHeaderText":True}
+	allowProperties={'name':True,'role':True,'states':True,'value':True,'description':True,'keyboardShortcut':True,'positionInfo_level':True,'positionInfo_indexInGroup':True,'positionInfo_similarItemsInGroup':True,"cellCoordsText":True,"rowNumber":True,"columnNumber":True,"includeTableCellCoords":True,"columnCount":True,"rowCount":True,"rowHeaderText":True,"columnHeaderText":True,"stateInfoText":True}
 
 	if reason==controlTypes.REASON_FOCUSENTERED:
 		allowProperties["value"]=False
@@ -916,6 +916,11 @@ def getSpeechTextForProperties(reason=controlTypes.REASON_QUERY,**propertyValues
 	realStates=propertyValues.get('_states',states)
 	if states is not None:
 		positiveStates=controlTypes.processPositiveStates(role,realStates,reason,states)
+		if controlTypes.STATE_SHADED in positiveStates:
+			#Translators: Reported when object has background colour.
+			#Shading information like background colour, pattern is reported.
+			textList.append(_("%s %s")%(((controlTypes.stateLabels[controlTypes.STATE_SHADED])),(propertyValues.get("stateInfoText"))))
+			positiveStates.discard(controlTypes.STATE_SHADED)
 		textList.extend([controlTypes.stateLabels[x] for x in positiveStates])
 	if 'negativeStates' in propertyValues:
 		negativeStates=propertyValues['negativeStates']
