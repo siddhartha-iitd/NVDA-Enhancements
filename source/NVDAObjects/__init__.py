@@ -578,6 +578,12 @@ class NVDAObject(baseObject.ScriptableObject):
 		"""
 		raise NotImplementedError
 		
+	def _get_stateInfoText(self):
+		"""The text of the states for this cell.
+		@rtype: str
+		"""
+		raise NotImplementedError
+		
 	def _get_recursiveDescendants(self):
 		"""Recursively traverse and return the descendants of this object.
 		This is a depth-first forward traversal.

@@ -49,9 +49,59 @@ alignmentLabels={
 	1:"default",
 }
 
+xlPatternAutomatic           =-4105       # from enum XlPattern
+xlPatternChecker             =9           # from enum XlPattern
+xlPatternCrissCross          =16          # from enum XlPattern
+xlPatternDown                =-4121       # from enum XlPattern
+xlPatternGray16              =17          # from enum XlPattern
+xlPatternGray25              =-4124       # from enum XlPattern
+xlPatternGray50              =-4125       # from enum XlPattern
+xlPatternGray75              =-4126       # from enum XlPattern
+xlPatternGray8               =18          # from enum XlPattern
+xlPatternGrid                =15          # from enum XlPattern
+xlPatternHorizontal          =-4128       # from enum XlPattern
+xlPatternLightDown           =13          # from enum XlPattern
+xlPatternLightHorizontal     =11          # from enum XlPattern
+xlPatternLightUp             =14          # from enum XlPattern
+xlPatternLightVertical       =12          # from enum XlPattern
+xlPatternNone                =-4142       # from enum XlPattern
+xlPatternSemiGray75          =10          # from enum XlPattern
+xlPatternSolid               =1           # from enum XlPattern
+xlPatternUp                  =-4162       # from enum XlPattern
+xlPatternVertical            =-4166       # from enum XlPattern
+xlPatternLinearGradient      =4000
+xlPatternRectangularGradient =4001
+
+backgroundPatternLabels={
+xlPatternAutomatic:"automatic",
+xlPatternChecker:"checker",
+xlPatternCrissCross:"crisscross",
+xlPatternDown:"down",
+xlPatternGray16:"gray16",
+xlPatternGray25:"gray25",
+xlPatternGray50:"gray50",
+xlPatternGray75:"gray75",
+xlPatternGray8:"gray8",
+xlPatternGrid:"grid",
+xlPatternHorizontal:"horizontal",
+xlPatternLightDown:"light down",
+xlPatternLightHorizontal:"light horizontal",
+xlPatternLightUp:"light up",
+xlPatternLightVertical:"light vertical",
+xlPatternNone:"none",
+xlPatternSemiGray75:"semi gray75",
+xlPatternSolid:"solid",
+xlPatternUp:"up",
+xlPatternVertical:"vertical",
+xlPatternLinearGradient:"linear gradient",
+xlPatternRectangularGradient:"rectangular gradient",
+}
+
 xlA1 = 1
 xlRC = 2
 xlUnderlineStyleNone=-4142
+xlColorIndexNone=-4142
+
 
 #Excel cell types
 xlCellTypeAllFormatConditions =-4172      # from enum XlCellType
@@ -831,6 +881,15 @@ class ExcelCell(ExcelBase):
 				states.add(controlTypes.STATE_CROPPED)
 			if self._overlapInfo['obscuringRightBy'] > 0:
 				states.add(controlTypes.STATE_OVERFLOWING)
+		if config.conf["documentFormatting"]["reportShading"]:
+            if (self.excelCellObject.Application.Version > "12.0"):
+				if self.excelCellObject.DisplayFormat.Interior.ColorIndex<>xlColorIndexNone:   
+                    states.add(controlTypes.STATE_SHADED)
+            else:
+                cellObj= self.excelCellObject
+                if cellObj.formatconditions.count==0:
+                    if cellObj.Interior.ColorIndex<>xlColorIndexNone:   
+                        states.add(controlTypes.STATE_SHADED)
 		return states
 
 	def getCellWidthAndTextWidth(self):
@@ -937,6 +996,24 @@ class ExcelCell(ExcelBase):
 				info['obscuringRightBy'] = 0
 		self._overlapInfo = info
 		return self._overlapInfo
+		
+	def _get_stateInfoText(self):
+                if (self.excelCellObject.Application.Version > "12.0"):
+                    cellObj=self.excelCellObject.DisplayFormat
+                else:
+                    cellObj=self.excelCellObject
+                backgroundPattern=backgroundPatternLabels.get(cellObj.Interior.Pattern)
+                if backgroundPattern == "linear gradient" or backgroundPattern == "rectangular gradient":
+                    backgroundColorOne=(colors.RGB.fromCOLORREF(int(cellObj.Interior.Gradient.ColorStops(1).Color)))
+                    backgroundColorOne=("{backgroundColorOne}").format(backgroundColorOne=backgroundColorOne.name if isinstance(backgroundColorOne,colors.RGB) else unicode(backgroundColorOne))
+                    backgroundColorTwo=(colors.RGB.fromCOLORREF(int(cellObj.Interior.Gradient.ColorStops(2).Color)))
+                    backgroundColorTwo=("{backgroundColorTwo}").format(backgroundColorTwo=backgroundColorTwo.name if isinstance(backgroundColorTwo,colors.RGB) else unicode(backgroundColorTwo))
+                    backgroundColor="%s and %s"%(backgroundColorOne,backgroundColorTwo)
+                else:
+                    backgroundColor=(colors.RGB.fromCOLORREF(int(cellObj.Interior.Color)))
+                    backgroundColor=("{backgroundColor}").format(backgroundColor=backgroundColor.name if isinstance(backgroundColor,colors.RGB) else unicode(backgroundColor))
+                shadingInfo="%s %s"%(backgroundColor,backgroundPattern)
+		return shadingInfo
 
 	def _get_parent(self):
 		worksheet=self.excelCellObject.Worksheet
