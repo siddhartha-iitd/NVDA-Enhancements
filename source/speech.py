@@ -925,7 +925,7 @@ def getSpeechTextForProperties(reason=controlTypes.REASON_QUERY,**propertyValues
 				textList.append(_("%s %s")%(((controlTypes.stateLabels[controlTypes.STATE_SHADED])),stateInfoText))
 			positiveStates.discard(controlTypes.STATE_SHADED)
 		else:
-			if stateInfoText != oldStateInfoText:
+			if config.conf["documentFormatting"]["reportShading"] and stateInfoText != oldStateInfoText:
 				textList.append(_("No Shading"))
 		oldStateInfoText=stateInfoText
 		textList.extend([controlTypes.stateLabels[x] for x in positiveStates])

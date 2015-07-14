@@ -180,6 +180,7 @@ confspec = ConfigObj(StringIO(
 	reportLandmarks = boolean(default=true)
 	reportFrames = boolean(default=true)
 	reportClickable = boolean(default=true)
+	reportShading = boolean(default=False)
 
 [reviewCursor]
 	simpleReviewMode = boolean(default=True)

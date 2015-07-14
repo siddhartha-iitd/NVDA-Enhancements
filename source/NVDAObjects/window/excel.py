@@ -886,12 +886,12 @@ class ExcelCell(ExcelBase):
 				if self.excelCellObject.DisplayFormat.Interior.ColorIndex<>xlColorIndexNone:
 					states.add(controlTypes.STATE_SHADED)
 			else:
-                cellObj= self.excelCellObject
-                if cellObj.formatconditions.count==0:
-                    if cellObj.Interior.ColorIndex<>xlColorIndexNone:   
-                        states.add(controlTypes.STATE_SHADED)
-			    else:
-                    ui.message("For Excel version 2007 and below if conditional formatting is applied,cell shading information is not available.")
+				cellObj= self.excelCellObject
+				if cellObj.formatconditions.count==0:
+					if cellObj.Interior.ColorIndex<>xlColorIndexNone:
+						states.add(controlTypes.STATE_SHADED)
+				else:
+					ui.message("For Excel version 2007 and below if conditional formatting is applied,cell shading information is not available.")
 		return states
 
 	def getCellWidthAndTextWidth(self):
