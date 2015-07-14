@@ -679,7 +679,10 @@ class ExcelCellTextInfo(NVDAObjectTextInfo):
 
 	def _getFormatFieldAndOffsets(self,offset,formatConfig,calculateOffsets=True):
 		formatField=textInfos.FormatField()
-		fontObj=self.obj.excelCellObject.font
+		if (self.obj.excelCellObject.Application.Version > "12.0"):
+			fontObj=self.obj.excelCellObject.DisplayFormat.font
+		else:
+			fontObj=self.obj.excelCellObject.font
 		if formatConfig['reportAlignment']:
 			value=alignmentLabels.get(self.obj.excelCellObject.horizontalAlignment)
 			if value:
@@ -705,11 +708,14 @@ class ExcelCellTextInfo(NVDAObjectTextInfo):
 				formatField['style']=styleName
 		if formatConfig['reportColor']:
 			try:
-				formatField['color']=colors.RGB.fromCOLORREF(int(fontObj.color))
+					formatField['color']=colors.RGB.fromCOLORREF(int(fontObj.color))
 			except COMError:
-				pass
+					pass
 			try:
-				formatField['background-color']=colors.RGB.fromCOLORREF(int(self.obj.excelCellObject.interior.color))
+				if (self.obj.excelCellObject.Application.Version > "12.0"):
+					formatField['background-color']=colors.RGB.fromCOLORREF(int(self.obj.excelCellObject.DisplayFormat.interior.color))
+				else:
+					formatField['background-color']=colors.RGB.fromCOLORREF(int(self.obj.excelCellObject.interior.color))
 			except COMError:
 				pass
 		return formatField,(self._startOffset,self._endOffset)
