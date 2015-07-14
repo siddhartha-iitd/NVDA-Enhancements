@@ -882,10 +882,10 @@ class ExcelCell(ExcelBase):
 			if self._overlapInfo['obscuringRightBy'] > 0:
 				states.add(controlTypes.STATE_OVERFLOWING)
 		if config.conf["documentFormatting"]["reportShading"]:
-            if (self.excelCellObject.Application.Version > "12.0"):
-				if self.excelCellObject.DisplayFormat.Interior.ColorIndex<>xlColorIndexNone:   
-                    states.add(controlTypes.STATE_SHADED)
-            else:
+			if (self.excelCellObject.Application.Version > "12.0"):
+				if self.excelCellObject.DisplayFormat.Interior.ColorIndex<>xlColorIndexNone:
+					states.add(controlTypes.STATE_SHADED)
+			else:
                 cellObj= self.excelCellObject
                 if cellObj.formatconditions.count==0:
                     if cellObj.Interior.ColorIndex<>xlColorIndexNone:   

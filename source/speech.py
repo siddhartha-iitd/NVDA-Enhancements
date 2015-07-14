@@ -890,7 +890,7 @@ def speakTextInfo(info,useCache=True,formatConfig=None,unit=None,reason=controlT
 			speak(speechSequence)
 
 def getSpeechTextForProperties(reason=controlTypes.REASON_QUERY,**propertyValues):
-	global oldTreeLevel, oldTableID, oldRowNumber, oldColumnNumber
+	global oldTreeLevel, oldTableID, oldRowNumber, oldColumnNumber,oldStateInfoText
 	textList=[]
 	name=propertyValues.get('name')
 	if name:
