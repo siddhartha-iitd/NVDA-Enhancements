@@ -296,7 +296,6 @@ class FormControlExcelCollectionQuicknavIterator(ExcelQuicknavIterator):
 		def topLeftCellRow(item):
 			row=item.TopLeftCell.Row
 			return row
-		
 		items=self.collectionFromWorksheet(self.document)
 		if not items:
 			return
@@ -304,19 +303,37 @@ class FormControlExcelCollectionQuicknavIterator(ExcelQuicknavIterator):
 		if self.direction=="previous":
 			items=reversed(items)
 		length=len(items)
-		row = position.Row
-		col = position.Column
-		self.lastPosition=0
-		for i in range(length):
-			if (items[i].TopLeftCell.Row==row and items[i].TopLeftCell.Column>col) or (items[i].TopLeftCell.Row>row):
-				self.lastPosition=i
-				item=self.quickNavItemClass(self.itemType,self.document,items[self.lastPosition],items )
+		if position:
+			row = position.Row
+			col = position.Column
+			for collectionItem in items:
+				if (collectionItem.TopLeftCell.Row==row and collectionItem.TopLeftCell.Column>col) or (collectionItem.TopLeftCell.Row>row):
+					item=self.quickNavItemClass(self.itemType,self.document,collectionItem,items )
+					yield item
+		else:
+			for collectionItem in items:
+				item=self.quickNavItemClass(self.itemType,self.document,collectionItem , items )
 				yield item
 	
+	def filter(self,item):
+		pass
+		
 class ExcelBrowseModeTreeInterceptor(browseMode.BrowseModeTreeInterceptor):
 
 	needsReviewCursorTextInfoWrapper=False
 	passThrough=True
+	
+	def _get_selection(self):
+		selection = self.rootNVDAObject.excelApplicationObject.Selection
+		try:
+			#cell(Range Type Object) is selected
+			if selection.Row:
+				isShapeActive = False
+				position=selection
+		except(COMError):
+			#form control object is selected
+			position=selection.TopLeftCell
+		return position
 
 	def _get_isAlive(self):
 		if not winUser.isWindow(self.rootNVDAObject.windowHandle):
@@ -345,16 +362,7 @@ class ExcelBrowseModeTreeInterceptor(browseMode.BrowseModeTreeInterceptor):
 		elif nodeType=="formula":
 			return FormulaExcelCollectionQuicknavIterator( nodeType , self.rootNVDAObject.excelWorksheetObject , direction , None ).iterate()
 		elif nodeType=="formField":
-			seln = self.rootNVDAObject.excelApplicationObject.Selection
-			try:
-				#cell(Range Type Object) is selected
-				if seln.Row:
-					isShapeActive = False
-					position=seln
-			except(COMError):
-				#form control object is selected
-				position=seln.TopLeftCell
-			return FormControlExcelCollectionQuicknavIterator( nodeType , self.rootNVDAObject.excelWorksheetObject , direction , None ).iterate(position)
+			return FormControlExcelCollectionQuicknavIterator( nodeType , self.rootNVDAObject.excelWorksheetObject , direction , None ).iterate(pos)
 		else:
 			raise NotImplementedError
 

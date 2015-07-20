@@ -196,6 +196,8 @@ class BrowseModeTreeInterceptor(treeInterceptorHandler.TreeInterceptor):
 			info=self.selection
 		except AttributeError:
 			info = None
+# 			if itemType=="formField":
+# 				info=1
 		try:
 			item = next(self._iterNodesByType(itemType, direction, info))
 		except NotImplementedError:
