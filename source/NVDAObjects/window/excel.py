@@ -195,8 +195,7 @@ class ExcelSheetQuickNavItem(ExcelQuickNavItem):
 	def moveTo(self):
 		self.sheetObject.Activate()
 		eventHandler.queueEvent("gainFocus",api.getDesktopObject().objectWithFocus())
-	
-	
+		
 class ExcelQuicknavIterator(object):
 	"""
 	Allows iterating over an MS excel collection (e.g. Comments, Formulas or charts) emitting L{QuickNavItem} objects.
@@ -512,7 +511,7 @@ class ExcelBrowseModeTreeInterceptor(browseMode.BrowseModeTreeInterceptor):
 	# Translators: Input help mode message for toggle focus and browse mode command in web browsing and other situations.
 	script_activatePosition.__doc__=_("Toggles between browse mode and focus mode. When in focus mode, keys will pass straight through to the application, allowing you to interact directly with a control. When in browse mode, you can navigate the document with the cursor, quick navigation keys, etc.")
 	script_activatePosition.category=inputCore.SCRCAT_BROWSEMODE
-
+	
 	__gestures = {
 		"kb:upArrow": "moveUp",
 		"kb:downArrow":"moveDown",
@@ -1120,7 +1119,7 @@ class ExcelCell(ExcelBase):
 				else:
 					self.excelCellObject.addComment(d.Value)
 		gui.runScriptModalDialog(d, callback)
-
+		
 	__gestures = {
 		"kb:NVDA+shift+c": "setColumnHeader",
 		"kb:NVDA+shift+r": "setRowHeader",

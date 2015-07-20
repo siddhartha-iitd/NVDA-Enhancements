@@ -114,7 +114,7 @@ class QuickNavItem(object):
 		Moves the browse mode caret or focus to this item.
 		"""
 		raise NotImplementedError
-
+	
 	def activate(self):
 		"""
 		Activates this item's position. E.g. follows a link, presses a button etc.
@@ -246,7 +246,7 @@ class BrowseModeTreeInterceptor(treeInterceptorHandler.TreeInterceptor):
 		self._activatePosition(info)
 	# Translators: the description for the activatePosition script on virtualBuffers.
 	script_activatePosition.__doc__ = _("activates the current object in the document")
-
+	
 	__gestures={
 		"kb:NVDA+f7": "elementsList",
 		"kb:enter": "activatePosition",
@@ -540,6 +540,7 @@ class ElementsListDialog(wx.Dialog):
 		self.tree = wx.TreeCtrl(self, wx.ID_ANY, style=wx.TR_HAS_BUTTONS | wx.TR_HIDE_ROOT | wx.TR_SINGLE)
 		self.tree.Bind(wx.EVT_SET_FOCUS, self.onTreeSetFocus)
 		self.tree.Bind(wx.EVT_CHAR, self.onTreeChar)
+		#self.tree.Bind(wx.EVT_KEY_DOWN, self.onTreeCharRename)
 		self.treeRoot = self.tree.AddRoot("root")
 		mainSizer.Add(self.tree,proportion=7,flag=wx.EXPAND)
 
@@ -691,12 +692,29 @@ class ElementsListDialog(wx.Dialog):
 				button.ProcessEvent(evt)
 			else:
 				wx.Bell()
-
+				
+		elif key == wx.WXK_F2 and self.ELEMENT_TYPES[self.lastSelectedElementType][0]=="sheet":
+			item=self.tree.GetSelection()
+			item = self.tree.GetItemPyData(item).item
+			d = wx.TextEntryDialog(gui.mainFrame, 
+			# Translators: Dialog text for 
+			_("Renaming sheet"),
+			# Translators: Title of a dialog rename a sheet 
+			_("Sheet Rename"),
+			defaultValue=item.label if item.label else u"",
+			style=wx.OK|wx.CANCEL)
+			def callback(result):
+				if result == wx.ID_OK:
+					item.sheetObject.name=d.Value
+					self.initElementType(self.ELEMENT_TYPES[self.lastSelectedElementType][0])
+			gui.runScriptModalDialog(d, callback)
+			evt.Skip()
+				
 		elif key >= wx.WXK_START or key == wx.WXK_BACK:
 			# Non-printable character.
 			self._searchText = ""
 			evt.Skip()
-
+			
 		else:
 			# Search the list.
 			# We have to implement this ourselves, as tree views don't accept space as a search character.
@@ -764,3 +782,4 @@ class ElementsListDialog(wx.Dialog):
 				item.moveTo()
 				item.report()
 			wx.CallLater(100, move)
+			
