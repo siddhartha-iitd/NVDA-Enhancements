@@ -247,8 +247,10 @@ class ExcelFormControlQuickNavItem(ExcelQuickNavItem):
   
 	def __init__( self , nodeType , document , formControlObject , formControlCollection ):
 		self.formControlObjectIndex = formControlObject.ZOrderPosition
-		if formControlObject.name:
-			self.label = formControlObject.name + " " + formControlObject.TopLeftCell.address(False,False,1,False) + "-" + formControlObject.BottomRightCell.address(False,False,1,False) 
+		if formControlObject.AlternativeText:
+			self.label = formControlObject.AlternativeText+" "+formControlObject.Name+" " + formControlObject.TopLeftCell.address(False,False,1,False) + "-" + formControlObject.BottomRightCell.address(False,False,1,False)
+		else:
+			self.label = formControlObject.Name + " " + formControlObject.TopLeftCell.address(False,False,1,False) + "-" + formControlObject.BottomRightCell.address(False,False,1,False)
 		super( ExcelFormControlQuickNavItem ,self).__init__( nodeType , document , formControlObject , formControlCollection )
   
 	def __lt__(self,other):
@@ -264,7 +266,6 @@ class ExcelFormControlQuickNavItem(ExcelQuickNavItem):
 		except(COMError):
 			pass
 		ui.message(self.label)
-		eventHandler.queueEvent("gainFocus",api.getDesktopObject().objectWithFocus())
  
 	@property
 	def isAfterSelection(self):
