@@ -567,9 +567,10 @@ class ElementsListDialog(wx.Dialog):
 		child.Bind(wx.EVT_RADIOBOX, self.onElementTypeChange)
 		mainSizer.Add(child,proportion=1)
 
-		self.tree = wx.TreeCtrl(self, wx.ID_ANY, style=wx.TR_HAS_BUTTONS | wx.TR_HIDE_ROOT | wx.TR_SINGLE)
+		self.tree = wx.TreeCtrl(self, wx.ID_ANY, style=wx.TR_HAS_BUTTONS | wx.TR_HIDE_ROOT | wx.TR_SINGLE | wx.TR_EDIT_LABELS)
 		self.tree.Bind(wx.EVT_SET_FOCUS, self.onTreeSetFocus)
 		self.tree.Bind(wx.EVT_CHAR, self.onTreeChar)
+		self.tree.Bind(wx.EVT_TREE_END_LABEL_EDIT, self.OnTreeLabelEditEnd)
 		self.treeRoot = self.tree.AddRoot("root")
 		mainSizer.Add(self.tree,proportion=7,flag=wx.EXPAND)
 
@@ -721,6 +722,11 @@ class ElementsListDialog(wx.Dialog):
 				button.ProcessEvent(evt)
 			else:
 				wx.Bell()
+				
+		elif key == wx.WXK_F2 and self.ELEMENT_TYPES[self.lastSelectedElementType][0]=="sheet":
+			item=self.tree.GetSelection()
+			self.tree.EditLabel(item)
+			evt.Skip()
 
 		elif key >= wx.WXK_START or key == wx.WXK_BACK:
 			# Non-printable character.
@@ -739,6 +745,13 @@ class ElementsListDialog(wx.Dialog):
 			else:
 				self._searchCallLater = wx.CallLater(1000, self._clearSearchText)
 			self.search(self._searchText)
+			
+	def OnTreeLabelEditEnd(self,evt):
+			sheetNewName=evt.GetLabel()
+			item=self.tree.GetSelection()
+			sheetItem = self.tree.GetItemPyData(item).item
+			sheetItem.sheetObject.name=sheetNewName
+			sheetItem.label=sheetNewName
 
 	def _clearSearchText(self):
 		self._searchText = ""
