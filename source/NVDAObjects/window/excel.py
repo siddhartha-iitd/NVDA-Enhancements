@@ -28,6 +28,8 @@ from . import Window
 from .. import NVDAObjectTextInfo
 import scriptHandler
 import browseMode
+import inputCore
+import virtualBuffers
 import ctypes
 
 xlCenter=-4108
@@ -391,6 +393,61 @@ class ExcelBrowseModeTreeInterceptor(browseMode.BrowseModeTreeInterceptor):
 				ui.message(locationText)
 				ui.message(cellValueText)
 
+	def script_activatePosition(self,gesture):
+		excelApplicationObject = self.rootNVDAObject.excelWorksheetObject.Application
+		rowNum = excelApplicationObject.ActiveCell.Row
+		colNum = excelApplicationObject.ActiveCell.Column
+		excelRangeObject = excelApplicationObject.Cells(rowNum,colNum)
+		if excelApplicationObject.ActiveSheet.ProtectContents and excelRangeObject.Locked:
+			# Translators: the description for the Locked cells in excel Browse Mode, if focused for editing
+			ui.message(_("This cell is non-editable"))
+			return		
+		focus = api.getFocusObject()
+		vbuf = focus.treeInterceptor
+		if not vbuf:
+			# #2023: Search the focus and its ancestors for an object for which browse mode is optional.
+			for obj in itertools.chain((api.getFocusObject(),), reversed(api.getFocusAncestors())):
+				if obj.shouldCreateTreeInterceptor:
+					continue
+				try:
+					obj.treeInterceptorClass
+				except:
+					continue
+				break
+			else:
+				return
+			# Force the tree intercepter to be created.
+			obj.shouldCreateTreeInterceptor = True
+			ti = treeInterceptorHandler.update(obj)
+			if not ti:
+				return
+			if focus in ti:
+				# Update the focus, as it will have cached that there is no tree intercepter.
+				focus.treeInterceptor = ti
+				# If we just happened to create a browse mode TreeInterceptor
+				# Then ensure that browse mode is reported here. From the users point of view, browse mode was turned on.
+				if isinstance(ti,browseMode.BrowseModeTreeInterceptor) and not ti.passThrough:
+					browseMode.reportPassThrough(ti,False)
+					braille.handler.handleGainFocus(ti)
+			return
+
+		if not isinstance(vbuf, browseMode.BrowseModeTreeInterceptor):
+			return
+		# Toggle browse mode pass-through.
+		vbuf.passThrough = not vbuf.passThrough
+		if isinstance(vbuf,virtualBuffers.VirtualBuffer):
+			# If we are enabling pass-through, the user has explicitly chosen to do so, so disable auto-pass-through.
+			# If we're disabling pass-through, re-enable auto-pass-through.
+			vbuf.disableAutoPassThrough = vbuf.passThrough
+		browseMode.reportPassThrough(vbuf)
+		excelRangeObject.Select
+		excelRangeObject.Activate()
+
+	# Translators: Input help mode message for toggle focus and browse mode command in web browsing and other situations.
+	script_activatePosition.__doc__=_("Toggles between browse mode and focus mode. When in focus mode, keys will pass straight through to the application, allowing you to interact directly with a control. When in browse mode, you can navigate the document with the cursor, quick navigation keys, etc.")
+	script_activatePosition.category=inputCore.SCRCAT_BROWSEMODE
+
+
 	def __contains__(self,obj):
 		return winUser.isDescendantWindow(self.rootNVDAObject.windowHandle,obj.windowHandle)
 
@@ -428,6 +485,9 @@ class ExcelBrowseModeTreeInterceptor(browseMode.BrowseModeTreeInterceptor):
         "kb:control+rightArrow":"endOfRow",
         "kb:control+alt+,":"readRow",
         "kb:control+alt+.":"readColumn",
+		"kb:enter": "activatePosition",
+		"kb(desktop):numpadEnter":"activatePosition",
+		"kb:space": "activatePosition",
 	}
 
 
