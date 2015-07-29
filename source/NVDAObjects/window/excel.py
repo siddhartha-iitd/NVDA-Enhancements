@@ -37,6 +37,8 @@ xlRight=-4152
 xlDistributed=-4117
 xlBottom=-4107
 xlTop=-4160
+xlToLeft=-4159
+xlUp=-4162
 xlCellWidthUnitToPixels = 7.5919335705812574139976275207592
 alignmentLabels={
 	xlCenter:"center",
@@ -259,11 +261,138 @@ class ExcelBrowseModeTreeInterceptor(browseMode.BrowseModeTreeInterceptor):
 			log.debugWarning("could not compair sheet names",exc_info=True)
 			return False
 
+	def scriptHelper(self,direction):
+		self.windowHandle=self.rootNVDAObject.windowHandle
+		self.excelWindowObject=self.rootNVDAObject.excelWindowObject
+		try:
+			getattr(self, 'cellPosition')
+		except AttributeError:
+			self.cellPosition = self.excelWindowObject.Selection
+
+		self.currentColumn = self.cellPosition.Column
+		self.currentRow = self.cellPosition.Row
+
+		if   direction == "left":
+			self.cellPosition = self.cellPosition.Offset(0,-1)
+		elif direction == "right":
+			self.cellPosition = self.cellPosition.Offset(0,1)
+		elif direction == "up":
+			self.cellPosition = self.cellPosition.Offset(-1,0)
+		elif direction == "down":
+			self.cellPosition = self.cellPosition.Offset(1,0)
+		#Start-of-Column
+		elif direction == "startcol":
+			rowOffset = 1-self.currentRow
+			self.cellPosition = self.cellPosition.Offset(rowOffset,0)
+		#Start-of-Row
+		elif direction == "startrow":
+			columnOffset = 1-self.currentColumn
+			self.cellPosition = self.cellPosition.Offset(0,columnOffset)
+		#End-of-Row
+		elif direction == "endrow":
+			self.lastColumn = self.rootNVDAObject.excelApplicationObject.ActiveSheet.Cells(self.currentRow, self.rootNVDAObject.excelApplicationObject.ActiveSheet.Columns.Count).End(xlToLeft).Column
+			columnOffset = self.lastColumn - self.currentColumn
+			self.cellPosition = self.cellPosition.Offset(0,columnOffset)
+		#End-of-Column
+		elif direction == "endcol":
+			self.lastRow = self.rootNVDAObject.excelApplicationObject.ActiveSheet.Cells(self.rootNVDAObject.excelApplicationObject.ActiveSheet.Rows.Count, self.currentColumn).End(xlUp).Row
+			rowOffset = self.lastRow - self.currentRow
+			self.cellPosition = self.cellPosition.Offset(rowOffset,0)
+		else:
+			return
+
+		try:
+			isMerged=self.cellPosition.mergeCells
+		except (COMError,NameError):
+			isMerged=False
+		
+		if isMerged:
+			self.cellPosition=self.cellPosition.MergeArea(1)
+			obj=ExcelMergedCell(windowHandle=self.windowHandle,excelWindowObject=self.excelWindowObject,excelCellObject=self.cellPosition)
+		else:
+			obj=ExcelCell(windowHandle=self.windowHandle,excelWindowObject=self.excelWindowObject,excelCellObject=self.cellPosition)
+		self.cellPosition.Select
+		self.cellPosition.Activate()
+		eventHandler.executeEvent('gainFocus',obj)
+    
+	def script_moveLeft(self,gesture):
+		self.scriptHelper("left")
+	
+	def script_moveRight(self,gesture):
+		self.scriptHelper("right")
+
+	def script_moveUp(self,gesture):
+		self.scriptHelper("up")
+
+	def script_moveDown(self,gesture):
+		self.scriptHelper("down")
+
+	def script_startOfColumn(self,gesture):
+		self.scriptHelper("startcol")
+
+	def script_startOfRow(self,gesture):
+		self.scriptHelper("startrow")
+
+	def script_endOfRow(self,gesture):
+		self.scriptHelper("endrow")
+
+	def script_endOfColumn(self,gesture):
+		self.scriptHelper("endcol")
+
+	def getColumnNameFromNumber(self,colNum):
+		 colList = (self.rootNVDAObject.excelWorksheetObject.Cells(1, colNum).Address(True, False)).split('$')
+		 return ''.join(colList)[:-1]
+ 
+	def script_readRow(self,gesture):
+		self.scriptHelper(-1)
+		ws = self.rootNVDAObject.excelWorksheetObject
+		currentRow = self.cellPosition.Row
+		# Translators: the description for the Row Number of current row in excel Browse Mode.
+		ui.message(_("Reading Row {rowNumber}".format(rowNumber=currentRow)))
+		lastColumn = ws.Cells(currentRow, ws.Columns.Count).End(xlToLeft).Column
+		col = 1
+		while col <= lastColumn:
+			if ws.Cells(currentRow,col).MergeCells:
+				mergedAreaColumnCount = ws.Cells(currentRow,col).MergeArea.columns.count
+				# Translators: the description for the Column Span of a Merged Area in excel Browse Mode
+				locationText = _("Column {fromCol} to {toCol}".format(fromCol=self.getColumnNameFromNumber(col),toCol=self.getColumnNameFromNumber(col+mergedAreaColumnCount-1))) if mergedAreaColumnCount > 1 else _("Column {singleCol}".format(singleCol=self.getColumnNameFromNumber(col)))
+				cellValueText = ws.Cells(currentRow,col).Text
+				col += mergedAreaColumnCount
+			else:
+				# Translators: the description for the Column Name of current cell in a row in excel Browse Mode
+				locationText = _("Column {colName}".format(colName=self.getColumnNameFromNumber(col)))
+				cellValueText = ws.Cells(currentRow,col).Text
+				col += 1
+			if cellValueText:
+				ui.message(locationText)
+				ui.message(cellValueText)
+ 
+	def script_readColumn(self,gesture):
+		self.scriptHelper(-1)
+		ws = self.rootNVDAObject.excelWorksheetObject
+		currentCol = self.cellPosition.Column
+		# Translators: the description for the Column Number of current column in excel Browse Mode
+		ui.message(_("Reading Column {colNum}".format(colNum=self.getColumnNameFromNumber(currentCol))))
+		lastRow = ws.Cells(ws.Rows.Count, currentCol).End(xlUp).Row
+		row = 1
+		while row <= lastRow:
+			if ws.Cells(row,currentCol).MergeCells:
+				mergedAreaRowCount = ws.Cells(row,currentCol).MergeArea.rows.count
+				# Translators: the description for the Row Span of a Merged Area in excel Browse Mode
+				locationText = _("Row {fromRow} to {toRow}".format(fromRow=row,toRow=row+mergedAreaRowCount-1)) if mergedAreaRowCount > 1 else _("Row {rowNum}".format(rowNum=row))
+				cellValueText = ws.Cells(row,currentCol).Text
+				row += mergedAreaRowCount
+			else:
+				# Translators: the description for the row number in excel Browse Mode
+				locationText = _("Row {rowNum}".format(rowNum=row))
+				cellValueText = ws.Cells(row,currentCol).Text
+				row += 1
+			if cellValueText:
+				ui.message(locationText)
+				ui.message(cellValueText)
 
 	def __contains__(self,obj):
 		return winUser.isDescendantWindow(self.rootNVDAObject.windowHandle,obj.windowHandle)
-
-
 
 	def _set_selection(self,info):
 		super(ExcelBrowseModeTreeInterceptor,self)._set_selection(info)
@@ -287,6 +416,20 @@ class ExcelBrowseModeTreeInterceptor(browseMode.BrowseModeTreeInterceptor):
 	# Translators: the description for the elements list command in Microsoft Excel.
 	script_elementsList.__doc__ = _("Presents a list of charts, cells with comments and cells with formulas")
 	script_elementsList.ignoreTreeInterceptorPassThrough=True
+	
+	__gestures = {
+		"kb:upArrow": "moveUp",
+		"kb:downArrow":"moveDown",
+		"kb:leftArrow":"moveLeft",
+		"kb:rightArrow":"moveRight",
+		"kb:control+upArrow":"startOfColumn",
+        "kb:control+downArrow":"endOfColumn",
+        "kb:control+leftArrow":"startOfRow",
+        "kb:control+rightArrow":"endOfRow",
+        "kb:control+alt+,":"readRow",
+        "kb:control+alt+.":"readColumn",
+	}
+
 
 class ElementsListDialog(browseMode.ElementsListDialog):
 
@@ -831,6 +974,8 @@ class ExcelCell(ExcelBase):
 				states.add(controlTypes.STATE_CROPPED)
 			if self._overlapInfo['obscuringRightBy'] > 0:
 				states.add(controlTypes.STATE_OVERFLOWING)
+		if self.excelWindowObject.ActiveSheet.ProtectContents and (not self.excelCellObject.Locked):
+			states.add(controlTypes.STATE_EDITABLE)
 		return states
 
 	def getCellWidthAndTextWidth(self):
