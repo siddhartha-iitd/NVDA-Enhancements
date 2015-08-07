@@ -65,6 +65,20 @@ xlCellTypeSameFormatConditions=-4173      # from enum XlCellType
 xlCellTypeSameValidation      =-4175      # from enum XlCellType
 xlCellTypeVisible             =12         # from enum XlCellType
 
+#MsoShapeType Enumeration
+msoFormControl=8
+#XlFormControl Enumeration
+xlButtonControl=0
+xlCheckBox=1
+xlDropDown=2
+xlEditBox=3
+xlGroupBox=4
+xlLabel=5
+xlListBox=6
+xlOptionButton=7
+xlScrollBar=8
+xlSpinner=9
+
 re_RC=re.compile(r'R(?:\[(\d+)\])?C(?:\[(\d+)\])?')
 re_absRC=re.compile(r'^R(\d+)C(\d+)(?::R(\d+)C(\d+))?$')
 
@@ -250,6 +264,12 @@ class ExcelBrowseModeTreeInterceptor(browseMode.BrowseModeTreeInterceptor):
 	needsReviewCursorTextInfoWrapper=False
 	passThrough=True
 
+	def _get_selection(self):
+		selection= api.getDesktopObject().objectWithFocus()._getSelection()
+		if selection.role in (controlTypes.ROLE_BUTTON, controlTypes.ROLE_CHECKBOX, controlTypes.ROLE_DROPDOWNBUTTON, controlTypes.ROLE_EDITBOX, controlTypes.ROLE_GROUPBOX, controlTypes.ROLE_LABEL, controlTypes.ROLE_LISTBOX, controlTypes.ROLE_RADIOBUTTON, controlTypes.ROLE_SCROLLBAR, controlTypes.ROLE_SPINBUTTON):
+			return selection.topLeftCell
+		return None
+
 	def _get_isAlive(self):
 		if not winUser.isWindow(self.rootNVDAObject.windowHandle):
 			return False
@@ -259,11 +279,8 @@ class ExcelBrowseModeTreeInterceptor(browseMode.BrowseModeTreeInterceptor):
 			log.debugWarning("could not compair sheet names",exc_info=True)
 			return False
 
-
 	def __contains__(self,obj):
 		return winUser.isDescendantWindow(self.rootNVDAObject.windowHandle,obj.windowHandle)
-
-
 
 	def _set_selection(self,info):
 		super(ExcelBrowseModeTreeInterceptor,self)._set_selection(info)
@@ -279,6 +296,8 @@ class ExcelBrowseModeTreeInterceptor(browseMode.BrowseModeTreeInterceptor):
 			return CommentExcelCollectionQuicknavIterator( nodeType , self.rootNVDAObject.excelWorksheetObject , direction , None ).iterate()
 		elif nodeType=="formula":
 			return FormulaExcelCollectionQuicknavIterator( nodeType , self.rootNVDAObject.excelWorksheetObject , direction , None ).iterate()
+		elif nodeType=="formField":
+			return ExcelFormControlQuicknavIterator( nodeType , self.rootNVDAObject.excelWorksheetObject , direction , None ).iterate(pos)
 		else:
 			raise NotImplementedError
 
@@ -300,6 +319,10 @@ class ElementsListDialog(browseMode.ElementsListDialog):
 		# Translators: The label of a radio button to select the type of element
 		# in the browse mode Elements List dialog.
 		("formula", _("&Formula")),
+		# Translators: The label of a radio button to select the type of element
+		# in the browse mode Elements List dialog.
+		("formField", _("&FormControl")),
+		
 	)
 
 class ExcelBase(Window):
@@ -342,7 +365,7 @@ class ExcelBase(Window):
 		return obj
 
 	def _getSelection(self):
-		selection=self.excelWindowObject.Selection
+		selection=self.excelWindowObject.Application.Selection
 		try:
 			isMerged=selection.mergeCells
 		except (COMError,NameError):
@@ -354,6 +377,11 @@ class ExcelBase(Window):
 			numCells=0
 
 		isChartActive = True if self.excelWindowObject.ActiveChart else False
+		try:
+			isFormControl = True if self.excelWindowObject.ActiveSheet.Shapes(selection.name).type==msoFormControl else False
+			formControl=self.excelWindowObject.ActiveSheet.Shapes(selection.name)
+		except:
+			isFormControl=False
 		obj=None
 		if isMerged:
 			obj=ExcelMergedCell(windowHandle=self.windowHandle,excelWindowObject=self.excelWindowObject,excelCellObject=selection.item(1))
@@ -365,6 +393,8 @@ class ExcelBase(Window):
 			selection = self.excelWindowObject.ActiveChart
 			import excelChart
 			obj=excelChart.ExcelChart(windowHandle=self.windowHandle,excelWindowObject=self.excelWindowObject,excelChartObject=selection)
+		elif isFormControl:
+			obj=ExcelFormControl(windowHandle=self.windowHandle,excelWindowObject=self.excelWindowObject,excelFormControlObject=formControl)
 		return obj
 
 
@@ -1151,3 +1181,146 @@ class ExcelMergedCell(ExcelCell):
 	def _get_colSpan(self):
 		return self.excelCellObject.mergeArea.columns.count
 
+class ExcelFormControl(ExcelWorksheet):
+
+		def __init__(self,windowHandle=None,excelWindowObject=None,excelFormControlObject=None):
+			self.excelWindowObject=excelWindowObject
+			self.excelWorksheetObject=self.excelWindowObject.ActiveSheet
+			self.excelFormControlObject=excelFormControlObject
+			super(ExcelFormControl,self).__init__(windowHandle=windowHandle, excelWindowObject=self.excelWindowObject, excelWorksheetObject=self.excelWorksheetObject)
+			for gesture in self.__changeSelectionGestures:
+				self.bindGesture(gesture, "changeSelection")
+
+		def _get_role(self):
+			try:
+				formControlType=self.excelFormControlObject.FormControlType if self.excelFormControlObject.Type==msoFormControl else None
+			except:
+				return None
+			if formControlType==xlButtonControl:
+				return controlTypes.ROLE_BUTTON
+			elif formControlType==xlCheckBox:
+				return controlTypes.ROLE_CHECKBOX
+			elif formControlType==xlDropDown:
+				return controlTypes.ROLE_DROPDOWNBUTTON
+			elif formControlType==xlEditBox:
+				return controlTypes.ROLE_EDITBOX
+			elif formControlType==xlGroupBox:
+				return controlTypes.ROLE_GROUPBOX
+			elif formControlType==xlLabel:
+				return controlTypes.ROLE_LABEL
+			elif formControlType==xlListBox:
+				return controlTypes.ROLE_LISTBOX
+			elif formControlType==xlOptionButton:
+				return controlTypes.ROLE_RADIOBUTTON
+			elif formControlType==xlScrollBar:
+				return controlTypes.ROLE_SCROLLBAR
+			elif formControlType==xlSpinner:
+				return controlTypes.ROLE_SPINBUTTON
+			else:
+				return None			
+		
+		def _get_states(self):
+			pass
+		
+		def _get_name(self):
+			if self.excelFormControlObject.AlternativeText:
+				return self.excelFormControlObject.AlternativeText+" "+self.excelFormControlObject.TopLeftCell.address(False,False,1,False) + "-" + self.excelFormControlObject.BottomRightCell.address(False,False,1,False)
+			else:
+				return self.excelFormControlObject.Name+" "+self.excelFormControlObject.TopLeftCell.address(False,False,1,False) + "-" + self.excelFormControlObject.BottomRightCell.address(False,False,1,False)
+
+		def _get_index(self):
+			return self.excelFormControlObject.ZOrderPosition
+
+		def _get_topLeftCell(self):
+			return self.excelFormControlObject.TopLeftCell
+		
+		__changeSelectionGestures = (
+				"kb:tab",
+				"kb:shift+tab",
+				"kb:upArrow",
+				"kb:downArrow",
+				"kb:leftArrow",
+				"kb:rightArrow",
+				"kb:f",
+				"kb:shift+f",
+		)
+
+class ExcelFormControlQuickNavItem(ExcelQuickNavItem):
+  
+    def __init__( self , nodeType , document , formControlObject , formControlCollection ):
+        self.formControlObjectIndex = formControlObject.ZOrderPosition
+        if formControlObject.AlternativeText:
+            self.label = formControlObject.AlternativeText+" "+formControlObject.Name+" " + formControlObject.TopLeftCell.address(False,False,1,False) + "-" + formControlObject.BottomRightCell.address(False,False,1,False)
+        else:
+            self.label = formControlObject.Name + " " + formControlObject.TopLeftCell.address(False,False,1,False) + "-" + formControlObject.BottomRightCell.address(False,False,1,False)
+        super( ExcelFormControlQuickNavItem ,self).__init__( nodeType , document , formControlObject , formControlCollection )
+  
+    def __lt__(self,other):
+        return self.formControlObjectIndex < other.formControlObjectIndex
+  
+    def moveTo(self):
+        try:
+            self.excelItemObject.Select(True)
+            eventHandler.queueEvent("gainFocus",api.getDesktopObject().objectWithFocus()._getSelection())
+            # After Select(), though the form control is selected, 
+            # pressing arrow keys moves the object
+  
+        except(COMError):
+            pass
+#         ui.message(self.label)
+ 
+    @property
+    def isAfterSelection(self):
+        activeCell = self.document.Application.ActiveCell
+        #log.debugWarning("active row: {} active column: {} current row: {} current column: {}".format ( activeCell.row , activeCell.column , self.excelCommentObject.row , self.excelCommentObject.column   ) )
+  
+        if self.excelItemObject.TopLeftCell.row == activeCell.row:
+            if self.excelItemObject.TopLeftCell.column > activeCell.column:
+                return False
+        elif self.excelItemObject.TopLeftCell.row > activeCell.row:
+            return False
+        return True
+
+class ExcelFormControlQuicknavIterator(ExcelQuicknavIterator):
+    quickNavItemClass=ExcelFormControlQuickNavItem
+    def collectionFromWorksheet( self , worksheetObject ):
+        try:
+            return worksheetObject.Shapes
+        except(COMError):
+            return None
+
+    def iterate(self, position):
+        """
+        returns a generator that emits L{QuickNavItem} objects for this collection.
+        @param position: an excelRangeObject representing either the TopLeftCell of the currently selected form control 
+                         or ActiveCell in a worksheet
+        """
+        # Returns the Row containing TopLeftCell of an item
+        def topLeftCellRow(item):
+            row=item.TopLeftCell.Row
+            return row
+        items=self.collectionFromWorksheet(self.document)
+        if not items:
+            return
+        items=sorted(items,key=topLeftCellRow)
+        if position:
+            row = position.Row
+            col = position.Column
+            if self.direction=="next":
+            	for collectionItem in items:
+            		if (collectionItem.TopLeftCell.Row==row and collectionItem.TopLeftCell.Column>col) or (collectionItem.TopLeftCell.Row>row):
+            			item=self.quickNavItemClass(self.itemType,self.document,collectionItem,items )
+            			yield item
+            elif self.direction=="previous":
+				for collectionItem in reversed(items):
+					if (collectionItem.TopLeftCell.Row==row and collectionItem.TopLeftCell.Column<col) or (collectionItem.TopLeftCell.Row<row):
+						item=self.quickNavItemClass(self.itemType,self.document,collectionItem,items )
+						yield item
+            	
+        else:
+            for collectionItem in items:
+                item=self.quickNavItemClass(self.itemType,self.document,collectionItem , items )
+                yield item
+    
+    def filter(self,item):
+        pass
