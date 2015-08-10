@@ -481,6 +481,12 @@ roleLabels={
 	# Translators: Identifies a thumb control (a button-like control for changing options).
 	ROLE_THUMB:_("thumb control"),
 	ROLE_CALENDAR:_("calendar"),
+	# Translators: Identifies an edit box.
+	ROLE_EDITBOX:_("edit box"),
+	# Translators: Identifies a list box.
+	ROLE_LISTBOX:_("list box"),
+	# Translators: Identifies a group box.
+	ROLE_GROUPBOX:_("group box"),
 }
 
 stateLabels={
