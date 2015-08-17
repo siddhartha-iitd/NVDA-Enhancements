@@ -10,16 +10,10 @@ from logHandler import log
 # maintains list of priority languages 
 languagePriorityListSpec = []
 
-#reverse of unicodeScriptNamesToISO15924Dictionary, required to obtain unicode script names from numeric script codes 
-ISO15924ToUnicodeScriptNamesDictionary = {}
-
 #reverse of langIDToScriptID, required to obtain language id for a specific script 
 scriptIDToLangID = {}
 
 def initialize():
-	# initializing reverse dictionary ISO15924ToUnicodeScriptNamesDictionary
-	for scriptName in unicodeScriptNamesToISO15924Dictionary.keys():
-		ISO15924ToUnicodeScriptNamesDictionary.setdefault( unicodeScriptNamesToISO15924Dictionary[scriptName] , scriptName )
 	for languageID in langIDToScriptID.keys():
 		scriptIDToLangID.setdefault( langIDToScriptID[languageID] , languageID )
 	updateLanguagePriorityFromConfig()
@@ -30,174 +24,37 @@ def updateLanguagePriorityFromConfig():
 	tempList = []
 	languageList = config.conf["writingScriptsToLanguage"]["languagePriorityList"].split(",")
 	for language in languageList: 
-		tempList.append( [ language , getScriptName(language) , getLanguageDescription( language ) ]) 
+		tempList.append( [ language , getScriptIDFromLangID(language) , getLanguageDescription( language ) ]) 
 	languagePriorityListSpec = tempList 
 
-unicodeScriptNamesToISO15924Dictionary = {
-	"Caucasian_Albanian":239, 
-	"Arabic":160,
-	"Imperial_Aramaic":124, 
-	"Armenian":230,
-	"Avestan":134,
-	"Balinese":360,
-	"Bamum":435,
-	"Bassa_Vah":259,
-	"Batak":365,
-	"Bengali":325,
-	"Bopomofo":285,
-	"Brahmi":300,
-	"Braille":570,
-	"Buginese":367,
-	"Buhid":372,
-	"Chakma":349,
-	"Canadian_Aboriginal":440,
-	"Carian":201,
-	"Cham":358,
-	"Cherokee":445,
-	"Coptic":204,
-	"Cypriot":403,
-	"Cyrillic":220,
-	"Devanagari":315,
-	"Deseret":250,
-	"Duployan":755,
-	"Egyptian_Hieroglyphs":50,
-	"Elbasan":226,
-	"Ethiopic":430,
-	"Georgian":240,
-	"Glagolitic":225,
-	"Gothic":206,
-	"Grantha":343,
-	"Greek":200,
-	"Gujarati":320,
-	"Gurmukhi":310,
-	"Hangul":286,
-	"Han":500,
-	"Hanunoo":371,
-	"Hebrew":125,
-	"Hiragana":410,
-	"Pahawh_Hmong":450,
-	"Old_Italic":210,
-	"Javanese":361,
-	"Kayah_Li":357,
-	"Katakana":411,
-	"Kharoshthi":305,
-	"Khmer":355,
-	"Khojki":322,
-	"Kannada":345,
-	"Kaithi":317,
-	"Lao":356,
-	"Latin":215,
-	"Lepcha":335,
-	"Limbu":336,
-	"Linear_A":400,
-	"Linear_B":401,
-	"Lisu":399,
-	"Lycian":202,
-	"Lydian":116,
-	"Mahajani":314,
-	"Mandaic":140,
-	"Manichaean":139,
-	"Mende_Kikakui":438,
-	"Meroitic_Cursive":101,
-	"Meroitic_Hieroglyphs":100,
-	"Malayalam":347,
-	"Modi":324,
-	"Mongolian":145,
-	"Mro":199,
-	"Meetei_Mayek":337,
-	"Multani":323,
-	"Myanmar":350,
-	"Old_North_Arabian":106,
-	"Nabataean":159,
-	"Nko":165,
-	"Ogham":212,
-	"Ol_Chiki":261,
-	"Old_Turkic":175,
-	"Oriya":327,
-	"Osage":219,
-	"Osmanya":260,
-	"Palmyrene":126,
-	"Pau_Cin_Hau":263,
-	"Old_Permic":227,
-	"Phags_Pa":331,
-	"Inscriptional_Pahlavi":131,
-	"Psalter_Pahlavi":132,
-	"Book_Pahlavi":133,
-	"Phoenician":115,
-	"Miao":282,
-	"Inscriptional_Parthian":130,
-	"Rejang":363,
-	"Rongorongo":620,
-	"Runic":211,
-	"Samaritan":123,
-	"Sarati":292,
-	"Old_South_Arabian":105,
-	"Saurashtra":344,
-	"Shavian":281,
-	"Sharada":319,
-	"Siddham":302,
-	"Khudawadi":318,
-	"Sinhala":348,
-	"Sora_Sompeng":398,
-	"Sundanese":362,
-	"Syloti_Nagri":316,
-	"Syriac":135,
-	"Tagbanwa":373,
-	"Takri":321,
-	"Tai_Le":353,
-	"New_Tai_Lue":354,
-	"Tamil":346,
-	"Tangut":520,
-	"Tai_Viet":359,
-	"Telugu":340,
-	"Tengwar":290,
-	"Tifinagh":120,
-	"Tagalog":370,
-	"Thaana":170,
-	"Thai":352,
-	"Tibetan":330,
-	"Tirhuta":326,
-	"Ugaritic":40,
-	"Vai":470,
-	"Warang_Citi":262,
-	"Woleai":480,
-	"Old_Persian":30,
-	"Cuneiform":20,
-	"Yi":460,
-	"Inherited":994,
-	"Symbols":996,
-	"Common":998,
-	"Unknown":999,
-}
-
 langIDToScriptID= {
-	'af_ZA':215, # south african
-	'am':230, # Armenian 
-	'ar':160, # Arabic 
-	'as':325 , # Assamese 
-	'bg':220, # Bulgarian 
-	'bn':325, # Bangla 
-	'ca':215, # Catalan 
-	'cs':215, # Czech 
-	'da':215, # Danish 
-	'de':215, # German 
-	'el':215, # Greek 
-	'fr':215, # french
-	'en':215, # english
-	'es':215, # spanish
-	'gu':320, # Gujarati 
-	'hi':315, # Hindi (hi)
-	'kn':345, # kanada
-	'ml':347, # Malayalam 
-	'mn':145, # mongolian
-	'mr':315, # Marathi (mr),
-	'ne':315, # Nepali (ne),
-	'or':327, # Oriya
-	'pa':310, # Punjabi
-	'sa':315, # Sanskrit (sa)
-	'sq':239, # Albanian 
-	'ta':346, # Tamil
-	'te':340, # Telugu 
+	"af_ZA" : "Latin",
+	"am" : "Armenian",
+	"ar" : "Arabic",
+	"as" : "Bengali",
+	"bg" : "Cyrillic",
+	"bn" : "Bengali",
+	"ca" : "Latin",
+	"cs" : "Latin",
+	"da" : "Latin",
+	"de" : "Latin",
+	"el" : "Latin",
+	"en" : "Latin",
+	"es" : "Latin",
+	"fr" : "Latin",
+	"gu" : "Gujarati",
+	"hi" : "Devanagari",
+	"kn" : "Kannada",
+	"ml" : "Malayalam",
+	"mn" : "Mongolian",
+	"mr" : "Devanagari",
+	"ne" : "Devanagari",
+	"or" : "Oriya",
+	"pa" : "Gurmukhi",
+	"sa" : "Devanagari",
+	"sq" : "Caucasian_Albanian",
+	"ta" : "Tamil",
+	"te" : "Telugu",
 }
 
 def getLanguagesWithDescriptions():
@@ -236,20 +93,18 @@ def getScriptCode(chr):
 			mStart = midPoint + 1
 		else:
 			return scriptCode[midPoint][2] 
-	return 0
+	return None
 
-def getLangID(scriptCode):
-	scriptName = ISO15924ToUnicodeScriptNamesDictionary[ scriptCode ] 
+def getLangID(scriptName ):
+	# we are using loop during search to maintain priority
 	for index in xrange( len( languagePriorityListSpec) ) :
 		if scriptName == languagePriorityListSpec[index][1]: 
 			return languagePriorityListSpec[index][0] 
 	#language not found in the priority list, so look up in the default mapping
-	langID = scriptIDToLangID.get (scriptCode )
-	if langID:
-		if isinstance( langID , tuple) and len(langID) > 0:
-			return langID[0]
-		else:
-			return langID
+	try:
+		return scriptIDToLangID.get (scriptName )
+	except KeyError:
+		return None
 
 def getLanguageDescription(language ):
 	desc=languageHandler.getLanguageDescription(language )
@@ -257,18 +112,10 @@ def getLanguageDescription(language ):
 	return label
 
 def getScriptIDFromLangID(langID ):
-	scriptID = langIDToScriptID.get (langID )
-	if scriptID: 
-		if isinstance( scriptID , tuple) and len(langID) > 0:
-			return scriptID [0]
-		else:
-			return scriptID 
-
-
-def getScriptName(languageID ):
-	scriptID = getScriptIDFromLangID( languageID )
-	if scriptID:
-		return ISO15924ToUnicodeScriptNamesDictionary[ scriptID ]  
+	try:
+		return langIDToScriptID.get (langID )
+	except KeyError:
+		return None
 
 def detectScript(text):
 	"""splits a string if there are multiple scripts in it
@@ -283,7 +130,7 @@ def detectScript(text):
 	beginIndex = 0
 	for index in xrange( len(text) ) :
 		currentScript = getScriptCode( text[index] ) 
-		if currentScript == 998: 
+		if currentScript == "Common": 
 			continue
 
 		if currentScript != oldScript:
@@ -323,1614 +170,826 @@ def detectLanguage(text, defaultLanguageForScript  =None):
 
 # generated by unicodeScriptPrep.py
 scriptCode= [
-	( 0x0 , 0x40 , 998 ), # Common
-	( 0x41 , 0x5a , 215 ), # Latin
-	( 0x5b , 0x60 , 998 ), # Common
-	( 0x61 , 0x7a , 215 ), # Latin
-	( 0x7b , 0xa9 , 998 ), # Common
-	( 0xaa , 0xaa , 215 ), # Latin
-	( 0xab , 0xb9 , 998 ), # Common
-	( 0xba , 0xba , 215 ), # Latin
-	( 0xbb , 0xbf , 998 ), # Common
-	( 0xc0 , 0xd6 , 215 ), # Latin
-	( 0xd7 , 0xd7 , 998 ), # Common
-	( 0xd8 , 0xf6 , 215 ), # Latin
-	( 0xf7 , 0xf7 , 998 ), # Common
-	( 0xf8 , 0x2b8 , 215 ), # Latin
-	( 0x2b9 , 0x2df , 998 ), # Common
-	( 0x2e0 , 0x2e4 , 215 ), # Latin
-	( 0x2e5 , 0x2e9 , 998 ), # Common
-	( 0x2ea , 0x2eb , 285 ), # Bopomofo
-	( 0x2ec , 0x2ff , 998 ), # Common
-	( 0x300 , 0x36f , 994 ), # Inherited
-	( 0x370 , 0x373 , 200 ), # Greek
-	( 0x374 , 0x374 , 998 ), # Common
-	( 0x375 , 0x377 , 200 ), # Greek
-	( 0x37a , 0x37d , 200 ), # Greek
-	( 0x37e , 0x37e , 998 ), # Common
-	( 0x37f , 0x37f , 200 ), # Greek
-	( 0x384 , 0x384 , 200 ), # Greek
-	( 0x385 , 0x385 , 998 ), # Common
-	( 0x386 , 0x386 , 200 ), # Greek
-	( 0x387 , 0x387 , 998 ), # Common
-	( 0x388 , 0x38a , 200 ), # Greek
-	( 0x38c , 0x38c , 200 ), # Greek
-	( 0x38e , 0x3a1 , 200 ), # Greek
-	( 0x3a3 , 0x3e1 , 200 ), # Greek
-	( 0x3e2 , 0x3ef , 204 ), # Coptic
-	( 0x3f0 , 0x3ff , 200 ), # Greek
-	( 0x400 , 0x484 , 220 ), # Cyrillic
-	( 0x485 , 0x486 , 994 ), # Inherited
-	( 0x487 , 0x52f , 220 ), # Cyrillic
-	( 0x531 , 0x556 , 230 ), # Armenian
-	( 0x559 , 0x55f , 230 ), # Armenian
-	( 0x561 , 0x587 , 230 ), # Armenian
-	( 0x589 , 0x589 , 998 ), # Common
-	( 0x58a , 0x58a , 230 ), # Armenian
-	( 0x58d , 0x58f , 230 ), # Armenian
-	( 0x591 , 0x5c7 , 125 ), # Hebrew
-	( 0x5d0 , 0x5ea , 125 ), # Hebrew
-	( 0x5f0 , 0x5f4 , 125 ), # Hebrew
-	( 0x600 , 0x604 , 160 ), # Arabic
-	( 0x605 , 0x605 , 998 ), # Common
-	( 0x606 , 0x60b , 160 ), # Arabic
-	( 0x60c , 0x60c , 998 ), # Common
-	( 0x60d , 0x61a , 160 ), # Arabic
-	( 0x61b , 0x61c , 998 ), # Common
-	( 0x61e , 0x61e , 160 ), # Arabic
-	( 0x61f , 0x61f , 998 ), # Common
-	( 0x620 , 0x63f , 160 ), # Arabic
-	( 0x640 , 0x640 , 998 ), # Common
-	( 0x641 , 0x64a , 160 ), # Arabic
-	( 0x64b , 0x655 , 994 ), # Inherited
-	( 0x656 , 0x66f , 160 ), # Arabic
-	( 0x670 , 0x670 , 994 ), # Inherited
-	( 0x671 , 0x6dc , 160 ), # Arabic
-	( 0x6dd , 0x6dd , 998 ), # Common
-	( 0x6de , 0x6ff , 160 ), # Arabic
-	( 0x700 , 0x70d , 135 ), # Syriac
-	( 0x70f , 0x74a , 135 ), # Syriac
-	( 0x74d , 0x74f , 135 ), # Syriac
-	( 0x750 , 0x77f , 160 ), # Arabic
-	( 0x780 , 0x7b1 , 170 ), # Thaana
-	( 0x7c0 , 0x7fa , 165 ), # Nko
-	( 0x800 , 0x82d , 123 ), # Samaritan
-	( 0x830 , 0x83e , 123 ), # Samaritan
-	( 0x840 , 0x85b , 140 ), # Mandaic
-	( 0x85e , 0x85e , 140 ), # Mandaic
-	( 0x8a0 , 0x8b4 , 160 ), # Arabic
-	( 0x8e3 , 0x8ff , 160 ), # Arabic
-	( 0x900 , 0x950 , 315 ), # Devanagari
-	( 0x951 , 0x952 , 994 ), # Inherited
-	( 0x953 , 0x963 , 315 ), # Devanagari
-	( 0x964 , 0x965 , 998 ), # Common
-	( 0x966 , 0x97f , 315 ), # Devanagari
-	( 0x980 , 0x983 , 325 ), # Bengali
-	( 0x985 , 0x98c , 325 ), # Bengali
-	( 0x98f , 0x990 , 325 ), # Bengali
-	( 0x993 , 0x9a8 , 325 ), # Bengali
-	( 0x9aa , 0x9b0 , 325 ), # Bengali
-	( 0x9b2 , 0x9b2 , 325 ), # Bengali
-	( 0x9b6 , 0x9b9 , 325 ), # Bengali
-	( 0x9bc , 0x9c4 , 325 ), # Bengali
-	( 0x9c7 , 0x9c8 , 325 ), # Bengali
-	( 0x9cb , 0x9ce , 325 ), # Bengali
-	( 0x9d7 , 0x9d7 , 325 ), # Bengali
-	( 0x9dc , 0x9dd , 325 ), # Bengali
-	( 0x9df , 0x9e3 , 325 ), # Bengali
-	( 0x9e6 , 0x9fb , 325 ), # Bengali
-	( 0xa01 , 0xa03 , 310 ), # Gurmukhi
-	( 0xa05 , 0xa0a , 310 ), # Gurmukhi
-	( 0xa0f , 0xa10 , 310 ), # Gurmukhi
-	( 0xa13 , 0xa28 , 310 ), # Gurmukhi
-	( 0xa2a , 0xa30 , 310 ), # Gurmukhi
-	( 0xa32 , 0xa33 , 310 ), # Gurmukhi
-	( 0xa35 , 0xa36 , 310 ), # Gurmukhi
-	( 0xa38 , 0xa39 , 310 ), # Gurmukhi
-	( 0xa3c , 0xa3c , 310 ), # Gurmukhi
-	( 0xa3e , 0xa42 , 310 ), # Gurmukhi
-	( 0xa47 , 0xa48 , 310 ), # Gurmukhi
-	( 0xa4b , 0xa4d , 310 ), # Gurmukhi
-	( 0xa51 , 0xa51 , 310 ), # Gurmukhi
-	( 0xa59 , 0xa5c , 310 ), # Gurmukhi
-	( 0xa5e , 0xa5e , 310 ), # Gurmukhi
-	( 0xa66 , 0xa75 , 310 ), # Gurmukhi
-	( 0xa81 , 0xa83 , 320 ), # Gujarati
-	( 0xa85 , 0xa8d , 320 ), # Gujarati
-	( 0xa8f , 0xa91 , 320 ), # Gujarati
-	( 0xa93 , 0xaa8 , 320 ), # Gujarati
-	( 0xaaa , 0xab0 , 320 ), # Gujarati
-	( 0xab2 , 0xab3 , 320 ), # Gujarati
-	( 0xab5 , 0xab9 , 320 ), # Gujarati
-	( 0xabc , 0xac5 , 320 ), # Gujarati
-	( 0xac7 , 0xac9 , 320 ), # Gujarati
-	( 0xacb , 0xacd , 320 ), # Gujarati
-	( 0xad0 , 0xad0 , 320 ), # Gujarati
-	( 0xae0 , 0xae3 , 320 ), # Gujarati
-	( 0xae6 , 0xaf1 , 320 ), # Gujarati
-	( 0xaf9 , 0xaf9 , 320 ), # Gujarati
-	( 0xb01 , 0xb03 , 327 ), # Oriya
-	( 0xb05 , 0xb0c , 327 ), # Oriya
-	( 0xb0f , 0xb10 , 327 ), # Oriya
-	( 0xb13 , 0xb28 , 327 ), # Oriya
-	( 0xb2a , 0xb30 , 327 ), # Oriya
-	( 0xb32 , 0xb33 , 327 ), # Oriya
-	( 0xb35 , 0xb39 , 327 ), # Oriya
-	( 0xb3c , 0xb44 , 327 ), # Oriya
-	( 0xb47 , 0xb48 , 327 ), # Oriya
-	( 0xb4b , 0xb4d , 327 ), # Oriya
-	( 0xb56 , 0xb57 , 327 ), # Oriya
-	( 0xb5c , 0xb5d , 327 ), # Oriya
-	( 0xb5f , 0xb63 , 327 ), # Oriya
-	( 0xb66 , 0xb77 , 327 ), # Oriya
-	( 0xb82 , 0xb83 , 346 ), # Tamil
-	( 0xb85 , 0xb8a , 346 ), # Tamil
-	( 0xb8e , 0xb90 , 346 ), # Tamil
-	( 0xb92 , 0xb95 , 346 ), # Tamil
-	( 0xb99 , 0xb9a , 346 ), # Tamil
-	( 0xb9c , 0xb9c , 346 ), # Tamil
-	( 0xb9e , 0xb9f , 346 ), # Tamil
-	( 0xba3 , 0xba4 , 346 ), # Tamil
-	( 0xba8 , 0xbaa , 346 ), # Tamil
-	( 0xbae , 0xbb9 , 346 ), # Tamil
-	( 0xbbe , 0xbc2 , 346 ), # Tamil
-	( 0xbc6 , 0xbc8 , 346 ), # Tamil
-	( 0xbca , 0xbcd , 346 ), # Tamil
-	( 0xbd0 , 0xbd0 , 346 ), # Tamil
-	( 0xbd7 , 0xbd7 , 346 ), # Tamil
-	( 0xbe6 , 0xbfa , 346 ), # Tamil
-	( 0xc00 , 0xc03 , 340 ), # Telugu
-	( 0xc05 , 0xc0c , 340 ), # Telugu
-	( 0xc0e , 0xc10 , 340 ), # Telugu
-	( 0xc12 , 0xc28 , 340 ), # Telugu
-	( 0xc2a , 0xc39 , 340 ), # Telugu
-	( 0xc3d , 0xc44 , 340 ), # Telugu
-	( 0xc46 , 0xc48 , 340 ), # Telugu
-	( 0xc4a , 0xc4d , 340 ), # Telugu
-	( 0xc55 , 0xc56 , 340 ), # Telugu
-	( 0xc58 , 0xc5a , 340 ), # Telugu
-	( 0xc60 , 0xc63 , 340 ), # Telugu
-	( 0xc66 , 0xc6f , 340 ), # Telugu
-	( 0xc78 , 0xc7f , 340 ), # Telugu
-	( 0xc81 , 0xc83 , 345 ), # Kannada
-	( 0xc85 , 0xc8c , 345 ), # Kannada
-	( 0xc8e , 0xc90 , 345 ), # Kannada
-	( 0xc92 , 0xca8 , 345 ), # Kannada
-	( 0xcaa , 0xcb3 , 345 ), # Kannada
-	( 0xcb5 , 0xcb9 , 345 ), # Kannada
-	( 0xcbc , 0xcc4 , 345 ), # Kannada
-	( 0xcc6 , 0xcc8 , 345 ), # Kannada
-	( 0xcca , 0xccd , 345 ), # Kannada
-	( 0xcd5 , 0xcd6 , 345 ), # Kannada
-	( 0xcde , 0xcde , 345 ), # Kannada
-	( 0xce0 , 0xce3 , 345 ), # Kannada
-	( 0xce6 , 0xcef , 345 ), # Kannada
-	( 0xcf1 , 0xcf2 , 345 ), # Kannada
-	( 0xd01 , 0xd03 , 347 ), # Malayalam
-	( 0xd05 , 0xd0c , 347 ), # Malayalam
-	( 0xd0e , 0xd10 , 347 ), # Malayalam
-	( 0xd12 , 0xd3a , 347 ), # Malayalam
-	( 0xd3d , 0xd44 , 347 ), # Malayalam
-	( 0xd46 , 0xd48 , 347 ), # Malayalam
-	( 0xd4a , 0xd4e , 347 ), # Malayalam
-	( 0xd57 , 0xd57 , 347 ), # Malayalam
-	( 0xd5f , 0xd63 , 347 ), # Malayalam
-	( 0xd66 , 0xd75 , 347 ), # Malayalam
-	( 0xd79 , 0xd7f , 347 ), # Malayalam
-	( 0xd82 , 0xd83 , 348 ), # Sinhala
-	( 0xd85 , 0xd96 , 348 ), # Sinhala
-	( 0xd9a , 0xdb1 , 348 ), # Sinhala
-	( 0xdb3 , 0xdbb , 348 ), # Sinhala
-	( 0xdbd , 0xdbd , 348 ), # Sinhala
-	( 0xdc0 , 0xdc6 , 348 ), # Sinhala
-	( 0xdca , 0xdca , 348 ), # Sinhala
-	( 0xdcf , 0xdd4 , 348 ), # Sinhala
-	( 0xdd6 , 0xdd6 , 348 ), # Sinhala
-	( 0xdd8 , 0xddf , 348 ), # Sinhala
-	( 0xde6 , 0xdef , 348 ), # Sinhala
-	( 0xdf2 , 0xdf4 , 348 ), # Sinhala
-	( 0xe01 , 0xe3a , 352 ), # Thai
-	( 0xe3f , 0xe3f , 998 ), # Common
-	( 0xe40 , 0xe5b , 352 ), # Thai
-	( 0xe81 , 0xe82 , 356 ), # Lao
-	( 0xe84 , 0xe84 , 356 ), # Lao
-	( 0xe87 , 0xe88 , 356 ), # Lao
-	( 0xe8a , 0xe8a , 356 ), # Lao
-	( 0xe8d , 0xe8d , 356 ), # Lao
-	( 0xe94 , 0xe97 , 356 ), # Lao
-	( 0xe99 , 0xe9f , 356 ), # Lao
-	( 0xea1 , 0xea3 , 356 ), # Lao
-	( 0xea5 , 0xea5 , 356 ), # Lao
-	( 0xea7 , 0xea7 , 356 ), # Lao
-	( 0xeaa , 0xeab , 356 ), # Lao
-	( 0xead , 0xeb9 , 356 ), # Lao
-	( 0xebb , 0xebd , 356 ), # Lao
-	( 0xec0 , 0xec4 , 356 ), # Lao
-	( 0xec6 , 0xec6 , 356 ), # Lao
-	( 0xec8 , 0xecd , 356 ), # Lao
-	( 0xed0 , 0xed9 , 356 ), # Lao
-	( 0xedc , 0xedf , 356 ), # Lao
-	( 0xf00 , 0xf47 , 330 ), # Tibetan
-	( 0xf49 , 0xf6c , 330 ), # Tibetan
-	( 0xf71 , 0xf97 , 330 ), # Tibetan
-	( 0xf99 , 0xfbc , 330 ), # Tibetan
-	( 0xfbe , 0xfcc , 330 ), # Tibetan
-	( 0xfce , 0xfd4 , 330 ), # Tibetan
-	( 0xfd5 , 0xfd8 , 998 ), # Common
-	( 0xfd9 , 0xfda , 330 ), # Tibetan
-	( 0x1000 , 0x109f , 350 ), # Myanmar
-	( 0x10a0 , 0x10c5 , 240 ), # Georgian
-	( 0x10c7 , 0x10c7 , 240 ), # Georgian
-	( 0x10cd , 0x10cd , 240 ), # Georgian
-	( 0x10d0 , 0x10fa , 240 ), # Georgian
-	( 0x10fb , 0x10fb , 998 ), # Common
-	( 0x10fc , 0x10ff , 240 ), # Georgian
-	( 0x1100 , 0x11ff , 286 ), # Hangul
-	( 0x1200 , 0x1248 , 430 ), # Ethiopic
-	( 0x124a , 0x124d , 430 ), # Ethiopic
-	( 0x1250 , 0x1256 , 430 ), # Ethiopic
-	( 0x1258 , 0x1258 , 430 ), # Ethiopic
-	( 0x125a , 0x125d , 430 ), # Ethiopic
-	( 0x1260 , 0x1288 , 430 ), # Ethiopic
-	( 0x128a , 0x128d , 430 ), # Ethiopic
-	( 0x1290 , 0x12b0 , 430 ), # Ethiopic
-	( 0x12b2 , 0x12b5 , 430 ), # Ethiopic
-	( 0x12b8 , 0x12be , 430 ), # Ethiopic
-	( 0x12c0 , 0x12c0 , 430 ), # Ethiopic
-	( 0x12c2 , 0x12c5 , 430 ), # Ethiopic
-	( 0x12c8 , 0x12d6 , 430 ), # Ethiopic
-	( 0x12d8 , 0x1310 , 430 ), # Ethiopic
-	( 0x1312 , 0x1315 , 430 ), # Ethiopic
-	( 0x1318 , 0x135a , 430 ), # Ethiopic
-	( 0x135d , 0x137c , 430 ), # Ethiopic
-	( 0x1380 , 0x1399 , 430 ), # Ethiopic
-	( 0x13a0 , 0x13f5 , 445 ), # Cherokee
-	( 0x13f8 , 0x13fd , 445 ), # Cherokee
-	( 0x1400 , 0x167f , 440 ), # Canadian_Aboriginal
-	( 0x1680 , 0x169c , 212 ), # Ogham
-	( 0x16a0 , 0x16ea , 211 ), # Runic
-	( 0x16eb , 0x16ed , 998 ), # Common
-	( 0x16ee , 0x16f8 , 211 ), # Runic
-	( 0x1700 , 0x170c , 370 ), # Tagalog
-	( 0x170e , 0x1714 , 370 ), # Tagalog
-	( 0x1720 , 0x1734 , 371 ), # Hanunoo
-	( 0x1735 , 0x1736 , 998 ), # Common
-	( 0x1740 , 0x1753 , 372 ), # Buhid
-	( 0x1760 , 0x176c , 373 ), # Tagbanwa
-	( 0x176e , 0x1770 , 373 ), # Tagbanwa
-	( 0x1772 , 0x1773 , 373 ), # Tagbanwa
-	( 0x1780 , 0x17dd , 355 ), # Khmer
-	( 0x17e0 , 0x17e9 , 355 ), # Khmer
-	( 0x17f0 , 0x17f9 , 355 ), # Khmer
-	( 0x1800 , 0x1801 , 145 ), # Mongolian
-	( 0x1802 , 0x1803 , 998 ), # Common
-	( 0x1804 , 0x1804 , 145 ), # Mongolian
-	( 0x1805 , 0x1805 , 998 ), # Common
-	( 0x1806 , 0x180e , 145 ), # Mongolian
-	( 0x1810 , 0x1819 , 145 ), # Mongolian
-	( 0x1820 , 0x1877 , 145 ), # Mongolian
-	( 0x1880 , 0x18aa , 145 ), # Mongolian
-	( 0x18b0 , 0x18f5 , 440 ), # Canadian_Aboriginal
-	( 0x1900 , 0x191e , 336 ), # Limbu
-	( 0x1920 , 0x192b , 336 ), # Limbu
-	( 0x1930 , 0x193b , 336 ), # Limbu
-	( 0x1940 , 0x1940 , 336 ), # Limbu
-	( 0x1944 , 0x194f , 336 ), # Limbu
-	( 0x1950 , 0x196d , 353 ), # Tai_Le
-	( 0x1970 , 0x1974 , 353 ), # Tai_Le
-	( 0x1980 , 0x19ab , 354 ), # New_Tai_Lue
-	( 0x19b0 , 0x19c9 , 354 ), # New_Tai_Lue
-	( 0x19d0 , 0x19da , 354 ), # New_Tai_Lue
-	( 0x19de , 0x19df , 354 ), # New_Tai_Lue
-	( 0x19e0 , 0x19ff , 355 ), # Khmer
-	( 0x1a00 , 0x1a1b , 367 ), # Buginese
-	( 0x1a1e , 0x1a1f , 367 ), # Buginese
-	( 0x1ab0 , 0x1abe , 994 ), # Inherited
-	( 0x1b00 , 0x1b4b , 360 ), # Balinese
-	( 0x1b50 , 0x1b7c , 360 ), # Balinese
-	( 0x1b80 , 0x1bbf , 362 ), # Sundanese
-	( 0x1bc0 , 0x1bf3 , 365 ), # Batak
-	( 0x1bfc , 0x1bff , 365 ), # Batak
-	( 0x1c00 , 0x1c37 , 335 ), # Lepcha
-	( 0x1c3b , 0x1c49 , 335 ), # Lepcha
-	( 0x1c4d , 0x1c4f , 335 ), # Lepcha
-	( 0x1c50 , 0x1c7f , 261 ), # Ol_Chiki
-	( 0x1cc0 , 0x1cc7 , 362 ), # Sundanese
-	( 0x1cd0 , 0x1cd2 , 994 ), # Inherited
-	( 0x1cd3 , 0x1cd3 , 998 ), # Common
-	( 0x1cd4 , 0x1ce0 , 994 ), # Inherited
-	( 0x1ce1 , 0x1ce1 , 998 ), # Common
-	( 0x1ce2 , 0x1ce8 , 994 ), # Inherited
-	( 0x1ce9 , 0x1cec , 998 ), # Common
-	( 0x1ced , 0x1ced , 994 ), # Inherited
-	( 0x1cee , 0x1cf3 , 998 ), # Common
-	( 0x1cf4 , 0x1cf4 , 994 ), # Inherited
-	( 0x1cf5 , 0x1cf6 , 998 ), # Common
-	( 0x1cf8 , 0x1cf9 , 994 ), # Inherited
-	( 0x1d00 , 0x1d25 , 215 ), # Latin
-	( 0x1d26 , 0x1d2a , 200 ), # Greek
-	( 0x1d2b , 0x1d2b , 220 ), # Cyrillic
-	( 0x1d2c , 0x1d5c , 215 ), # Latin
-	( 0x1d5d , 0x1d61 , 200 ), # Greek
-	( 0x1d62 , 0x1d65 , 215 ), # Latin
-	( 0x1d66 , 0x1d6a , 200 ), # Greek
-	( 0x1d6b , 0x1d77 , 215 ), # Latin
-	( 0x1d78 , 0x1d78 , 220 ), # Cyrillic
-	( 0x1d79 , 0x1dbe , 215 ), # Latin
-	( 0x1dbf , 0x1dbf , 200 ), # Greek
-	( 0x1dc0 , 0x1df5 , 994 ), # Inherited
-	( 0x1dfc , 0x1dff , 994 ), # Inherited
-	( 0x1e00 , 0x1eff , 215 ), # Latin
-	( 0x1f00 , 0x1f15 , 200 ), # Greek
-	( 0x1f18 , 0x1f1d , 200 ), # Greek
-	( 0x1f20 , 0x1f45 , 200 ), # Greek
-	( 0x1f48 , 0x1f4d , 200 ), # Greek
-	( 0x1f50 , 0x1f57 , 200 ), # Greek
-	( 0x1f59 , 0x1f59 , 200 ), # Greek
-	( 0x1f5b , 0x1f5b , 200 ), # Greek
-	( 0x1f5d , 0x1f5d , 200 ), # Greek
-	( 0x1f5f , 0x1f7d , 200 ), # Greek
-	( 0x1f80 , 0x1fb4 , 200 ), # Greek
-	( 0x1fb6 , 0x1fc4 , 200 ), # Greek
-	( 0x1fc6 , 0x1fd3 , 200 ), # Greek
-	( 0x1fd6 , 0x1fdb , 200 ), # Greek
-	( 0x1fdd , 0x1fef , 200 ), # Greek
-	( 0x1ff2 , 0x1ff4 , 200 ), # Greek
-	( 0x1ff6 , 0x1ffe , 200 ), # Greek
-	( 0x2000 , 0x200b , 998 ), # Common
-	( 0x200c , 0x200d , 994 ), # Inherited
-	( 0x200e , 0x2064 , 998 ), # Common
-	( 0x2066 , 0x2070 , 998 ), # Common
-	( 0x2071 , 0x2071 , 215 ), # Latin
-	( 0x2074 , 0x207e , 998 ), # Common
-	( 0x207f , 0x207f , 215 ), # Latin
-	( 0x2080 , 0x208e , 998 ), # Common
-	( 0x2090 , 0x209c , 215 ), # Latin
-	( 0x20a0 , 0x20be , 998 ), # Common
-	( 0x20d0 , 0x20f0 , 994 ), # Inherited
-	( 0x2100 , 0x2125 , 998 ), # Common
-	( 0x2126 , 0x2126 , 200 ), # Greek
-	( 0x2127 , 0x2129 , 998 ), # Common
-	( 0x212a , 0x212b , 215 ), # Latin
-	( 0x212c , 0x2131 , 998 ), # Common
-	( 0x2132 , 0x2132 , 215 ), # Latin
-	( 0x2133 , 0x214d , 998 ), # Common
-	( 0x214e , 0x214e , 215 ), # Latin
-	( 0x214f , 0x215f , 998 ), # Common
-	( 0x2160 , 0x2188 , 215 ), # Latin
-	( 0x2189 , 0x218b , 998 ), # Common
-	( 0x2190 , 0x23fa , 998 ), # Common
-	( 0x2400 , 0x2426 , 998 ), # Common
-	( 0x2440 , 0x244a , 998 ), # Common
-	( 0x2460 , 0x27ff , 998 ), # Common
-	( 0x2800 , 0x28ff , 570 ), # Braille
-	( 0x2900 , 0x2b73 , 998 ), # Common
-	( 0x2b76 , 0x2b95 , 998 ), # Common
-	( 0x2b98 , 0x2bb9 , 998 ), # Common
-	( 0x2bbd , 0x2bc8 , 998 ), # Common
-	( 0x2bca , 0x2bd1 , 998 ), # Common
-	( 0x2bec , 0x2bef , 998 ), # Common
-	( 0x2c00 , 0x2c2e , 225 ), # Glagolitic
-	( 0x2c30 , 0x2c5e , 225 ), # Glagolitic
-	( 0x2c60 , 0x2c7f , 215 ), # Latin
-	( 0x2c80 , 0x2cf3 , 204 ), # Coptic
-	( 0x2cf9 , 0x2cff , 204 ), # Coptic
-	( 0x2d00 , 0x2d25 , 240 ), # Georgian
-	( 0x2d27 , 0x2d27 , 240 ), # Georgian
-	( 0x2d2d , 0x2d2d , 240 ), # Georgian
-	( 0x2d30 , 0x2d67 , 120 ), # Tifinagh
-	( 0x2d6f , 0x2d70 , 120 ), # Tifinagh
-	( 0x2d7f , 0x2d7f , 120 ), # Tifinagh
-	( 0x2d80 , 0x2d96 , 430 ), # Ethiopic
-	( 0x2da0 , 0x2da6 , 430 ), # Ethiopic
-	( 0x2da8 , 0x2dae , 430 ), # Ethiopic
-	( 0x2db0 , 0x2db6 , 430 ), # Ethiopic
-	( 0x2db8 , 0x2dbe , 430 ), # Ethiopic
-	( 0x2dc0 , 0x2dc6 , 430 ), # Ethiopic
-	( 0x2dc8 , 0x2dce , 430 ), # Ethiopic
-	( 0x2dd0 , 0x2dd6 , 430 ), # Ethiopic
-	( 0x2dd8 , 0x2dde , 430 ), # Ethiopic
-	( 0x2de0 , 0x2dff , 220 ), # Cyrillic
-	( 0x2e00 , 0x2e42 , 998 ), # Common
-	( 0x2e80 , 0x2e99 , 500 ), # Han
-	( 0x2e9b , 0x2ef3 , 500 ), # Han
-	( 0x2f00 , 0x2fd5 , 500 ), # Han
-	( 0x2ff0 , 0x2ffb , 998 ), # Common
-	( 0x3000 , 0x3004 , 998 ), # Common
-	( 0x3005 , 0x3005 , 500 ), # Han
-	( 0x3006 , 0x3006 , 998 ), # Common
-	( 0x3007 , 0x3007 , 500 ), # Han
-	( 0x3008 , 0x3020 , 998 ), # Common
-	( 0x3021 , 0x3029 , 500 ), # Han
-	( 0x302a , 0x302d , 994 ), # Inherited
-	( 0x302e , 0x302f , 286 ), # Hangul
-	( 0x3030 , 0x3037 , 998 ), # Common
-	( 0x3038 , 0x303b , 500 ), # Han
-	( 0x303c , 0x303f , 998 ), # Common
-	( 0x3041 , 0x3096 , 410 ), # Hiragana
-	( 0x3099 , 0x309a , 994 ), # Inherited
-	( 0x309b , 0x309c , 998 ), # Common
-	( 0x309d , 0x309f , 410 ), # Hiragana
-	( 0x30a0 , 0x30a0 , 998 ), # Common
-	( 0x30a1 , 0x30fa , 411 ), # Katakana
-	( 0x30fb , 0x30fc , 998 ), # Common
-	( 0x30fd , 0x30ff , 411 ), # Katakana
-	( 0x3105 , 0x312d , 285 ), # Bopomofo
-	( 0x3131 , 0x318e , 286 ), # Hangul
-	( 0x3190 , 0x319f , 998 ), # Common
-	( 0x31a0 , 0x31ba , 285 ), # Bopomofo
-	( 0x31c0 , 0x31e3 , 998 ), # Common
-	( 0x31f0 , 0x31ff , 411 ), # Katakana
-	( 0x3200 , 0x321e , 286 ), # Hangul
-	( 0x3220 , 0x325f , 998 ), # Common
-	( 0x3260 , 0x327e , 286 ), # Hangul
-	( 0x327f , 0x32cf , 998 ), # Common
-	( 0x32d0 , 0x32fe , 411 ), # Katakana
-	( 0x3300 , 0x3357 , 411 ), # Katakana
-	( 0x3358 , 0x33ff , 998 ), # Common
-	( 0x3400 , 0x4db5 , 500 ), # Han
-	( 0x4dc0 , 0x4dff , 998 ), # Common
-	( 0x4e00 , 0x9fd5 , 500 ), # Han
-	( 0xa000 , 0xa48c , 460 ), # Yi
-	( 0xa490 , 0xa4c6 , 460 ), # Yi
-	( 0xa4d0 , 0xa4ff , 399 ), # Lisu
-	( 0xa500 , 0xa62b , 470 ), # Vai
-	( 0xa640 , 0xa69f , 220 ), # Cyrillic
-	( 0xa6a0 , 0xa6f7 , 435 ), # Bamum
-	( 0xa700 , 0xa721 , 998 ), # Common
-	( 0xa722 , 0xa787 , 215 ), # Latin
-	( 0xa788 , 0xa78a , 998 ), # Common
-	( 0xa78b , 0xa7ad , 215 ), # Latin
-	( 0xa7b0 , 0xa7b7 , 215 ), # Latin
-	( 0xa7f7 , 0xa7ff , 215 ), # Latin
-	( 0xa800 , 0xa82b , 316 ), # Syloti_Nagri
-	( 0xa830 , 0xa839 , 998 ), # Common
-	( 0xa840 , 0xa877 , 331 ), # Phags_Pa
-	( 0xa880 , 0xa8c4 , 344 ), # Saurashtra
-	( 0xa8ce , 0xa8d9 , 344 ), # Saurashtra
-	( 0xa8e0 , 0xa8fd , 315 ), # Devanagari
-	( 0xa900 , 0xa92d , 357 ), # Kayah_Li
-	( 0xa92e , 0xa92e , 998 ), # Common
-	( 0xa92f , 0xa92f , 357 ), # Kayah_Li
-	( 0xa930 , 0xa953 , 363 ), # Rejang
-	( 0xa95f , 0xa95f , 363 ), # Rejang
-	( 0xa960 , 0xa97c , 286 ), # Hangul
-	( 0xa980 , 0xa9cd , 361 ), # Javanese
-	( 0xa9cf , 0xa9cf , 998 ), # Common
-	( 0xa9d0 , 0xa9d9 , 361 ), # Javanese
-	( 0xa9de , 0xa9df , 361 ), # Javanese
-	( 0xa9e0 , 0xa9fe , 350 ), # Myanmar
-	( 0xaa00 , 0xaa36 , 358 ), # Cham
-	( 0xaa40 , 0xaa4d , 358 ), # Cham
-	( 0xaa50 , 0xaa59 , 358 ), # Cham
-	( 0xaa5c , 0xaa5f , 358 ), # Cham
-	( 0xaa60 , 0xaa7f , 350 ), # Myanmar
-	( 0xaa80 , 0xaac2 , 359 ), # Tai_Viet
-	( 0xaadb , 0xaadf , 359 ), # Tai_Viet
-	( 0xaae0 , 0xaaf6 , 337 ), # Meetei_Mayek
-	( 0xab01 , 0xab06 , 430 ), # Ethiopic
-	( 0xab09 , 0xab0e , 430 ), # Ethiopic
-	( 0xab11 , 0xab16 , 430 ), # Ethiopic
-	( 0xab20 , 0xab26 , 430 ), # Ethiopic
-	( 0xab28 , 0xab2e , 430 ), # Ethiopic
-	( 0xab30 , 0xab5a , 215 ), # Latin
-	( 0xab5b , 0xab5b , 998 ), # Common
-	( 0xab5c , 0xab64 , 215 ), # Latin
-	( 0xab65 , 0xab65 , 200 ), # Greek
-	( 0xab70 , 0xabbf , 445 ), # Cherokee
-	( 0xabc0 , 0xabed , 337 ), # Meetei_Mayek
-	( 0xabf0 , 0xabf9 , 337 ), # Meetei_Mayek
-	( 0xac00 , 0xd7a3 , 286 ), # Hangul
-	( 0xd7b0 , 0xd7c6 , 286 ), # Hangul
-	( 0xd7cb , 0xd7fb , 286 ), # Hangul
-	( 0xf900 , 0xfa6d , 500 ), # Han
-	( 0xfa70 , 0xfad9 , 500 ), # Han
-	( 0xfb00 , 0xfb06 , 215 ), # Latin
-	( 0xfb13 , 0xfb17 , 230 ), # Armenian
-	( 0xfb1d , 0xfb36 , 125 ), # Hebrew
-	( 0xfb38 , 0xfb3c , 125 ), # Hebrew
-	( 0xfb3e , 0xfb3e , 125 ), # Hebrew
-	( 0xfb40 , 0xfb41 , 125 ), # Hebrew
-	( 0xfb43 , 0xfb44 , 125 ), # Hebrew
-	( 0xfb46 , 0xfb4f , 125 ), # Hebrew
-	( 0xfb50 , 0xfbc1 , 160 ), # Arabic
-	( 0xfbd3 , 0xfd3d , 160 ), # Arabic
-	( 0xfd3e , 0xfd3f , 998 ), # Common
-	( 0xfd50 , 0xfd8f , 160 ), # Arabic
-	( 0xfd92 , 0xfdc7 , 160 ), # Arabic
-	( 0xfdf0 , 0xfdfd , 160 ), # Arabic
-	( 0xfe00 , 0xfe0f , 994 ), # Inherited
-	( 0xfe10 , 0xfe19 , 998 ), # Common
-	( 0xfe20 , 0xfe2d , 994 ), # Inherited
-	( 0xfe2e , 0xfe2f , 220 ), # Cyrillic
-	( 0xfe30 , 0xfe52 , 998 ), # Common
-	( 0xfe54 , 0xfe66 , 998 ), # Common
-	( 0xfe68 , 0xfe6b , 998 ), # Common
-	( 0xfe70 , 0xfe74 , 160 ), # Arabic
-	( 0xfe76 , 0xfefc , 160 ), # Arabic
-	( 0xfeff , 0xfeff , 998 ), # Common
-	( 0xff01 , 0xff20 , 998 ), # Common
-	( 0xff21 , 0xff3a , 215 ), # Latin
-	( 0xff3b , 0xff40 , 998 ), # Common
-	( 0xff41 , 0xff5a , 215 ), # Latin
-	( 0xff5b , 0xff65 , 998 ), # Common
-	( 0xff66 , 0xff6f , 411 ), # Katakana
-	( 0xff70 , 0xff70 , 998 ), # Common
-	( 0xff71 , 0xff9d , 411 ), # Katakana
-	( 0xff9e , 0xff9f , 998 ), # Common
-	( 0xffa0 , 0xffbe , 286 ), # Hangul
-	( 0xffc2 , 0xffc7 , 286 ), # Hangul
-	( 0xffca , 0xffcf , 286 ), # Hangul
-	( 0xffd2 , 0xffd7 , 286 ), # Hangul
-	( 0xffda , 0xffdc , 286 ), # Hangul
-	( 0xffe0 , 0xffe6 , 998 ), # Common
-	( 0xffe8 , 0xffee , 998 ), # Common
-	( 0xfff9 , 0xfffd , 998 ), # Common
-	( 0x10000 , 0x1000b , 401 ), # Linear_B
-	( 0x1000d , 0x10026 , 401 ), # Linear_B
-	( 0x10028 , 0x1003a , 401 ), # Linear_B
-	( 0x1003c , 0x1003d , 401 ), # Linear_B
-	( 0x1003f , 0x1004d , 401 ), # Linear_B
-	( 0x10050 , 0x1005d , 401 ), # Linear_B
-	( 0x10080 , 0x100fa , 401 ), # Linear_B
-	( 0x10100 , 0x10102 , 998 ), # Common
-	( 0x10107 , 0x10133 , 998 ), # Common
-	( 0x10137 , 0x1013f , 998 ), # Common
-	( 0x10140 , 0x1018c , 200 ), # Greek
-	( 0x10190 , 0x1019b , 998 ), # Common
-	( 0x101a0 , 0x101a0 , 200 ), # Greek
-	( 0x101d0 , 0x101fc , 998 ), # Common
-	( 0x101fd , 0x101fd , 994 ), # Inherited
-	( 0x10280 , 0x1029c , 202 ), # Lycian
-	( 0x102a0 , 0x102d0 , 201 ), # Carian
-	( 0x102e0 , 0x102e0 , 994 ), # Inherited
-	( 0x102e1 , 0x102fb , 998 ), # Common
-	( 0x10300 , 0x10323 , 210 ), # Old_Italic
-	( 0x10330 , 0x1034a , 206 ), # Gothic
-	( 0x10350 , 0x1037a , 227 ), # Old_Permic
-	( 0x10380 , 0x1039d , 40 ), # Ugaritic
-	( 0x1039f , 0x1039f , 40 ), # Ugaritic
-	( 0x103a0 , 0x103c3 , 30 ), # Old_Persian
-	( 0x103c8 , 0x103d5 , 30 ), # Old_Persian
-	( 0x10400 , 0x1044f , 250 ), # Deseret
-	( 0x10450 , 0x1047f , 281 ), # Shavian
-	( 0x10480 , 0x1049d , 260 ), # Osmanya
-	( 0x104a0 , 0x104a9 , 260 ), # Osmanya
-	( 0x10500 , 0x10527 , 226 ), # Elbasan
-	( 0x10530 , 0x10563 , 239 ), # Caucasian_Albanian
-	( 0x1056f , 0x1056f , 239 ), # Caucasian_Albanian
-	( 0x10600 , 0x10736 , 400 ), # Linear_A
-	( 0x10740 , 0x10755 , 400 ), # Linear_A
-	( 0x10760 , 0x10767 , 400 ), # Linear_A
-	( 0x10800 , 0x10805 , 403 ), # Cypriot
-	( 0x10808 , 0x10808 , 403 ), # Cypriot
-	( 0x1080a , 0x10835 , 403 ), # Cypriot
-	( 0x10837 , 0x10838 , 403 ), # Cypriot
-	( 0x1083c , 0x1083c , 403 ), # Cypriot
-	( 0x1083f , 0x1083f , 403 ), # Cypriot
-	( 0x10840 , 0x10855 , 124 ), # Imperial_Aramaic
-	( 0x10857 , 0x1085f , 124 ), # Imperial_Aramaic
-	( 0x10860 , 0x1087f , 126 ), # Palmyrene
-	( 0x10880 , 0x1089e , 159 ), # Nabataean
-	( 0x108a7 , 0x108af , 159 ), # Nabataean
-	( 0x10900 , 0x1091b , 115 ), # Phoenician
-	( 0x1091f , 0x1091f , 115 ), # Phoenician
-	( 0x10920 , 0x10939 , 116 ), # Lydian
-	( 0x1093f , 0x1093f , 116 ), # Lydian
-	( 0x10980 , 0x1099f , 100 ), # Meroitic_Hieroglyphs
-	( 0x109a0 , 0x109b7 , 101 ), # Meroitic_Cursive
-	( 0x109bc , 0x109cf , 101 ), # Meroitic_Cursive
-	( 0x109d2 , 0x109ff , 101 ), # Meroitic_Cursive
-	( 0x10a00 , 0x10a03 , 305 ), # Kharoshthi
-	( 0x10a05 , 0x10a06 , 305 ), # Kharoshthi
-	( 0x10a0c , 0x10a13 , 305 ), # Kharoshthi
-	( 0x10a15 , 0x10a17 , 305 ), # Kharoshthi
-	( 0x10a19 , 0x10a33 , 305 ), # Kharoshthi
-	( 0x10a38 , 0x10a3a , 305 ), # Kharoshthi
-	( 0x10a3f , 0x10a47 , 305 ), # Kharoshthi
-	( 0x10a50 , 0x10a58 , 305 ), # Kharoshthi
-	( 0x10a60 , 0x10a7f , 105 ), # Old_South_Arabian
-	( 0x10a80 , 0x10a9f , 106 ), # Old_North_Arabian
-	( 0x10ac0 , 0x10ae6 , 139 ), # Manichaean
-	( 0x10aeb , 0x10af6 , 139 ), # Manichaean
-	( 0x10b00 , 0x10b35 , 134 ), # Avestan
-	( 0x10b39 , 0x10b3f , 134 ), # Avestan
-	( 0x10b40 , 0x10b55 , 130 ), # Inscriptional_Parthian
-	( 0x10b58 , 0x10b5f , 130 ), # Inscriptional_Parthian
-	( 0x10b60 , 0x10b72 , 131 ), # Inscriptional_Pahlavi
-	( 0x10b78 , 0x10b7f , 131 ), # Inscriptional_Pahlavi
-	( 0x10b80 , 0x10b91 , 132 ), # Psalter_Pahlavi
-	( 0x10b99 , 0x10b9c , 132 ), # Psalter_Pahlavi
-	( 0x10ba9 , 0x10baf , 132 ), # Psalter_Pahlavi
-	( 0x10c00 , 0x10c48 , 175 ), # Old_Turkic
-	( 0x10e60 , 0x10e7e , 160 ), # Arabic
-	( 0x11000 , 0x1104d , 300 ), # Brahmi
-	( 0x11052 , 0x1106f , 300 ), # Brahmi
-	( 0x1107f , 0x1107f , 300 ), # Brahmi
-	( 0x11080 , 0x110c1 , 317 ), # Kaithi
-	( 0x110d0 , 0x110e8 , 398 ), # Sora_Sompeng
-	( 0x110f0 , 0x110f9 , 398 ), # Sora_Sompeng
-	( 0x11100 , 0x11134 , 349 ), # Chakma
-	( 0x11136 , 0x11143 , 349 ), # Chakma
-	( 0x11150 , 0x11176 , 314 ), # Mahajani
-	( 0x11180 , 0x111cd , 319 ), # Sharada
-	( 0x111d0 , 0x111df , 319 ), # Sharada
-	( 0x111e1 , 0x111f4 , 348 ), # Sinhala
-	( 0x11200 , 0x11211 , 322 ), # Khojki
-	( 0x11213 , 0x1123d , 322 ), # Khojki
-	( 0x11280 , 0x11286 , 323 ), # Multani
-	( 0x11288 , 0x11288 , 323 ), # Multani
-	( 0x1128a , 0x1128d , 323 ), # Multani
-	( 0x1128f , 0x1129d , 323 ), # Multani
-	( 0x1129f , 0x112a9 , 323 ), # Multani
-	( 0x112b0 , 0x112ea , 318 ), # Khudawadi
-	( 0x112f0 , 0x112f9 , 318 ), # Khudawadi
-	( 0x11300 , 0x11303 , 343 ), # Grantha
-	( 0x11305 , 0x1130c , 343 ), # Grantha
-	( 0x1130f , 0x11310 , 343 ), # Grantha
-	( 0x11313 , 0x11328 , 343 ), # Grantha
-	( 0x1132a , 0x11330 , 343 ), # Grantha
-	( 0x11332 , 0x11333 , 343 ), # Grantha
-	( 0x11335 , 0x11339 , 343 ), # Grantha
-	( 0x1133c , 0x11344 , 343 ), # Grantha
-	( 0x11347 , 0x11348 , 343 ), # Grantha
-	( 0x1134b , 0x1134d , 343 ), # Grantha
-	( 0x11350 , 0x11350 , 343 ), # Grantha
-	( 0x11357 , 0x11357 , 343 ), # Grantha
-	( 0x1135d , 0x11363 , 343 ), # Grantha
-	( 0x11366 , 0x1136c , 343 ), # Grantha
-	( 0x11370 , 0x11374 , 343 ), # Grantha
-	( 0x11480 , 0x114c7 , 326 ), # Tirhuta
-	( 0x114d0 , 0x114d9 , 326 ), # Tirhuta
-	( 0x11580 , 0x115b5 , 302 ), # Siddham
-	( 0x115b8 , 0x115dd , 302 ), # Siddham
-	( 0x11600 , 0x11644 , 324 ), # Modi
-	( 0x11650 , 0x11659 , 324 ), # Modi
-	( 0x11680 , 0x116b7 , 321 ), # Takri
-	( 0x116c0 , 0x116c9 , 321 ), # Takri
-	( 0x118a0 , 0x118f2 , 262 ), # Warang_Citi
-	( 0x118ff , 0x118ff , 262 ), # Warang_Citi
-	( 0x11ac0 , 0x11af8 , 263 ), # Pau_Cin_Hau
-	( 0x12000 , 0x12399 , 20 ), # Cuneiform
-	( 0x12400 , 0x1246e , 20 ), # Cuneiform
-	( 0x12470 , 0x12474 , 20 ), # Cuneiform
-	( 0x12480 , 0x12543 , 20 ), # Cuneiform
-	( 0x13000 , 0x1342e , 50 ), # Egyptian_Hieroglyphs
-	( 0x16800 , 0x16a38 , 435 ), # Bamum
-	( 0x16a40 , 0x16a5e , 199 ), # Mro
-	( 0x16a60 , 0x16a69 , 199 ), # Mro
-	( 0x16a6e , 0x16a6f , 199 ), # Mro
-	( 0x16ad0 , 0x16aed , 259 ), # Bassa_Vah
-	( 0x16af0 , 0x16af5 , 259 ), # Bassa_Vah
-	( 0x16b00 , 0x16b45 , 450 ), # Pahawh_Hmong
-	( 0x16b50 , 0x16b59 , 450 ), # Pahawh_Hmong
-	( 0x16b5b , 0x16b61 , 450 ), # Pahawh_Hmong
-	( 0x16b63 , 0x16b77 , 450 ), # Pahawh_Hmong
-	( 0x16b7d , 0x16b8f , 450 ), # Pahawh_Hmong
-	( 0x16f00 , 0x16f44 , 282 ), # Miao
-	( 0x16f50 , 0x16f7e , 282 ), # Miao
-	( 0x16f8f , 0x16f9f , 282 ), # Miao
-	( 0x1b000 , 0x1b000 , 411 ), # Katakana
-	( 0x1b001 , 0x1b001 , 410 ), # Hiragana
-	( 0x1bc00 , 0x1bc6a , 755 ), # Duployan
-	( 0x1bc70 , 0x1bc7c , 755 ), # Duployan
-	( 0x1bc80 , 0x1bc88 , 755 ), # Duployan
-	( 0x1bc90 , 0x1bc99 , 755 ), # Duployan
-	( 0x1bc9c , 0x1bc9f , 755 ), # Duployan
-	( 0x1bca0 , 0x1bca3 , 998 ), # Common
-	( 0x1d000 , 0x1d0f5 , 998 ), # Common
-	( 0x1d100 , 0x1d126 , 998 ), # Common
-	( 0x1d129 , 0x1d166 , 998 ), # Common
-	( 0x1d167 , 0x1d169 , 994 ), # Inherited
-	( 0x1d16a , 0x1d17a , 998 ), # Common
-	( 0x1d17b , 0x1d182 , 994 ), # Inherited
-	( 0x1d183 , 0x1d184 , 998 ), # Common
-	( 0x1d185 , 0x1d18b , 994 ), # Inherited
-	( 0x1d18c , 0x1d1a9 , 998 ), # Common
-	( 0x1d1aa , 0x1d1ad , 994 ), # Inherited
-	( 0x1d1ae , 0x1d1e8 , 998 ), # Common
-	( 0x1d200 , 0x1d245 , 200 ), # Greek
-	( 0x1d300 , 0x1d356 , 998 ), # Common
-	( 0x1d360 , 0x1d371 , 998 ), # Common
-	( 0x1d400 , 0x1d454 , 998 ), # Common
-	( 0x1d456 , 0x1d49c , 998 ), # Common
-	( 0x1d49e , 0x1d49f , 998 ), # Common
-	( 0x1d4a2 , 0x1d4a2 , 998 ), # Common
-	( 0x1d4a5 , 0x1d4a6 , 998 ), # Common
-	( 0x1d4a9 , 0x1d4ac , 998 ), # Common
-	( 0x1d4ae , 0x1d4b9 , 998 ), # Common
-	( 0x1d4bb , 0x1d4bb , 998 ), # Common
-	( 0x1d4bd , 0x1d4c3 , 998 ), # Common
-	( 0x1d4c5 , 0x1d505 , 998 ), # Common
-	( 0x1d507 , 0x1d50a , 998 ), # Common
-	( 0x1d50d , 0x1d514 , 998 ), # Common
-	( 0x1d516 , 0x1d51c , 998 ), # Common
-	( 0x1d51e , 0x1d539 , 998 ), # Common
-	( 0x1d53b , 0x1d53e , 998 ), # Common
-	( 0x1d540 , 0x1d544 , 998 ), # Common
-	( 0x1d546 , 0x1d546 , 998 ), # Common
-	( 0x1d54a , 0x1d550 , 998 ), # Common
-	( 0x1d552 , 0x1d6a5 , 998 ), # Common
-	( 0x1d6a8 , 0x1d7cb , 998 ), # Common
-	( 0x1d7ce , 0x1d7ff , 998 ), # Common
-	( 0x1e800 , 0x1e8c4 , 438 ), # Mende_Kikakui
-	( 0x1e8c7 , 0x1e8d6 , 438 ), # Mende_Kikakui
-	( 0x1ee00 , 0x1ee03 , 160 ), # Arabic
-	( 0x1ee05 , 0x1ee1f , 160 ), # Arabic
-	( 0x1ee21 , 0x1ee22 , 160 ), # Arabic
-	( 0x1ee24 , 0x1ee24 , 160 ), # Arabic
-	( 0x1ee27 , 0x1ee27 , 160 ), # Arabic
-	( 0x1ee29 , 0x1ee32 , 160 ), # Arabic
-	( 0x1ee34 , 0x1ee37 , 160 ), # Arabic
-	( 0x1ee39 , 0x1ee39 , 160 ), # Arabic
-	( 0x1ee3b , 0x1ee3b , 160 ), # Arabic
-	( 0x1ee42 , 0x1ee42 , 160 ), # Arabic
-	( 0x1ee47 , 0x1ee47 , 160 ), # Arabic
-	( 0x1ee49 , 0x1ee49 , 160 ), # Arabic
-	( 0x1ee4b , 0x1ee4b , 160 ), # Arabic
-	( 0x1ee4d , 0x1ee4f , 160 ), # Arabic
-	( 0x1ee51 , 0x1ee52 , 160 ), # Arabic
-	( 0x1ee54 , 0x1ee54 , 160 ), # Arabic
-	( 0x1ee57 , 0x1ee57 , 160 ), # Arabic
-	( 0x1ee59 , 0x1ee59 , 160 ), # Arabic
-	( 0x1ee5b , 0x1ee5b , 160 ), # Arabic
-	( 0x1ee5d , 0x1ee5d , 160 ), # Arabic
-	( 0x1ee5f , 0x1ee5f , 160 ), # Arabic
-	( 0x1ee61 , 0x1ee62 , 160 ), # Arabic
-	( 0x1ee64 , 0x1ee64 , 160 ), # Arabic
-	( 0x1ee67 , 0x1ee6a , 160 ), # Arabic
-	( 0x1ee6c , 0x1ee72 , 160 ), # Arabic
-	( 0x1ee74 , 0x1ee77 , 160 ), # Arabic
-	( 0x1ee79 , 0x1ee7c , 160 ), # Arabic
-	( 0x1ee7e , 0x1ee7e , 160 ), # Arabic
-	( 0x1ee80 , 0x1ee89 , 160 ), # Arabic
-	( 0x1ee8b , 0x1ee9b , 160 ), # Arabic
-	( 0x1eea1 , 0x1eea3 , 160 ), # Arabic
-	( 0x1eea5 , 0x1eea9 , 160 ), # Arabic
-	( 0x1eeab , 0x1eebb , 160 ), # Arabic
-	( 0x1eef0 , 0x1eef1 , 160 ), # Arabic
-	( 0x1f000 , 0x1f02b , 998 ), # Common
-	( 0x1f030 , 0x1f093 , 998 ), # Common
-	( 0x1f0a0 , 0x1f0ae , 998 ), # Common
-	( 0x1f0b1 , 0x1f0bf , 998 ), # Common
-	( 0x1f0c1 , 0x1f0cf , 998 ), # Common
-	( 0x1f0d1 , 0x1f0f5 , 998 ), # Common
-	( 0x1f100 , 0x1f10c , 998 ), # Common
-	( 0x1f110 , 0x1f12e , 998 ), # Common
-	( 0x1f130 , 0x1f16b , 998 ), # Common
-	( 0x1f170 , 0x1f19a , 998 ), # Common
-	( 0x1f1e6 , 0x1f1ff , 998 ), # Common
-	( 0x1f200 , 0x1f200 , 410 ), # Hiragana
-	( 0x1f201 , 0x1f202 , 998 ), # Common
-	( 0x1f210 , 0x1f23a , 998 ), # Common
-	( 0x1f240 , 0x1f248 , 998 ), # Common
-	( 0x1f250 , 0x1f251 , 998 ), # Common
-	( 0x1f300 , 0x1f579 , 998 ), # Common
-	( 0x1f57b , 0x1f5a3 , 998 ), # Common
-	( 0x1f5a5 , 0x1f6d0 , 998 ), # Common
-	( 0x1f6e0 , 0x1f6ec , 998 ), # Common
-	( 0x1f6f0 , 0x1f6f3 , 998 ), # Common
-	( 0x1f700 , 0x1f773 , 998 ), # Common
-	( 0x1f780 , 0x1f7d4 , 998 ), # Common
-	( 0x1f800 , 0x1f80b , 998 ), # Common
-	( 0x1f810 , 0x1f847 , 998 ), # Common
-	( 0x1f850 , 0x1f859 , 998 ), # Common
-	( 0x1f860 , 0x1f887 , 998 ), # Common
-	( 0x1f890 , 0x1f8ad , 998 ), # Common
-	( 0x1f910 , 0x1f918 , 998 ), # Common
-	( 0x1f980 , 0x1f984 , 998 ), # Common
-	( 0x1f9c0 , 0x1f9c0 , 998 ), # Common
-	( 0x20000 , 0x2a6d6 , 500 ), # Han
-	( 0x2a700 , 0x2b734 , 500 ), # Han
-	( 0x2b740 , 0x2b81d , 500 ), # Han
-	( 0x2b820 , 0x2cea1 , 500 ), # Han
-	( 0x2f800 , 0x2fa1d , 500 ), # Han
-	( 0xe0001 , 0xe0001 , 998 ), # Common
-	( 0xe0020 , 0xe007f , 998 ), # Common
-]
-scriptCode= [
-	( 0x0 , 0x40 , 998 ), # Common
-	( 0x41 , 0x5a , 215 ), # Latin
-	( 0x5b , 0x60 , 998 ), # Common
-	( 0x61 , 0x7a , 215 ), # Latin
-	( 0x7b , 0xa9 , 998 ), # Common
-	( 0xaa , 0xaa , 215 ), # Latin
-	( 0xab , 0xb9 , 998 ), # Common
-	( 0xba , 0xba , 215 ), # Latin
-	( 0xbb , 0xbf , 998 ), # Common
-	( 0xc0 , 0xd6 , 215 ), # Latin
-	( 0xd7 , 0xd7 , 998 ), # Common
-	( 0xd8 , 0xf6 , 215 ), # Latin
-	( 0xf7 , 0xf7 , 998 ), # Common
-	( 0xf8 , 0x2b8 , 215 ), # Latin
-	( 0x2b9 , 0x2df , 998 ), # Common
-	( 0x2e0 , 0x2e4 , 215 ), # Latin
-	( 0x2e5 , 0x2e9 , 998 ), # Common
-	( 0x2ea , 0x2eb , 285 ), # Bopomofo
-	( 0x2ec , 0x2ff , 998 ), # Common
-	( 0x300 , 0x36f , 994 ), # Inherited
-	( 0x370 , 0x373 , 200 ), # Greek
-	( 0x374 , 0x374 , 998 ), # Common
-	( 0x375 , 0x377 , 200 ), # Greek
-	( 0x37a , 0x37d , 200 ), # Greek
-	( 0x37e , 0x37e , 998 ), # Common
-	( 0x37f , 0x37f , 200 ), # Greek
-	( 0x384 , 0x384 , 200 ), # Greek
-	( 0x385 , 0x385 , 998 ), # Common
-	( 0x386 , 0x386 , 200 ), # Greek
-	( 0x387 , 0x387 , 998 ), # Common
-	( 0x388 , 0x38a , 200 ), # Greek
-	( 0x38c , 0x38c , 200 ), # Greek
-	( 0x38e , 0x3a1 , 200 ), # Greek
-	( 0x3a3 , 0x3e1 , 200 ), # Greek
-	( 0x3e2 , 0x3ef , 204 ), # Coptic
-	( 0x3f0 , 0x3ff , 200 ), # Greek
-	( 0x400 , 0x484 , 220 ), # Cyrillic
-	( 0x485 , 0x486 , 994 ), # Inherited
-	( 0x487 , 0x52f , 220 ), # Cyrillic
-	( 0x531 , 0x556 , 230 ), # Armenian
-	( 0x559 , 0x55f , 230 ), # Armenian
-	( 0x561 , 0x587 , 230 ), # Armenian
-	( 0x589 , 0x589 , 998 ), # Common
-	( 0x58a , 0x58a , 230 ), # Armenian
-	( 0x58d , 0x58f , 230 ), # Armenian
-	( 0x591 , 0x5c7 , 125 ), # Hebrew
-	( 0x5d0 , 0x5ea , 125 ), # Hebrew
-	( 0x5f0 , 0x5f4 , 125 ), # Hebrew
-	( 0x600 , 0x604 , 160 ), # Arabic
-	( 0x605 , 0x605 , 998 ), # Common
-	( 0x606 , 0x60b , 160 ), # Arabic
-	( 0x60c , 0x60c , 998 ), # Common
-	( 0x60d , 0x61a , 160 ), # Arabic
-	( 0x61b , 0x61c , 998 ), # Common
-	( 0x61e , 0x61e , 160 ), # Arabic
-	( 0x61f , 0x61f , 998 ), # Common
-	( 0x620 , 0x63f , 160 ), # Arabic
-	( 0x640 , 0x640 , 998 ), # Common
-	( 0x641 , 0x64a , 160 ), # Arabic
-	( 0x64b , 0x655 , 994 ), # Inherited
-	( 0x656 , 0x66f , 160 ), # Arabic
-	( 0x670 , 0x670 , 994 ), # Inherited
-	( 0x671 , 0x6dc , 160 ), # Arabic
-	( 0x6dd , 0x6dd , 998 ), # Common
-	( 0x6de , 0x6ff , 160 ), # Arabic
-	( 0x700 , 0x70d , 135 ), # Syriac
-	( 0x70f , 0x74a , 135 ), # Syriac
-	( 0x74d , 0x74f , 135 ), # Syriac
-	( 0x750 , 0x77f , 160 ), # Arabic
-	( 0x780 , 0x7b1 , 170 ), # Thaana
-	( 0x7c0 , 0x7fa , 165 ), # Nko
-	( 0x800 , 0x82d , 123 ), # Samaritan
-	( 0x830 , 0x83e , 123 ), # Samaritan
-	( 0x840 , 0x85b , 140 ), # Mandaic
-	( 0x85e , 0x85e , 140 ), # Mandaic
-	( 0x8a0 , 0x8b4 , 160 ), # Arabic
-	( 0x8e3 , 0x8ff , 160 ), # Arabic
-	( 0x900 , 0x950 , 315 ), # Devanagari
-	( 0x951 , 0x952 , 994 ), # Inherited
-	( 0x953 , 0x963 , 315 ), # Devanagari
-	( 0x964 , 0x965 , 998 ), # Common
-	( 0x966 , 0x97f , 315 ), # Devanagari
-	( 0x980 , 0x983 , 325 ), # Bengali
-	( 0x985 , 0x98c , 325 ), # Bengali
-	( 0x98f , 0x990 , 325 ), # Bengali
-	( 0x993 , 0x9a8 , 325 ), # Bengali
-	( 0x9aa , 0x9b0 , 325 ), # Bengali
-	( 0x9b2 , 0x9b2 , 325 ), # Bengali
-	( 0x9b6 , 0x9b9 , 325 ), # Bengali
-	( 0x9bc , 0x9c4 , 325 ), # Bengali
-	( 0x9c7 , 0x9c8 , 325 ), # Bengali
-	( 0x9cb , 0x9ce , 325 ), # Bengali
-	( 0x9d7 , 0x9d7 , 325 ), # Bengali
-	( 0x9dc , 0x9dd , 325 ), # Bengali
-	( 0x9df , 0x9e3 , 325 ), # Bengali
-	( 0x9e6 , 0x9fb , 325 ), # Bengali
-	( 0xa01 , 0xa03 , 310 ), # Gurmukhi
-	( 0xa05 , 0xa0a , 310 ), # Gurmukhi
-	( 0xa0f , 0xa10 , 310 ), # Gurmukhi
-	( 0xa13 , 0xa28 , 310 ), # Gurmukhi
-	( 0xa2a , 0xa30 , 310 ), # Gurmukhi
-	( 0xa32 , 0xa33 , 310 ), # Gurmukhi
-	( 0xa35 , 0xa36 , 310 ), # Gurmukhi
-	( 0xa38 , 0xa39 , 310 ), # Gurmukhi
-	( 0xa3c , 0xa3c , 310 ), # Gurmukhi
-	( 0xa3e , 0xa42 , 310 ), # Gurmukhi
-	( 0xa47 , 0xa48 , 310 ), # Gurmukhi
-	( 0xa4b , 0xa4d , 310 ), # Gurmukhi
-	( 0xa51 , 0xa51 , 310 ), # Gurmukhi
-	( 0xa59 , 0xa5c , 310 ), # Gurmukhi
-	( 0xa5e , 0xa5e , 310 ), # Gurmukhi
-	( 0xa66 , 0xa75 , 310 ), # Gurmukhi
-	( 0xa81 , 0xa83 , 320 ), # Gujarati
-	( 0xa85 , 0xa8d , 320 ), # Gujarati
-	( 0xa8f , 0xa91 , 320 ), # Gujarati
-	( 0xa93 , 0xaa8 , 320 ), # Gujarati
-	( 0xaaa , 0xab0 , 320 ), # Gujarati
-	( 0xab2 , 0xab3 , 320 ), # Gujarati
-	( 0xab5 , 0xab9 , 320 ), # Gujarati
-	( 0xabc , 0xac5 , 320 ), # Gujarati
-	( 0xac7 , 0xac9 , 320 ), # Gujarati
-	( 0xacb , 0xacd , 320 ), # Gujarati
-	( 0xad0 , 0xad0 , 320 ), # Gujarati
-	( 0xae0 , 0xae3 , 320 ), # Gujarati
-	( 0xae6 , 0xaf1 , 320 ), # Gujarati
-	( 0xaf9 , 0xaf9 , 320 ), # Gujarati
-	( 0xb01 , 0xb03 , 327 ), # Oriya
-	( 0xb05 , 0xb0c , 327 ), # Oriya
-	( 0xb0f , 0xb10 , 327 ), # Oriya
-	( 0xb13 , 0xb28 , 327 ), # Oriya
-	( 0xb2a , 0xb30 , 327 ), # Oriya
-	( 0xb32 , 0xb33 , 327 ), # Oriya
-	( 0xb35 , 0xb39 , 327 ), # Oriya
-	( 0xb3c , 0xb44 , 327 ), # Oriya
-	( 0xb47 , 0xb48 , 327 ), # Oriya
-	( 0xb4b , 0xb4d , 327 ), # Oriya
-	( 0xb56 , 0xb57 , 327 ), # Oriya
-	( 0xb5c , 0xb5d , 327 ), # Oriya
-	( 0xb5f , 0xb63 , 327 ), # Oriya
-	( 0xb66 , 0xb77 , 327 ), # Oriya
-	( 0xb82 , 0xb83 , 346 ), # Tamil
-	( 0xb85 , 0xb8a , 346 ), # Tamil
-	( 0xb8e , 0xb90 , 346 ), # Tamil
-	( 0xb92 , 0xb95 , 346 ), # Tamil
-	( 0xb99 , 0xb9a , 346 ), # Tamil
-	( 0xb9c , 0xb9c , 346 ), # Tamil
-	( 0xb9e , 0xb9f , 346 ), # Tamil
-	( 0xba3 , 0xba4 , 346 ), # Tamil
-	( 0xba8 , 0xbaa , 346 ), # Tamil
-	( 0xbae , 0xbb9 , 346 ), # Tamil
-	( 0xbbe , 0xbc2 , 346 ), # Tamil
-	( 0xbc6 , 0xbc8 , 346 ), # Tamil
-	( 0xbca , 0xbcd , 346 ), # Tamil
-	( 0xbd0 , 0xbd0 , 346 ), # Tamil
-	( 0xbd7 , 0xbd7 , 346 ), # Tamil
-	( 0xbe6 , 0xbfa , 346 ), # Tamil
-	( 0xc00 , 0xc03 , 340 ), # Telugu
-	( 0xc05 , 0xc0c , 340 ), # Telugu
-	( 0xc0e , 0xc10 , 340 ), # Telugu
-	( 0xc12 , 0xc28 , 340 ), # Telugu
-	( 0xc2a , 0xc39 , 340 ), # Telugu
-	( 0xc3d , 0xc44 , 340 ), # Telugu
-	( 0xc46 , 0xc48 , 340 ), # Telugu
-	( 0xc4a , 0xc4d , 340 ), # Telugu
-	( 0xc55 , 0xc56 , 340 ), # Telugu
-	( 0xc58 , 0xc5a , 340 ), # Telugu
-	( 0xc60 , 0xc63 , 340 ), # Telugu
-	( 0xc66 , 0xc6f , 340 ), # Telugu
-	( 0xc78 , 0xc7f , 340 ), # Telugu
-	( 0xc81 , 0xc83 , 345 ), # Kannada
-	( 0xc85 , 0xc8c , 345 ), # Kannada
-	( 0xc8e , 0xc90 , 345 ), # Kannada
-	( 0xc92 , 0xca8 , 345 ), # Kannada
-	( 0xcaa , 0xcb3 , 345 ), # Kannada
-	( 0xcb5 , 0xcb9 , 345 ), # Kannada
-	( 0xcbc , 0xcc4 , 345 ), # Kannada
-	( 0xcc6 , 0xcc8 , 345 ), # Kannada
-	( 0xcca , 0xccd , 345 ), # Kannada
-	( 0xcd5 , 0xcd6 , 345 ), # Kannada
-	( 0xcde , 0xcde , 345 ), # Kannada
-	( 0xce0 , 0xce3 , 345 ), # Kannada
-	( 0xce6 , 0xcef , 345 ), # Kannada
-	( 0xcf1 , 0xcf2 , 345 ), # Kannada
-	( 0xd01 , 0xd03 , 347 ), # Malayalam
-	( 0xd05 , 0xd0c , 347 ), # Malayalam
-	( 0xd0e , 0xd10 , 347 ), # Malayalam
-	( 0xd12 , 0xd3a , 347 ), # Malayalam
-	( 0xd3d , 0xd44 , 347 ), # Malayalam
-	( 0xd46 , 0xd48 , 347 ), # Malayalam
-	( 0xd4a , 0xd4e , 347 ), # Malayalam
-	( 0xd57 , 0xd57 , 347 ), # Malayalam
-	( 0xd5f , 0xd63 , 347 ), # Malayalam
-	( 0xd66 , 0xd75 , 347 ), # Malayalam
-	( 0xd79 , 0xd7f , 347 ), # Malayalam
-	( 0xd82 , 0xd83 , 348 ), # Sinhala
-	( 0xd85 , 0xd96 , 348 ), # Sinhala
-	( 0xd9a , 0xdb1 , 348 ), # Sinhala
-	( 0xdb3 , 0xdbb , 348 ), # Sinhala
-	( 0xdbd , 0xdbd , 348 ), # Sinhala
-	( 0xdc0 , 0xdc6 , 348 ), # Sinhala
-	( 0xdca , 0xdca , 348 ), # Sinhala
-	( 0xdcf , 0xdd4 , 348 ), # Sinhala
-	( 0xdd6 , 0xdd6 , 348 ), # Sinhala
-	( 0xdd8 , 0xddf , 348 ), # Sinhala
-	( 0xde6 , 0xdef , 348 ), # Sinhala
-	( 0xdf2 , 0xdf4 , 348 ), # Sinhala
-	( 0xe01 , 0xe3a , 352 ), # Thai
-	( 0xe3f , 0xe3f , 998 ), # Common
-	( 0xe40 , 0xe5b , 352 ), # Thai
-	( 0xe81 , 0xe82 , 356 ), # Lao
-	( 0xe84 , 0xe84 , 356 ), # Lao
-	( 0xe87 , 0xe88 , 356 ), # Lao
-	( 0xe8a , 0xe8a , 356 ), # Lao
-	( 0xe8d , 0xe8d , 356 ), # Lao
-	( 0xe94 , 0xe97 , 356 ), # Lao
-	( 0xe99 , 0xe9f , 356 ), # Lao
-	( 0xea1 , 0xea3 , 356 ), # Lao
-	( 0xea5 , 0xea5 , 356 ), # Lao
-	( 0xea7 , 0xea7 , 356 ), # Lao
-	( 0xeaa , 0xeab , 356 ), # Lao
-	( 0xead , 0xeb9 , 356 ), # Lao
-	( 0xebb , 0xebd , 356 ), # Lao
-	( 0xec0 , 0xec4 , 356 ), # Lao
-	( 0xec6 , 0xec6 , 356 ), # Lao
-	( 0xec8 , 0xecd , 356 ), # Lao
-	( 0xed0 , 0xed9 , 356 ), # Lao
-	( 0xedc , 0xedf , 356 ), # Lao
-	( 0xf00 , 0xf47 , 330 ), # Tibetan
-	( 0xf49 , 0xf6c , 330 ), # Tibetan
-	( 0xf71 , 0xf97 , 330 ), # Tibetan
-	( 0xf99 , 0xfbc , 330 ), # Tibetan
-	( 0xfbe , 0xfcc , 330 ), # Tibetan
-	( 0xfce , 0xfd4 , 330 ), # Tibetan
-	( 0xfd5 , 0xfd8 , 998 ), # Common
-	( 0xfd9 , 0xfda , 330 ), # Tibetan
-	( 0x1000 , 0x109f , 350 ), # Myanmar
-	( 0x10a0 , 0x10c5 , 240 ), # Georgian
-	( 0x10c7 , 0x10c7 , 240 ), # Georgian
-	( 0x10cd , 0x10cd , 240 ), # Georgian
-	( 0x10d0 , 0x10fa , 240 ), # Georgian
-	( 0x10fb , 0x10fb , 998 ), # Common
-	( 0x10fc , 0x10ff , 240 ), # Georgian
-	( 0x1100 , 0x11ff , 286 ), # Hangul
-	( 0x1200 , 0x1248 , 430 ), # Ethiopic
-	( 0x124a , 0x124d , 430 ), # Ethiopic
-	( 0x1250 , 0x1256 , 430 ), # Ethiopic
-	( 0x1258 , 0x1258 , 430 ), # Ethiopic
-	( 0x125a , 0x125d , 430 ), # Ethiopic
-	( 0x1260 , 0x1288 , 430 ), # Ethiopic
-	( 0x128a , 0x128d , 430 ), # Ethiopic
-	( 0x1290 , 0x12b0 , 430 ), # Ethiopic
-	( 0x12b2 , 0x12b5 , 430 ), # Ethiopic
-	( 0x12b8 , 0x12be , 430 ), # Ethiopic
-	( 0x12c0 , 0x12c0 , 430 ), # Ethiopic
-	( 0x12c2 , 0x12c5 , 430 ), # Ethiopic
-	( 0x12c8 , 0x12d6 , 430 ), # Ethiopic
-	( 0x12d8 , 0x1310 , 430 ), # Ethiopic
-	( 0x1312 , 0x1315 , 430 ), # Ethiopic
-	( 0x1318 , 0x135a , 430 ), # Ethiopic
-	( 0x135d , 0x137c , 430 ), # Ethiopic
-	( 0x1380 , 0x1399 , 430 ), # Ethiopic
-	( 0x13a0 , 0x13f5 , 445 ), # Cherokee
-	( 0x13f8 , 0x13fd , 445 ), # Cherokee
-	( 0x1400 , 0x167f , 440 ), # Canadian_Aboriginal
-	( 0x1680 , 0x169c , 212 ), # Ogham
-	( 0x16a0 , 0x16ea , 211 ), # Runic
-	( 0x16eb , 0x16ed , 998 ), # Common
-	( 0x16ee , 0x16f8 , 211 ), # Runic
-	( 0x1700 , 0x170c , 370 ), # Tagalog
-	( 0x170e , 0x1714 , 370 ), # Tagalog
-	( 0x1720 , 0x1734 , 371 ), # Hanunoo
-	( 0x1735 , 0x1736 , 998 ), # Common
-	( 0x1740 , 0x1753 , 372 ), # Buhid
-	( 0x1760 , 0x176c , 373 ), # Tagbanwa
-	( 0x176e , 0x1770 , 373 ), # Tagbanwa
-	( 0x1772 , 0x1773 , 373 ), # Tagbanwa
-	( 0x1780 , 0x17dd , 355 ), # Khmer
-	( 0x17e0 , 0x17e9 , 355 ), # Khmer
-	( 0x17f0 , 0x17f9 , 355 ), # Khmer
-	( 0x1800 , 0x1801 , 145 ), # Mongolian
-	( 0x1802 , 0x1803 , 998 ), # Common
-	( 0x1804 , 0x1804 , 145 ), # Mongolian
-	( 0x1805 , 0x1805 , 998 ), # Common
-	( 0x1806 , 0x180e , 145 ), # Mongolian
-	( 0x1810 , 0x1819 , 145 ), # Mongolian
-	( 0x1820 , 0x1877 , 145 ), # Mongolian
-	( 0x1880 , 0x18aa , 145 ), # Mongolian
-	( 0x18b0 , 0x18f5 , 440 ), # Canadian_Aboriginal
-	( 0x1900 , 0x191e , 336 ), # Limbu
-	( 0x1920 , 0x192b , 336 ), # Limbu
-	( 0x1930 , 0x193b , 336 ), # Limbu
-	( 0x1940 , 0x1940 , 336 ), # Limbu
-	( 0x1944 , 0x194f , 336 ), # Limbu
-	( 0x1950 , 0x196d , 353 ), # Tai_Le
-	( 0x1970 , 0x1974 , 353 ), # Tai_Le
-	( 0x1980 , 0x19ab , 354 ), # New_Tai_Lue
-	( 0x19b0 , 0x19c9 , 354 ), # New_Tai_Lue
-	( 0x19d0 , 0x19da , 354 ), # New_Tai_Lue
-	( 0x19de , 0x19df , 354 ), # New_Tai_Lue
-	( 0x19e0 , 0x19ff , 355 ), # Khmer
-	( 0x1a00 , 0x1a1b , 367 ), # Buginese
-	( 0x1a1e , 0x1a1f , 367 ), # Buginese
-	( 0x1ab0 , 0x1abe , 994 ), # Inherited
-	( 0x1b00 , 0x1b4b , 360 ), # Balinese
-	( 0x1b50 , 0x1b7c , 360 ), # Balinese
-	( 0x1b80 , 0x1bbf , 362 ), # Sundanese
-	( 0x1bc0 , 0x1bf3 , 365 ), # Batak
-	( 0x1bfc , 0x1bff , 365 ), # Batak
-	( 0x1c00 , 0x1c37 , 335 ), # Lepcha
-	( 0x1c3b , 0x1c49 , 335 ), # Lepcha
-	( 0x1c4d , 0x1c4f , 335 ), # Lepcha
-	( 0x1c50 , 0x1c7f , 261 ), # Ol_Chiki
-	( 0x1cc0 , 0x1cc7 , 362 ), # Sundanese
-	( 0x1cd0 , 0x1cd2 , 994 ), # Inherited
-	( 0x1cd3 , 0x1cd3 , 998 ), # Common
-	( 0x1cd4 , 0x1ce0 , 994 ), # Inherited
-	( 0x1ce1 , 0x1ce1 , 998 ), # Common
-	( 0x1ce2 , 0x1ce8 , 994 ), # Inherited
-	( 0x1ce9 , 0x1cec , 998 ), # Common
-	( 0x1ced , 0x1ced , 994 ), # Inherited
-	( 0x1cee , 0x1cf3 , 998 ), # Common
-	( 0x1cf4 , 0x1cf4 , 994 ), # Inherited
-	( 0x1cf5 , 0x1cf6 , 998 ), # Common
-	( 0x1cf8 , 0x1cf9 , 994 ), # Inherited
-	( 0x1d00 , 0x1d25 , 215 ), # Latin
-	( 0x1d26 , 0x1d2a , 200 ), # Greek
-	( 0x1d2b , 0x1d2b , 220 ), # Cyrillic
-	( 0x1d2c , 0x1d5c , 215 ), # Latin
-	( 0x1d5d , 0x1d61 , 200 ), # Greek
-	( 0x1d62 , 0x1d65 , 215 ), # Latin
-	( 0x1d66 , 0x1d6a , 200 ), # Greek
-	( 0x1d6b , 0x1d77 , 215 ), # Latin
-	( 0x1d78 , 0x1d78 , 220 ), # Cyrillic
-	( 0x1d79 , 0x1dbe , 215 ), # Latin
-	( 0x1dbf , 0x1dbf , 200 ), # Greek
-	( 0x1dc0 , 0x1df5 , 994 ), # Inherited
-	( 0x1dfc , 0x1dff , 994 ), # Inherited
-	( 0x1e00 , 0x1eff , 215 ), # Latin
-	( 0x1f00 , 0x1f15 , 200 ), # Greek
-	( 0x1f18 , 0x1f1d , 200 ), # Greek
-	( 0x1f20 , 0x1f45 , 200 ), # Greek
-	( 0x1f48 , 0x1f4d , 200 ), # Greek
-	( 0x1f50 , 0x1f57 , 200 ), # Greek
-	( 0x1f59 , 0x1f59 , 200 ), # Greek
-	( 0x1f5b , 0x1f5b , 200 ), # Greek
-	( 0x1f5d , 0x1f5d , 200 ), # Greek
-	( 0x1f5f , 0x1f7d , 200 ), # Greek
-	( 0x1f80 , 0x1fb4 , 200 ), # Greek
-	( 0x1fb6 , 0x1fc4 , 200 ), # Greek
-	( 0x1fc6 , 0x1fd3 , 200 ), # Greek
-	( 0x1fd6 , 0x1fdb , 200 ), # Greek
-	( 0x1fdd , 0x1fef , 200 ), # Greek
-	( 0x1ff2 , 0x1ff4 , 200 ), # Greek
-	( 0x1ff6 , 0x1ffe , 200 ), # Greek
-	( 0x2000 , 0x200b , 998 ), # Common
-	( 0x200c , 0x200d , 994 ), # Inherited
-	( 0x200e , 0x2064 , 998 ), # Common
-	( 0x2066 , 0x2070 , 998 ), # Common
-	( 0x2071 , 0x2071 , 215 ), # Latin
-	( 0x2074 , 0x207e , 998 ), # Common
-	( 0x207f , 0x207f , 215 ), # Latin
-	( 0x2080 , 0x208e , 998 ), # Common
-	( 0x2090 , 0x209c , 215 ), # Latin
-	( 0x20a0 , 0x20be , 998 ), # Common
-	( 0x20d0 , 0x20f0 , 994 ), # Inherited
-	( 0x2100 , 0x2125 , 998 ), # Common
-	( 0x2126 , 0x2126 , 200 ), # Greek
-	( 0x2127 , 0x2129 , 998 ), # Common
-	( 0x212a , 0x212b , 215 ), # Latin
-	( 0x212c , 0x2131 , 998 ), # Common
-	( 0x2132 , 0x2132 , 215 ), # Latin
-	( 0x2133 , 0x214d , 998 ), # Common
-	( 0x214e , 0x214e , 215 ), # Latin
-	( 0x214f , 0x215f , 998 ), # Common
-	( 0x2160 , 0x2188 , 215 ), # Latin
-	( 0x2189 , 0x218b , 998 ), # Common
-	( 0x2190 , 0x23fa , 998 ), # Common
-	( 0x2400 , 0x2426 , 998 ), # Common
-	( 0x2440 , 0x244a , 998 ), # Common
-	( 0x2460 , 0x27ff , 998 ), # Common
-	( 0x2800 , 0x28ff , 570 ), # Braille
-	( 0x2900 , 0x2b73 , 998 ), # Common
-	( 0x2b76 , 0x2b95 , 998 ), # Common
-	( 0x2b98 , 0x2bb9 , 998 ), # Common
-	( 0x2bbd , 0x2bc8 , 998 ), # Common
-	( 0x2bca , 0x2bd1 , 998 ), # Common
-	( 0x2bec , 0x2bef , 998 ), # Common
-	( 0x2c00 , 0x2c2e , 225 ), # Glagolitic
-	( 0x2c30 , 0x2c5e , 225 ), # Glagolitic
-	( 0x2c60 , 0x2c7f , 215 ), # Latin
-	( 0x2c80 , 0x2cf3 , 204 ), # Coptic
-	( 0x2cf9 , 0x2cff , 204 ), # Coptic
-	( 0x2d00 , 0x2d25 , 240 ), # Georgian
-	( 0x2d27 , 0x2d27 , 240 ), # Georgian
-	( 0x2d2d , 0x2d2d , 240 ), # Georgian
-	( 0x2d30 , 0x2d67 , 120 ), # Tifinagh
-	( 0x2d6f , 0x2d70 , 120 ), # Tifinagh
-	( 0x2d7f , 0x2d7f , 120 ), # Tifinagh
-	( 0x2d80 , 0x2d96 , 430 ), # Ethiopic
-	( 0x2da0 , 0x2da6 , 430 ), # Ethiopic
-	( 0x2da8 , 0x2dae , 430 ), # Ethiopic
-	( 0x2db0 , 0x2db6 , 430 ), # Ethiopic
-	( 0x2db8 , 0x2dbe , 430 ), # Ethiopic
-	( 0x2dc0 , 0x2dc6 , 430 ), # Ethiopic
-	( 0x2dc8 , 0x2dce , 430 ), # Ethiopic
-	( 0x2dd0 , 0x2dd6 , 430 ), # Ethiopic
-	( 0x2dd8 , 0x2dde , 430 ), # Ethiopic
-	( 0x2de0 , 0x2dff , 220 ), # Cyrillic
-	( 0x2e00 , 0x2e42 , 998 ), # Common
-	( 0x2e80 , 0x2e99 , 500 ), # Han
-	( 0x2e9b , 0x2ef3 , 500 ), # Han
-	( 0x2f00 , 0x2fd5 , 500 ), # Han
-	( 0x2ff0 , 0x2ffb , 998 ), # Common
-	( 0x3000 , 0x3004 , 998 ), # Common
-	( 0x3005 , 0x3005 , 500 ), # Han
-	( 0x3006 , 0x3006 , 998 ), # Common
-	( 0x3007 , 0x3007 , 500 ), # Han
-	( 0x3008 , 0x3020 , 998 ), # Common
-	( 0x3021 , 0x3029 , 500 ), # Han
-	( 0x302a , 0x302d , 994 ), # Inherited
-	( 0x302e , 0x302f , 286 ), # Hangul
-	( 0x3030 , 0x3037 , 998 ), # Common
-	( 0x3038 , 0x303b , 500 ), # Han
-	( 0x303c , 0x303f , 998 ), # Common
-	( 0x3041 , 0x3096 , 410 ), # Hiragana
-	( 0x3099 , 0x309a , 994 ), # Inherited
-	( 0x309b , 0x309c , 998 ), # Common
-	( 0x309d , 0x309f , 410 ), # Hiragana
-	( 0x30a0 , 0x30a0 , 998 ), # Common
-	( 0x30a1 , 0x30fa , 411 ), # Katakana
-	( 0x30fb , 0x30fc , 998 ), # Common
-	( 0x30fd , 0x30ff , 411 ), # Katakana
-	( 0x3105 , 0x312d , 285 ), # Bopomofo
-	( 0x3131 , 0x318e , 286 ), # Hangul
-	( 0x3190 , 0x319f , 998 ), # Common
-	( 0x31a0 , 0x31ba , 285 ), # Bopomofo
-	( 0x31c0 , 0x31e3 , 998 ), # Common
-	( 0x31f0 , 0x31ff , 411 ), # Katakana
-	( 0x3200 , 0x321e , 286 ), # Hangul
-	( 0x3220 , 0x325f , 998 ), # Common
-	( 0x3260 , 0x327e , 286 ), # Hangul
-	( 0x327f , 0x32cf , 998 ), # Common
-	( 0x32d0 , 0x32fe , 411 ), # Katakana
-	( 0x3300 , 0x3357 , 411 ), # Katakana
-	( 0x3358 , 0x33ff , 998 ), # Common
-	( 0x3400 , 0x4db5 , 500 ), # Han
-	( 0x4dc0 , 0x4dff , 998 ), # Common
-	( 0x4e00 , 0x9fd5 , 500 ), # Han
-	( 0xa000 , 0xa48c , 460 ), # Yi
-	( 0xa490 , 0xa4c6 , 460 ), # Yi
-	( 0xa4d0 , 0xa4ff , 399 ), # Lisu
-	( 0xa500 , 0xa62b , 470 ), # Vai
-	( 0xa640 , 0xa69f , 220 ), # Cyrillic
-	( 0xa6a0 , 0xa6f7 , 435 ), # Bamum
-	( 0xa700 , 0xa721 , 998 ), # Common
-	( 0xa722 , 0xa787 , 215 ), # Latin
-	( 0xa788 , 0xa78a , 998 ), # Common
-	( 0xa78b , 0xa7ad , 215 ), # Latin
-	( 0xa7b0 , 0xa7b7 , 215 ), # Latin
-	( 0xa7f7 , 0xa7ff , 215 ), # Latin
-	( 0xa800 , 0xa82b , 316 ), # Syloti_Nagri
-	( 0xa830 , 0xa839 , 998 ), # Common
-	( 0xa840 , 0xa877 , 331 ), # Phags_Pa
-	( 0xa880 , 0xa8c4 , 344 ), # Saurashtra
-	( 0xa8ce , 0xa8d9 , 344 ), # Saurashtra
-	( 0xa8e0 , 0xa8fd , 315 ), # Devanagari
-	( 0xa900 , 0xa92d , 357 ), # Kayah_Li
-	( 0xa92e , 0xa92e , 998 ), # Common
-	( 0xa92f , 0xa92f , 357 ), # Kayah_Li
-	( 0xa930 , 0xa953 , 363 ), # Rejang
-	( 0xa95f , 0xa95f , 363 ), # Rejang
-	( 0xa960 , 0xa97c , 286 ), # Hangul
-	( 0xa980 , 0xa9cd , 361 ), # Javanese
-	( 0xa9cf , 0xa9cf , 998 ), # Common
-	( 0xa9d0 , 0xa9d9 , 361 ), # Javanese
-	( 0xa9de , 0xa9df , 361 ), # Javanese
-	( 0xa9e0 , 0xa9fe , 350 ), # Myanmar
-	( 0xaa00 , 0xaa36 , 358 ), # Cham
-	( 0xaa40 , 0xaa4d , 358 ), # Cham
-	( 0xaa50 , 0xaa59 , 358 ), # Cham
-	( 0xaa5c , 0xaa5f , 358 ), # Cham
-	( 0xaa60 , 0xaa7f , 350 ), # Myanmar
-	( 0xaa80 , 0xaac2 , 359 ), # Tai_Viet
-	( 0xaadb , 0xaadf , 359 ), # Tai_Viet
-	( 0xaae0 , 0xaaf6 , 337 ), # Meetei_Mayek
-	( 0xab01 , 0xab06 , 430 ), # Ethiopic
-	( 0xab09 , 0xab0e , 430 ), # Ethiopic
-	( 0xab11 , 0xab16 , 430 ), # Ethiopic
-	( 0xab20 , 0xab26 , 430 ), # Ethiopic
-	( 0xab28 , 0xab2e , 430 ), # Ethiopic
-	( 0xab30 , 0xab5a , 215 ), # Latin
-	( 0xab5b , 0xab5b , 998 ), # Common
-	( 0xab5c , 0xab64 , 215 ), # Latin
-	( 0xab65 , 0xab65 , 200 ), # Greek
-	( 0xab70 , 0xabbf , 445 ), # Cherokee
-	( 0xabc0 , 0xabed , 337 ), # Meetei_Mayek
-	( 0xabf0 , 0xabf9 , 337 ), # Meetei_Mayek
-	( 0xac00 , 0xd7a3 , 286 ), # Hangul
-	( 0xd7b0 , 0xd7c6 , 286 ), # Hangul
-	( 0xd7cb , 0xd7fb , 286 ), # Hangul
-	( 0xf900 , 0xfa6d , 500 ), # Han
-	( 0xfa70 , 0xfad9 , 500 ), # Han
-	( 0xfb00 , 0xfb06 , 215 ), # Latin
-	( 0xfb13 , 0xfb17 , 230 ), # Armenian
-	( 0xfb1d , 0xfb36 , 125 ), # Hebrew
-	( 0xfb38 , 0xfb3c , 125 ), # Hebrew
-	( 0xfb3e , 0xfb3e , 125 ), # Hebrew
-	( 0xfb40 , 0xfb41 , 125 ), # Hebrew
-	( 0xfb43 , 0xfb44 , 125 ), # Hebrew
-	( 0xfb46 , 0xfb4f , 125 ), # Hebrew
-	( 0xfb50 , 0xfbc1 , 160 ), # Arabic
-	( 0xfbd3 , 0xfd3d , 160 ), # Arabic
-	( 0xfd3e , 0xfd3f , 998 ), # Common
-	( 0xfd50 , 0xfd8f , 160 ), # Arabic
-	( 0xfd92 , 0xfdc7 , 160 ), # Arabic
-	( 0xfdf0 , 0xfdfd , 160 ), # Arabic
-	( 0xfe00 , 0xfe0f , 994 ), # Inherited
-	( 0xfe10 , 0xfe19 , 998 ), # Common
-	( 0xfe20 , 0xfe2d , 994 ), # Inherited
-	( 0xfe2e , 0xfe2f , 220 ), # Cyrillic
-	( 0xfe30 , 0xfe52 , 998 ), # Common
-	( 0xfe54 , 0xfe66 , 998 ), # Common
-	( 0xfe68 , 0xfe6b , 998 ), # Common
-	( 0xfe70 , 0xfe74 , 160 ), # Arabic
-	( 0xfe76 , 0xfefc , 160 ), # Arabic
-	( 0xfeff , 0xfeff , 998 ), # Common
-	( 0xff01 , 0xff20 , 998 ), # Common
-	( 0xff21 , 0xff3a , 215 ), # Latin
-	( 0xff3b , 0xff40 , 998 ), # Common
-	( 0xff41 , 0xff5a , 215 ), # Latin
-	( 0xff5b , 0xff65 , 998 ), # Common
-	( 0xff66 , 0xff6f , 411 ), # Katakana
-	( 0xff70 , 0xff70 , 998 ), # Common
-	( 0xff71 , 0xff9d , 411 ), # Katakana
-	( 0xff9e , 0xff9f , 998 ), # Common
-	( 0xffa0 , 0xffbe , 286 ), # Hangul
-	( 0xffc2 , 0xffc7 , 286 ), # Hangul
-	( 0xffca , 0xffcf , 286 ), # Hangul
-	( 0xffd2 , 0xffd7 , 286 ), # Hangul
-	( 0xffda , 0xffdc , 286 ), # Hangul
-	( 0xffe0 , 0xffe6 , 998 ), # Common
-	( 0xffe8 , 0xffee , 998 ), # Common
-	( 0xfff9 , 0xfffd , 998 ), # Common
-	( 0x10000 , 0x1000b , 401 ), # Linear_B
-	( 0x1000d , 0x10026 , 401 ), # Linear_B
-	( 0x10028 , 0x1003a , 401 ), # Linear_B
-	( 0x1003c , 0x1003d , 401 ), # Linear_B
-	( 0x1003f , 0x1004d , 401 ), # Linear_B
-	( 0x10050 , 0x1005d , 401 ), # Linear_B
-	( 0x10080 , 0x100fa , 401 ), # Linear_B
-	( 0x10100 , 0x10102 , 998 ), # Common
-	( 0x10107 , 0x10133 , 998 ), # Common
-	( 0x10137 , 0x1013f , 998 ), # Common
-	( 0x10140 , 0x1018c , 200 ), # Greek
-	( 0x10190 , 0x1019b , 998 ), # Common
-	( 0x101a0 , 0x101a0 , 200 ), # Greek
-	( 0x101d0 , 0x101fc , 998 ), # Common
-	( 0x101fd , 0x101fd , 994 ), # Inherited
-	( 0x10280 , 0x1029c , 202 ), # Lycian
-	( 0x102a0 , 0x102d0 , 201 ), # Carian
-	( 0x102e0 , 0x102e0 , 994 ), # Inherited
-	( 0x102e1 , 0x102fb , 998 ), # Common
-	( 0x10300 , 0x10323 , 210 ), # Old_Italic
-	( 0x10330 , 0x1034a , 206 ), # Gothic
-	( 0x10350 , 0x1037a , 227 ), # Old_Permic
-	( 0x10380 , 0x1039d , 40 ), # Ugaritic
-	( 0x1039f , 0x1039f , 40 ), # Ugaritic
-	( 0x103a0 , 0x103c3 , 30 ), # Old_Persian
-	( 0x103c8 , 0x103d5 , 30 ), # Old_Persian
-	( 0x10400 , 0x1044f , 250 ), # Deseret
-	( 0x10450 , 0x1047f , 281 ), # Shavian
-	( 0x10480 , 0x1049d , 260 ), # Osmanya
-	( 0x104a0 , 0x104a9 , 260 ), # Osmanya
-	( 0x10500 , 0x10527 , 226 ), # Elbasan
-	( 0x10530 , 0x10563 , 239 ), # Caucasian_Albanian
-	( 0x1056f , 0x1056f , 239 ), # Caucasian_Albanian
-	( 0x10600 , 0x10736 , 400 ), # Linear_A
-	( 0x10740 , 0x10755 , 400 ), # Linear_A
-	( 0x10760 , 0x10767 , 400 ), # Linear_A
-	( 0x10800 , 0x10805 , 403 ), # Cypriot
-	( 0x10808 , 0x10808 , 403 ), # Cypriot
-	( 0x1080a , 0x10835 , 403 ), # Cypriot
-	( 0x10837 , 0x10838 , 403 ), # Cypriot
-	( 0x1083c , 0x1083c , 403 ), # Cypriot
-	( 0x1083f , 0x1083f , 403 ), # Cypriot
-	( 0x10840 , 0x10855 , 124 ), # Imperial_Aramaic
-	( 0x10857 , 0x1085f , 124 ), # Imperial_Aramaic
-	( 0x10860 , 0x1087f , 126 ), # Palmyrene
-	( 0x10880 , 0x1089e , 159 ), # Nabataean
-	( 0x108a7 , 0x108af , 159 ), # Nabataean
-	( 0x10900 , 0x1091b , 115 ), # Phoenician
-	( 0x1091f , 0x1091f , 115 ), # Phoenician
-	( 0x10920 , 0x10939 , 116 ), # Lydian
-	( 0x1093f , 0x1093f , 116 ), # Lydian
-	( 0x10980 , 0x1099f , 100 ), # Meroitic_Hieroglyphs
-	( 0x109a0 , 0x109b7 , 101 ), # Meroitic_Cursive
-	( 0x109bc , 0x109cf , 101 ), # Meroitic_Cursive
-	( 0x109d2 , 0x109ff , 101 ), # Meroitic_Cursive
-	( 0x10a00 , 0x10a03 , 305 ), # Kharoshthi
-	( 0x10a05 , 0x10a06 , 305 ), # Kharoshthi
-	( 0x10a0c , 0x10a13 , 305 ), # Kharoshthi
-	( 0x10a15 , 0x10a17 , 305 ), # Kharoshthi
-	( 0x10a19 , 0x10a33 , 305 ), # Kharoshthi
-	( 0x10a38 , 0x10a3a , 305 ), # Kharoshthi
-	( 0x10a3f , 0x10a47 , 305 ), # Kharoshthi
-	( 0x10a50 , 0x10a58 , 305 ), # Kharoshthi
-	( 0x10a60 , 0x10a7f , 105 ), # Old_South_Arabian
-	( 0x10a80 , 0x10a9f , 106 ), # Old_North_Arabian
-	( 0x10ac0 , 0x10ae6 , 139 ), # Manichaean
-	( 0x10aeb , 0x10af6 , 139 ), # Manichaean
-	( 0x10b00 , 0x10b35 , 134 ), # Avestan
-	( 0x10b39 , 0x10b3f , 134 ), # Avestan
-	( 0x10b40 , 0x10b55 , 130 ), # Inscriptional_Parthian
-	( 0x10b58 , 0x10b5f , 130 ), # Inscriptional_Parthian
-	( 0x10b60 , 0x10b72 , 131 ), # Inscriptional_Pahlavi
-	( 0x10b78 , 0x10b7f , 131 ), # Inscriptional_Pahlavi
-	( 0x10b80 , 0x10b91 , 132 ), # Psalter_Pahlavi
-	( 0x10b99 , 0x10b9c , 132 ), # Psalter_Pahlavi
-	( 0x10ba9 , 0x10baf , 132 ), # Psalter_Pahlavi
-	( 0x10c00 , 0x10c48 , 175 ), # Old_Turkic
-	( 0x10e60 , 0x10e7e , 160 ), # Arabic
-	( 0x11000 , 0x1104d , 300 ), # Brahmi
-	( 0x11052 , 0x1106f , 300 ), # Brahmi
-	( 0x1107f , 0x1107f , 300 ), # Brahmi
-	( 0x11080 , 0x110c1 , 317 ), # Kaithi
-	( 0x110d0 , 0x110e8 , 398 ), # Sora_Sompeng
-	( 0x110f0 , 0x110f9 , 398 ), # Sora_Sompeng
-	( 0x11100 , 0x11134 , 349 ), # Chakma
-	( 0x11136 , 0x11143 , 349 ), # Chakma
-	( 0x11150 , 0x11176 , 314 ), # Mahajani
-	( 0x11180 , 0x111cd , 319 ), # Sharada
-	( 0x111d0 , 0x111df , 319 ), # Sharada
-	( 0x111e1 , 0x111f4 , 348 ), # Sinhala
-	( 0x11200 , 0x11211 , 322 ), # Khojki
-	( 0x11213 , 0x1123d , 322 ), # Khojki
-	( 0x11280 , 0x11286 , 323 ), # Multani
-	( 0x11288 , 0x11288 , 323 ), # Multani
-	( 0x1128a , 0x1128d , 323 ), # Multani
-	( 0x1128f , 0x1129d , 323 ), # Multani
-	( 0x1129f , 0x112a9 , 323 ), # Multani
-	( 0x112b0 , 0x112ea , 318 ), # Khudawadi
-	( 0x112f0 , 0x112f9 , 318 ), # Khudawadi
-	( 0x11300 , 0x11303 , 343 ), # Grantha
-	( 0x11305 , 0x1130c , 343 ), # Grantha
-	( 0x1130f , 0x11310 , 343 ), # Grantha
-	( 0x11313 , 0x11328 , 343 ), # Grantha
-	( 0x1132a , 0x11330 , 343 ), # Grantha
-	( 0x11332 , 0x11333 , 343 ), # Grantha
-	( 0x11335 , 0x11339 , 343 ), # Grantha
-	( 0x1133c , 0x11344 , 343 ), # Grantha
-	( 0x11347 , 0x11348 , 343 ), # Grantha
-	( 0x1134b , 0x1134d , 343 ), # Grantha
-	( 0x11350 , 0x11350 , 343 ), # Grantha
-	( 0x11357 , 0x11357 , 343 ), # Grantha
-	( 0x1135d , 0x11363 , 343 ), # Grantha
-	( 0x11366 , 0x1136c , 343 ), # Grantha
-	( 0x11370 , 0x11374 , 343 ), # Grantha
-	( 0x11480 , 0x114c7 , 326 ), # Tirhuta
-	( 0x114d0 , 0x114d9 , 326 ), # Tirhuta
-	( 0x11580 , 0x115b5 , 302 ), # Siddham
-	( 0x115b8 , 0x115dd , 302 ), # Siddham
-	( 0x11600 , 0x11644 , 324 ), # Modi
-	( 0x11650 , 0x11659 , 324 ), # Modi
-	( 0x11680 , 0x116b7 , 321 ), # Takri
-	( 0x116c0 , 0x116c9 , 321 ), # Takri
-	( 0x118a0 , 0x118f2 , 262 ), # Warang_Citi
-	( 0x118ff , 0x118ff , 262 ), # Warang_Citi
-	( 0x11ac0 , 0x11af8 , 263 ), # Pau_Cin_Hau
-	( 0x12000 , 0x12399 , 20 ), # Cuneiform
-	( 0x12400 , 0x1246e , 20 ), # Cuneiform
-	( 0x12470 , 0x12474 , 20 ), # Cuneiform
-	( 0x12480 , 0x12543 , 20 ), # Cuneiform
-	( 0x13000 , 0x1342e , 50 ), # Egyptian_Hieroglyphs
-	( 0x16800 , 0x16a38 , 435 ), # Bamum
-	( 0x16a40 , 0x16a5e , 199 ), # Mro
-	( 0x16a60 , 0x16a69 , 199 ), # Mro
-	( 0x16a6e , 0x16a6f , 199 ), # Mro
-	( 0x16ad0 , 0x16aed , 259 ), # Bassa_Vah
-	( 0x16af0 , 0x16af5 , 259 ), # Bassa_Vah
-	( 0x16b00 , 0x16b45 , 450 ), # Pahawh_Hmong
-	( 0x16b50 , 0x16b59 , 450 ), # Pahawh_Hmong
-	( 0x16b5b , 0x16b61 , 450 ), # Pahawh_Hmong
-	( 0x16b63 , 0x16b77 , 450 ), # Pahawh_Hmong
-	( 0x16b7d , 0x16b8f , 450 ), # Pahawh_Hmong
-	( 0x16f00 , 0x16f44 , 282 ), # Miao
-	( 0x16f50 , 0x16f7e , 282 ), # Miao
-	( 0x16f8f , 0x16f9f , 282 ), # Miao
-	( 0x1b000 , 0x1b000 , 411 ), # Katakana
-	( 0x1b001 , 0x1b001 , 410 ), # Hiragana
-	( 0x1bc00 , 0x1bc6a , 755 ), # Duployan
-	( 0x1bc70 , 0x1bc7c , 755 ), # Duployan
-	( 0x1bc80 , 0x1bc88 , 755 ), # Duployan
-	( 0x1bc90 , 0x1bc99 , 755 ), # Duployan
-	( 0x1bc9c , 0x1bc9f , 755 ), # Duployan
-	( 0x1bca0 , 0x1bca3 , 998 ), # Common
-	( 0x1d000 , 0x1d0f5 , 998 ), # Common
-	( 0x1d100 , 0x1d126 , 998 ), # Common
-	( 0x1d129 , 0x1d166 , 998 ), # Common
-	( 0x1d167 , 0x1d169 , 994 ), # Inherited
-	( 0x1d16a , 0x1d17a , 998 ), # Common
-	( 0x1d17b , 0x1d182 , 994 ), # Inherited
-	( 0x1d183 , 0x1d184 , 998 ), # Common
-	( 0x1d185 , 0x1d18b , 994 ), # Inherited
-	( 0x1d18c , 0x1d1a9 , 998 ), # Common
-	( 0x1d1aa , 0x1d1ad , 994 ), # Inherited
-	( 0x1d1ae , 0x1d1e8 , 998 ), # Common
-	( 0x1d200 , 0x1d245 , 200 ), # Greek
-	( 0x1d300 , 0x1d356 , 998 ), # Common
-	( 0x1d360 , 0x1d371 , 998 ), # Common
-	( 0x1d400 , 0x1d454 , 998 ), # Common
-	( 0x1d456 , 0x1d49c , 998 ), # Common
-	( 0x1d49e , 0x1d49f , 998 ), # Common
-	( 0x1d4a2 , 0x1d4a2 , 998 ), # Common
-	( 0x1d4a5 , 0x1d4a6 , 998 ), # Common
-	( 0x1d4a9 , 0x1d4ac , 998 ), # Common
-	( 0x1d4ae , 0x1d4b9 , 998 ), # Common
-	( 0x1d4bb , 0x1d4bb , 998 ), # Common
-	( 0x1d4bd , 0x1d4c3 , 998 ), # Common
-	( 0x1d4c5 , 0x1d505 , 998 ), # Common
-	( 0x1d507 , 0x1d50a , 998 ), # Common
-	( 0x1d50d , 0x1d514 , 998 ), # Common
-	( 0x1d516 , 0x1d51c , 998 ), # Common
-	( 0x1d51e , 0x1d539 , 998 ), # Common
-	( 0x1d53b , 0x1d53e , 998 ), # Common
-	( 0x1d540 , 0x1d544 , 998 ), # Common
-	( 0x1d546 , 0x1d546 , 998 ), # Common
-	( 0x1d54a , 0x1d550 , 998 ), # Common
-	( 0x1d552 , 0x1d6a5 , 998 ), # Common
-	( 0x1d6a8 , 0x1d7cb , 998 ), # Common
-	( 0x1d7ce , 0x1d7ff , 998 ), # Common
-	( 0x1e800 , 0x1e8c4 , 438 ), # Mende_Kikakui
-	( 0x1e8c7 , 0x1e8d6 , 438 ), # Mende_Kikakui
-	( 0x1ee00 , 0x1ee03 , 160 ), # Arabic
-	( 0x1ee05 , 0x1ee1f , 160 ), # Arabic
-	( 0x1ee21 , 0x1ee22 , 160 ), # Arabic
-	( 0x1ee24 , 0x1ee24 , 160 ), # Arabic
-	( 0x1ee27 , 0x1ee27 , 160 ), # Arabic
-	( 0x1ee29 , 0x1ee32 , 160 ), # Arabic
-	( 0x1ee34 , 0x1ee37 , 160 ), # Arabic
-	( 0x1ee39 , 0x1ee39 , 160 ), # Arabic
-	( 0x1ee3b , 0x1ee3b , 160 ), # Arabic
-	( 0x1ee42 , 0x1ee42 , 160 ), # Arabic
-	( 0x1ee47 , 0x1ee47 , 160 ), # Arabic
-	( 0x1ee49 , 0x1ee49 , 160 ), # Arabic
-	( 0x1ee4b , 0x1ee4b , 160 ), # Arabic
-	( 0x1ee4d , 0x1ee4f , 160 ), # Arabic
-	( 0x1ee51 , 0x1ee52 , 160 ), # Arabic
-	( 0x1ee54 , 0x1ee54 , 160 ), # Arabic
-	( 0x1ee57 , 0x1ee57 , 160 ), # Arabic
-	( 0x1ee59 , 0x1ee59 , 160 ), # Arabic
-	( 0x1ee5b , 0x1ee5b , 160 ), # Arabic
-	( 0x1ee5d , 0x1ee5d , 160 ), # Arabic
-	( 0x1ee5f , 0x1ee5f , 160 ), # Arabic
-	( 0x1ee61 , 0x1ee62 , 160 ), # Arabic
-	( 0x1ee64 , 0x1ee64 , 160 ), # Arabic
-	( 0x1ee67 , 0x1ee6a , 160 ), # Arabic
-	( 0x1ee6c , 0x1ee72 , 160 ), # Arabic
-	( 0x1ee74 , 0x1ee77 , 160 ), # Arabic
-	( 0x1ee79 , 0x1ee7c , 160 ), # Arabic
-	( 0x1ee7e , 0x1ee7e , 160 ), # Arabic
-	( 0x1ee80 , 0x1ee89 , 160 ), # Arabic
-	( 0x1ee8b , 0x1ee9b , 160 ), # Arabic
-	( 0x1eea1 , 0x1eea3 , 160 ), # Arabic
-	( 0x1eea5 , 0x1eea9 , 160 ), # Arabic
-	( 0x1eeab , 0x1eebb , 160 ), # Arabic
-	( 0x1eef0 , 0x1eef1 , 160 ), # Arabic
-	( 0x1f000 , 0x1f02b , 998 ), # Common
-	( 0x1f030 , 0x1f093 , 998 ), # Common
-	( 0x1f0a0 , 0x1f0ae , 998 ), # Common
-	( 0x1f0b1 , 0x1f0bf , 998 ), # Common
-	( 0x1f0c1 , 0x1f0cf , 998 ), # Common
-	( 0x1f0d1 , 0x1f0f5 , 998 ), # Common
-	( 0x1f100 , 0x1f10c , 998 ), # Common
-	( 0x1f110 , 0x1f12e , 998 ), # Common
-	( 0x1f130 , 0x1f16b , 998 ), # Common
-	( 0x1f170 , 0x1f19a , 998 ), # Common
-	( 0x1f1e6 , 0x1f1ff , 998 ), # Common
-	( 0x1f200 , 0x1f200 , 410 ), # Hiragana
-	( 0x1f201 , 0x1f202 , 998 ), # Common
-	( 0x1f210 , 0x1f23a , 998 ), # Common
-	( 0x1f240 , 0x1f248 , 998 ), # Common
-	( 0x1f250 , 0x1f251 , 998 ), # Common
-	( 0x1f300 , 0x1f579 , 998 ), # Common
-	( 0x1f57b , 0x1f5a3 , 998 ), # Common
-	( 0x1f5a5 , 0x1f6d0 , 998 ), # Common
-	( 0x1f6e0 , 0x1f6ec , 998 ), # Common
-	( 0x1f6f0 , 0x1f6f3 , 998 ), # Common
-	( 0x1f700 , 0x1f773 , 998 ), # Common
-	( 0x1f780 , 0x1f7d4 , 998 ), # Common
-	( 0x1f800 , 0x1f80b , 998 ), # Common
-	( 0x1f810 , 0x1f847 , 998 ), # Common
-	( 0x1f850 , 0x1f859 , 998 ), # Common
-	( 0x1f860 , 0x1f887 , 998 ), # Common
-	( 0x1f890 , 0x1f8ad , 998 ), # Common
-	( 0x1f910 , 0x1f918 , 998 ), # Common
-	( 0x1f980 , 0x1f984 , 998 ), # Common
-	( 0x1f9c0 , 0x1f9c0 , 998 ), # Common
-	( 0x20000 , 0x2a6d6 , 500 ), # Han
-	( 0x2a700 , 0x2b734 , 500 ), # Han
-	( 0x2b740 , 0x2b81d , 500 ), # Han
-	( 0x2b820 , 0x2cea1 , 500 ), # Han
-	( 0x2f800 , 0x2fa1d , 500 ), # Han
-	( 0xe0001 , 0xe0001 , 998 ), # Common
-	( 0xe0020 , 0xe007f , 998 ), # Common
+	( 0X0 , 0X40 , "Common" ), # Common
+	( 0X41 , 0X5a , "Latin" ), # Latin
+	( 0X5b , 0X60 , "Common" ), # Common
+	( 0X61 , 0X7a , "Latin" ), # Latin
+	( 0X7b , 0Xa9 , "Common" ), # Common
+	( 0Xaa , 0Xaa , "Latin" ), # Latin
+	( 0Xab , 0Xb9 , "Common" ), # Common
+	( 0Xba , 0Xba , "Latin" ), # Latin
+	( 0Xbb , 0Xbf , "Common" ), # Common
+	( 0Xc0 , 0Xd6 , "Latin" ), # Latin
+	( 0Xd7 , 0Xd7 , "Common" ), # Common
+	( 0Xd8 , 0Xf6 , "Latin" ), # Latin
+	( 0Xf7 , 0Xf7 , "Common" ), # Common
+	( 0Xf8 , 0X2b8 , "Latin" ), # Latin
+	( 0X2b9 , 0X2df , "Common" ), # Common
+	( 0X2e0 , 0X2e4 , "Latin" ), # Latin
+	( 0X2e5 , 0X2e9 , "Common" ), # Common
+	( 0X2ea , 0X2eb , "Bopomofo" ), # Bopomofo
+	( 0X2ec , 0X2ff , "Common" ), # Common
+	( 0X300 , 0X36f , "Inherited" ), # Inherited
+	( 0X370 , 0X373 , "Greek" ), # Greek
+	( 0X374 , 0X374 , "Common" ), # Common
+	( 0X375 , 0X377 , "Greek" ), # Greek
+	( 0X37a , 0X37d , "Greek" ), # Greek
+	( 0X37e , 0X37e , "Common" ), # Common
+	( 0X37f , 0X37f , "Greek" ), # Greek
+	( 0X384 , 0X384 , "Greek" ), # Greek
+	( 0X385 , 0X385 , "Common" ), # Common
+	( 0X386 , 0X386 , "Greek" ), # Greek
+	( 0X387 , 0X387 , "Common" ), # Common
+	( 0X388 , 0X38a , "Greek" ), # Greek
+	( 0X38c , 0X38c , "Greek" ), # Greek
+	( 0X38e , 0X3a1 , "Greek" ), # Greek
+	( 0X3a3 , 0X3e1 , "Greek" ), # Greek
+	( 0X3e2 , 0X3ef , "Coptic" ), # Coptic
+	( 0X3f0 , 0X3ff , "Greek" ), # Greek
+	( 0X400 , 0X484 , "Cyrillic" ), # Cyrillic
+	( 0X485 , 0X486 , "Inherited" ), # Inherited
+	( 0X487 , 0X52f , "Cyrillic" ), # Cyrillic
+	( 0X531 , 0X556 , "Armenian" ), # Armenian
+	( 0X559 , 0X55f , "Armenian" ), # Armenian
+	( 0X561 , 0X587 , "Armenian" ), # Armenian
+	( 0X589 , 0X589 , "Common" ), # Common
+	( 0X58a , 0X58a , "Armenian" ), # Armenian
+	( 0X58d , 0X58f , "Armenian" ), # Armenian
+	( 0X591 , 0X5c7 , "Hebrew" ), # Hebrew
+	( 0X5d0 , 0X5ea , "Hebrew" ), # Hebrew
+	( 0X5f0 , 0X5f4 , "Hebrew" ), # Hebrew
+	( 0X600 , 0X604 , "Arabic" ), # Arabic
+	( 0X605 , 0X605 , "Common" ), # Common
+	( 0X606 , 0X60b , "Arabic" ), # Arabic
+	( 0X60c , 0X60c , "Common" ), # Common
+	( 0X60d , 0X61a , "Arabic" ), # Arabic
+	( 0X61b , 0X61c , "Common" ), # Common
+	( 0X61e , 0X61e , "Arabic" ), # Arabic
+	( 0X61f , 0X61f , "Common" ), # Common
+	( 0X620 , 0X63f , "Arabic" ), # Arabic
+	( 0X640 , 0X640 , "Common" ), # Common
+	( 0X641 , 0X64a , "Arabic" ), # Arabic
+	( 0X64b , 0X655 , "Inherited" ), # Inherited
+	( 0X656 , 0X66f , "Arabic" ), # Arabic
+	( 0X670 , 0X670 , "Inherited" ), # Inherited
+	( 0X671 , 0X6dc , "Arabic" ), # Arabic
+	( 0X6dd , 0X6dd , "Common" ), # Common
+	( 0X6de , 0X6ff , "Arabic" ), # Arabic
+	( 0X700 , 0X70d , "Syriac" ), # Syriac
+	( 0X70f , 0X74a , "Syriac" ), # Syriac
+	( 0X74d , 0X74f , "Syriac" ), # Syriac
+	( 0X750 , 0X77f , "Arabic" ), # Arabic
+	( 0X780 , 0X7b1 , "Thaana" ), # Thaana
+	( 0X7c0 , 0X7fa , "Nko" ), # Nko
+	( 0X800 , 0X82d , "Samaritan" ), # Samaritan
+	( 0X830 , 0X83e , "Samaritan" ), # Samaritan
+	( 0X840 , 0X85b , "Mandaic" ), # Mandaic
+	( 0X85e , 0X85e , "Mandaic" ), # Mandaic
+	( 0X8a0 , 0X8b4 , "Arabic" ), # Arabic
+	( 0X8e3 , 0X8ff , "Arabic" ), # Arabic
+	( 0X900 , 0X950 , "Devanagari" ), # Devanagari
+	( 0X951 , 0X952 , "Inherited" ), # Inherited
+	( 0X953 , 0X963 , "Devanagari" ), # Devanagari
+	( 0X964 , 0X965 , "Common" ), # Common
+	( 0X966 , 0X97f , "Devanagari" ), # Devanagari
+	( 0X980 , 0X983 , "Bengali" ), # Bengali
+	( 0X985 , 0X98c , "Bengali" ), # Bengali
+	( 0X98f , 0X990 , "Bengali" ), # Bengali
+	( 0X993 , 0X9a8 , "Bengali" ), # Bengali
+	( 0X9aa , 0X9b0 , "Bengali" ), # Bengali
+	( 0X9b2 , 0X9b2 , "Bengali" ), # Bengali
+	( 0X9b6 , 0X9b9 , "Bengali" ), # Bengali
+	( 0X9bc , 0X9c4 , "Bengali" ), # Bengali
+	( 0X9c7 , 0X9c8 , "Bengali" ), # Bengali
+	( 0X9cb , 0X9ce , "Bengali" ), # Bengali
+	( 0X9d7 , 0X9d7 , "Bengali" ), # Bengali
+	( 0X9dc , 0X9dd , "Bengali" ), # Bengali
+	( 0X9df , 0X9e3 , "Bengali" ), # Bengali
+	( 0X9e6 , 0X9fb , "Bengali" ), # Bengali
+	( 0Xa01 , 0Xa03 , "Gurmukhi" ), # Gurmukhi
+	( 0Xa05 , 0Xa0a , "Gurmukhi" ), # Gurmukhi
+	( 0Xa0f , 0Xa10 , "Gurmukhi" ), # Gurmukhi
+	( 0Xa13 , 0Xa28 , "Gurmukhi" ), # Gurmukhi
+	( 0Xa2a , 0Xa30 , "Gurmukhi" ), # Gurmukhi
+	( 0Xa32 , 0Xa33 , "Gurmukhi" ), # Gurmukhi
+	( 0Xa35 , 0Xa36 , "Gurmukhi" ), # Gurmukhi
+	( 0Xa38 , 0Xa39 , "Gurmukhi" ), # Gurmukhi
+	( 0Xa3c , 0Xa3c , "Gurmukhi" ), # Gurmukhi
+	( 0Xa3e , 0Xa42 , "Gurmukhi" ), # Gurmukhi
+	( 0Xa47 , 0Xa48 , "Gurmukhi" ), # Gurmukhi
+	( 0Xa4b , 0Xa4d , "Gurmukhi" ), # Gurmukhi
+	( 0Xa51 , 0Xa51 , "Gurmukhi" ), # Gurmukhi
+	( 0Xa59 , 0Xa5c , "Gurmukhi" ), # Gurmukhi
+	( 0Xa5e , 0Xa5e , "Gurmukhi" ), # Gurmukhi
+	( 0Xa66 , 0Xa75 , "Gurmukhi" ), # Gurmukhi
+	( 0Xa81 , 0Xa83 , "Gujarati" ), # Gujarati
+	( 0Xa85 , 0Xa8d , "Gujarati" ), # Gujarati
+	( 0Xa8f , 0Xa91 , "Gujarati" ), # Gujarati
+	( 0Xa93 , 0Xaa8 , "Gujarati" ), # Gujarati
+	( 0Xaaa , 0Xab0 , "Gujarati" ), # Gujarati
+	( 0Xab2 , 0Xab3 , "Gujarati" ), # Gujarati
+	( 0Xab5 , 0Xab9 , "Gujarati" ), # Gujarati
+	( 0Xabc , 0Xac5 , "Gujarati" ), # Gujarati
+	( 0Xac7 , 0Xac9 , "Gujarati" ), # Gujarati
+	( 0Xacb , 0Xacd , "Gujarati" ), # Gujarati
+	( 0Xad0 , 0Xad0 , "Gujarati" ), # Gujarati
+	( 0Xae0 , 0Xae3 , "Gujarati" ), # Gujarati
+	( 0Xae6 , 0Xaf1 , "Gujarati" ), # Gujarati
+	( 0Xaf9 , 0Xaf9 , "Gujarati" ), # Gujarati
+	( 0Xb01 , 0Xb03 , "Oriya" ), # Oriya
+	( 0Xb05 , 0Xb0c , "Oriya" ), # Oriya
+	( 0Xb0f , 0Xb10 , "Oriya" ), # Oriya
+	( 0Xb13 , 0Xb28 , "Oriya" ), # Oriya
+	( 0Xb2a , 0Xb30 , "Oriya" ), # Oriya
+	( 0Xb32 , 0Xb33 , "Oriya" ), # Oriya
+	( 0Xb35 , 0Xb39 , "Oriya" ), # Oriya
+	( 0Xb3c , 0Xb44 , "Oriya" ), # Oriya
+	( 0Xb47 , 0Xb48 , "Oriya" ), # Oriya
+	( 0Xb4b , 0Xb4d , "Oriya" ), # Oriya
+	( 0Xb56 , 0Xb57 , "Oriya" ), # Oriya
+	( 0Xb5c , 0Xb5d , "Oriya" ), # Oriya
+	( 0Xb5f , 0Xb63 , "Oriya" ), # Oriya
+	( 0Xb66 , 0Xb77 , "Oriya" ), # Oriya
+	( 0Xb82 , 0Xb83 , "Tamil" ), # Tamil
+	( 0Xb85 , 0Xb8a , "Tamil" ), # Tamil
+	( 0Xb8e , 0Xb90 , "Tamil" ), # Tamil
+	( 0Xb92 , 0Xb95 , "Tamil" ), # Tamil
+	( 0Xb99 , 0Xb9a , "Tamil" ), # Tamil
+	( 0Xb9c , 0Xb9c , "Tamil" ), # Tamil
+	( 0Xb9e , 0Xb9f , "Tamil" ), # Tamil
+	( 0Xba3 , 0Xba4 , "Tamil" ), # Tamil
+	( 0Xba8 , 0Xbaa , "Tamil" ), # Tamil
+	( 0Xbae , 0Xbb9 , "Tamil" ), # Tamil
+	( 0Xbbe , 0Xbc2 , "Tamil" ), # Tamil
+	( 0Xbc6 , 0Xbc8 , "Tamil" ), # Tamil
+	( 0Xbca , 0Xbcd , "Tamil" ), # Tamil
+	( 0Xbd0 , 0Xbd0 , "Tamil" ), # Tamil
+	( 0Xbd7 , 0Xbd7 , "Tamil" ), # Tamil
+	( 0Xbe6 , 0Xbfa , "Tamil" ), # Tamil
+	( 0Xc00 , 0Xc03 , "Telugu" ), # Telugu
+	( 0Xc05 , 0Xc0c , "Telugu" ), # Telugu
+	( 0Xc0e , 0Xc10 , "Telugu" ), # Telugu
+	( 0Xc12 , 0Xc28 , "Telugu" ), # Telugu
+	( 0Xc2a , 0Xc39 , "Telugu" ), # Telugu
+	( 0Xc3d , 0Xc44 , "Telugu" ), # Telugu
+	( 0Xc46 , 0Xc48 , "Telugu" ), # Telugu
+	( 0Xc4a , 0Xc4d , "Telugu" ), # Telugu
+	( 0Xc55 , 0Xc56 , "Telugu" ), # Telugu
+	( 0Xc58 , 0Xc5a , "Telugu" ), # Telugu
+	( 0Xc60 , 0Xc63 , "Telugu" ), # Telugu
+	( 0Xc66 , 0Xc6f , "Telugu" ), # Telugu
+	( 0Xc78 , 0Xc7f , "Telugu" ), # Telugu
+	( 0Xc81 , 0Xc83 , "Kannada" ), # Kannada
+	( 0Xc85 , 0Xc8c , "Kannada" ), # Kannada
+	( 0Xc8e , 0Xc90 , "Kannada" ), # Kannada
+	( 0Xc92 , 0Xca8 , "Kannada" ), # Kannada
+	( 0Xcaa , 0Xcb3 , "Kannada" ), # Kannada
+	( 0Xcb5 , 0Xcb9 , "Kannada" ), # Kannada
+	( 0Xcbc , 0Xcc4 , "Kannada" ), # Kannada
+	( 0Xcc6 , 0Xcc8 , "Kannada" ), # Kannada
+	( 0Xcca , 0Xccd , "Kannada" ), # Kannada
+	( 0Xcd5 , 0Xcd6 , "Kannada" ), # Kannada
+	( 0Xcde , 0Xcde , "Kannada" ), # Kannada
+	( 0Xce0 , 0Xce3 , "Kannada" ), # Kannada
+	( 0Xce6 , 0Xcef , "Kannada" ), # Kannada
+	( 0Xcf1 , 0Xcf2 , "Kannada" ), # Kannada
+	( 0Xd01 , 0Xd03 , "Malayalam" ), # Malayalam
+	( 0Xd05 , 0Xd0c , "Malayalam" ), # Malayalam
+	( 0Xd0e , 0Xd10 , "Malayalam" ), # Malayalam
+	( 0Xd12 , 0Xd3a , "Malayalam" ), # Malayalam
+	( 0Xd3d , 0Xd44 , "Malayalam" ), # Malayalam
+	( 0Xd46 , 0Xd48 , "Malayalam" ), # Malayalam
+	( 0Xd4a , 0Xd4e , "Malayalam" ), # Malayalam
+	( 0Xd57 , 0Xd57 , "Malayalam" ), # Malayalam
+	( 0Xd5f , 0Xd63 , "Malayalam" ), # Malayalam
+	( 0Xd66 , 0Xd75 , "Malayalam" ), # Malayalam
+	( 0Xd79 , 0Xd7f , "Malayalam" ), # Malayalam
+	( 0Xd82 , 0Xd83 , "Sinhala" ), # Sinhala
+	( 0Xd85 , 0Xd96 , "Sinhala" ), # Sinhala
+	( 0Xd9a , 0Xdb1 , "Sinhala" ), # Sinhala
+	( 0Xdb3 , 0Xdbb , "Sinhala" ), # Sinhala
+	( 0Xdbd , 0Xdbd , "Sinhala" ), # Sinhala
+	( 0Xdc0 , 0Xdc6 , "Sinhala" ), # Sinhala
+	( 0Xdca , 0Xdca , "Sinhala" ), # Sinhala
+	( 0Xdcf , 0Xdd4 , "Sinhala" ), # Sinhala
+	( 0Xdd6 , 0Xdd6 , "Sinhala" ), # Sinhala
+	( 0Xdd8 , 0Xddf , "Sinhala" ), # Sinhala
+	( 0Xde6 , 0Xdef , "Sinhala" ), # Sinhala
+	( 0Xdf2 , 0Xdf4 , "Sinhala" ), # Sinhala
+	( 0Xe01 , 0Xe3a , "Thai" ), # Thai
+	( 0Xe3f , 0Xe3f , "Common" ), # Common
+	( 0Xe40 , 0Xe5b , "Thai" ), # Thai
+	( 0Xe81 , 0Xe82 , "Lao" ), # Lao
+	( 0Xe84 , 0Xe84 , "Lao" ), # Lao
+	( 0Xe87 , 0Xe88 , "Lao" ), # Lao
+	( 0Xe8a , 0Xe8a , "Lao" ), # Lao
+	( 0Xe8d , 0Xe8d , "Lao" ), # Lao
+	( 0Xe94 , 0Xe97 , "Lao" ), # Lao
+	( 0Xe99 , 0Xe9f , "Lao" ), # Lao
+	( 0Xea1 , 0Xea3 , "Lao" ), # Lao
+	( 0Xea5 , 0Xea5 , "Lao" ), # Lao
+	( 0Xea7 , 0Xea7 , "Lao" ), # Lao
+	( 0Xeaa , 0Xeab , "Lao" ), # Lao
+	( 0Xead , 0Xeb9 , "Lao" ), # Lao
+	( 0Xebb , 0Xebd , "Lao" ), # Lao
+	( 0Xec0 , 0Xec4 , "Lao" ), # Lao
+	( 0Xec6 , 0Xec6 , "Lao" ), # Lao
+	( 0Xec8 , 0Xecd , "Lao" ), # Lao
+	( 0Xed0 , 0Xed9 , "Lao" ), # Lao
+	( 0Xedc , 0Xedf , "Lao" ), # Lao
+	( 0Xf00 , 0Xf47 , "Tibetan" ), # Tibetan
+	( 0Xf49 , 0Xf6c , "Tibetan" ), # Tibetan
+	( 0Xf71 , 0Xf97 , "Tibetan" ), # Tibetan
+	( 0Xf99 , 0Xfbc , "Tibetan" ), # Tibetan
+	( 0Xfbe , 0Xfcc , "Tibetan" ), # Tibetan
+	( 0Xfce , 0Xfd4 , "Tibetan" ), # Tibetan
+	( 0Xfd5 , 0Xfd8 , "Common" ), # Common
+	( 0Xfd9 , 0Xfda , "Tibetan" ), # Tibetan
+	( 0X1000 , 0X109f , "Myanmar" ), # Myanmar
+	( 0X10a0 , 0X10c5 , "Georgian" ), # Georgian
+	( 0X10c7 , 0X10c7 , "Georgian" ), # Georgian
+	( 0X10cd , 0X10cd , "Georgian" ), # Georgian
+	( 0X10d0 , 0X10fa , "Georgian" ), # Georgian
+	( 0X10fb , 0X10fb , "Common" ), # Common
+	( 0X10fc , 0X10ff , "Georgian" ), # Georgian
+	( 0X1100 , 0X11ff , "Hangul" ), # Hangul
+	( 0X1200 , 0X1248 , "Ethiopic" ), # Ethiopic
+	( 0X124a , 0X124d , "Ethiopic" ), # Ethiopic
+	( 0X1250 , 0X1256 , "Ethiopic" ), # Ethiopic
+	( 0X1258 , 0X1258 , "Ethiopic" ), # Ethiopic
+	( 0X125a , 0X125d , "Ethiopic" ), # Ethiopic
+	( 0X1260 , 0X1288 , "Ethiopic" ), # Ethiopic
+	( 0X128a , 0X128d , "Ethiopic" ), # Ethiopic
+	( 0X1290 , 0X12b0 , "Ethiopic" ), # Ethiopic
+	( 0X12b2 , 0X12b5 , "Ethiopic" ), # Ethiopic
+	( 0X12b8 , 0X12be , "Ethiopic" ), # Ethiopic
+	( 0X12c0 , 0X12c0 , "Ethiopic" ), # Ethiopic
+	( 0X12c2 , 0X12c5 , "Ethiopic" ), # Ethiopic
+	( 0X12c8 , 0X12d6 , "Ethiopic" ), # Ethiopic
+	( 0X12d8 , 0X1310 , "Ethiopic" ), # Ethiopic
+	( 0X1312 , 0X1315 , "Ethiopic" ), # Ethiopic
+	( 0X1318 , 0X135a , "Ethiopic" ), # Ethiopic
+	( 0X135d , 0X137c , "Ethiopic" ), # Ethiopic
+	( 0X1380 , 0X1399 , "Ethiopic" ), # Ethiopic
+	( 0X13a0 , 0X13f5 , "Cherokee" ), # Cherokee
+	( 0X13f8 , 0X13fd , "Cherokee" ), # Cherokee
+	( 0X1400 , 0X167f , "Canadian_Aboriginal" ), # Canadian_Aboriginal
+	( 0X1680 , 0X169c , "Ogham" ), # Ogham
+	( 0X16a0 , 0X16ea , "Runic" ), # Runic
+	( 0X16eb , 0X16ed , "Common" ), # Common
+	( 0X16ee , 0X16f8 , "Runic" ), # Runic
+	( 0X1700 , 0X170c , "Tagalog" ), # Tagalog
+	( 0X170e , 0X1714 , "Tagalog" ), # Tagalog
+	( 0X1720 , 0X1734 , "Hanunoo" ), # Hanunoo
+	( 0X1735 , 0X1736 , "Common" ), # Common
+	( 0X1740 , 0X1753 , "Buhid" ), # Buhid
+	( 0X1760 , 0X176c , "Tagbanwa" ), # Tagbanwa
+	( 0X176e , 0X1770 , "Tagbanwa" ), # Tagbanwa
+	( 0X1772 , 0X1773 , "Tagbanwa" ), # Tagbanwa
+	( 0X1780 , 0X17dd , "Khmer" ), # Khmer
+	( 0X17e0 , 0X17e9 , "Khmer" ), # Khmer
+	( 0X17f0 , 0X17f9 , "Khmer" ), # Khmer
+	( 0X1800 , 0X1801 , "Mongolian" ), # Mongolian
+	( 0X1802 , 0X1803 , "Common" ), # Common
+	( 0X1804 , 0X1804 , "Mongolian" ), # Mongolian
+	( 0X1805 , 0X1805 , "Common" ), # Common
+	( 0X1806 , 0X180e , "Mongolian" ), # Mongolian
+	( 0X1810 , 0X1819 , "Mongolian" ), # Mongolian
+	( 0X1820 , 0X1877 , "Mongolian" ), # Mongolian
+	( 0X1880 , 0X18aa , "Mongolian" ), # Mongolian
+	( 0X18b0 , 0X18f5 , "Canadian_Aboriginal" ), # Canadian_Aboriginal
+	( 0X1900 , 0X191e , "Limbu" ), # Limbu
+	( 0X1920 , 0X192b , "Limbu" ), # Limbu
+	( 0X1930 , 0X193b , "Limbu" ), # Limbu
+	( 0X1940 , 0X1940 , "Limbu" ), # Limbu
+	( 0X1944 , 0X194f , "Limbu" ), # Limbu
+	( 0X1950 , 0X196d , "Tai_Le" ), # Tai_Le
+	( 0X1970 , 0X1974 , "Tai_Le" ), # Tai_Le
+	( 0X1980 , 0X19ab , "New_Tai_Lue" ), # New_Tai_Lue
+	( 0X19b0 , 0X19c9 , "New_Tai_Lue" ), # New_Tai_Lue
+	( 0X19d0 , 0X19da , "New_Tai_Lue" ), # New_Tai_Lue
+	( 0X19de , 0X19df , "New_Tai_Lue" ), # New_Tai_Lue
+	( 0X19e0 , 0X19ff , "Khmer" ), # Khmer
+	( 0X1a00 , 0X1a1b , "Buginese" ), # Buginese
+	( 0X1a1e , 0X1a1f , "Buginese" ), # Buginese
+	( 0X1a20 , 0X1a5e , "Tai_Tham" ), # Tai_Tham
+	( 0X1a60 , 0X1a7c , "Tai_Tham" ), # Tai_Tham
+	( 0X1a7f , 0X1a89 , "Tai_Tham" ), # Tai_Tham
+	( 0X1a90 , 0X1a99 , "Tai_Tham" ), # Tai_Tham
+	( 0X1aa0 , 0X1aad , "Tai_Tham" ), # Tai_Tham
+	( 0X1ab0 , 0X1abe , "Inherited" ), # Inherited
+	( 0X1b00 , 0X1b4b , "Balinese" ), # Balinese
+	( 0X1b50 , 0X1b7c , "Balinese" ), # Balinese
+	( 0X1b80 , 0X1bbf , "Sundanese" ), # Sundanese
+	( 0X1bc0 , 0X1bf3 , "Batak" ), # Batak
+	( 0X1bfc , 0X1bff , "Batak" ), # Batak
+	( 0X1c00 , 0X1c37 , "Lepcha" ), # Lepcha
+	( 0X1c3b , 0X1c49 , "Lepcha" ), # Lepcha
+	( 0X1c4d , 0X1c4f , "Lepcha" ), # Lepcha
+	( 0X1c50 , 0X1c7f , "Ol_Chiki" ), # Ol_Chiki
+	( 0X1cc0 , 0X1cc7 , "Sundanese" ), # Sundanese
+	( 0X1cd0 , 0X1cd2 , "Inherited" ), # Inherited
+	( 0X1cd3 , 0X1cd3 , "Common" ), # Common
+	( 0X1cd4 , 0X1ce0 , "Inherited" ), # Inherited
+	( 0X1ce1 , 0X1ce1 , "Common" ), # Common
+	( 0X1ce2 , 0X1ce8 , "Inherited" ), # Inherited
+	( 0X1ce9 , 0X1cec , "Common" ), # Common
+	( 0X1ced , 0X1ced , "Inherited" ), # Inherited
+	( 0X1cee , 0X1cf3 , "Common" ), # Common
+	( 0X1cf4 , 0X1cf4 , "Inherited" ), # Inherited
+	( 0X1cf5 , 0X1cf6 , "Common" ), # Common
+	( 0X1cf8 , 0X1cf9 , "Inherited" ), # Inherited
+	( 0X1d00 , 0X1d25 , "Latin" ), # Latin
+	( 0X1d26 , 0X1d2a , "Greek" ), # Greek
+	( 0X1d2b , 0X1d2b , "Cyrillic" ), # Cyrillic
+	( 0X1d2c , 0X1d5c , "Latin" ), # Latin
+	( 0X1d5d , 0X1d61 , "Greek" ), # Greek
+	( 0X1d62 , 0X1d65 , "Latin" ), # Latin
+	( 0X1d66 , 0X1d6a , "Greek" ), # Greek
+	( 0X1d6b , 0X1d77 , "Latin" ), # Latin
+	( 0X1d78 , 0X1d78 , "Cyrillic" ), # Cyrillic
+	( 0X1d79 , 0X1dbe , "Latin" ), # Latin
+	( 0X1dbf , 0X1dbf , "Greek" ), # Greek
+	( 0X1dc0 , 0X1df5 , "Inherited" ), # Inherited
+	( 0X1dfc , 0X1dff , "Inherited" ), # Inherited
+	( 0X1e00 , 0X1eff , "Latin" ), # Latin
+	( 0X1f00 , 0X1f15 , "Greek" ), # Greek
+	( 0X1f18 , 0X1f1d , "Greek" ), # Greek
+	( 0X1f20 , 0X1f45 , "Greek" ), # Greek
+	( 0X1f48 , 0X1f4d , "Greek" ), # Greek
+	( 0X1f50 , 0X1f57 , "Greek" ), # Greek
+	( 0X1f59 , 0X1f59 , "Greek" ), # Greek
+	( 0X1f5b , 0X1f5b , "Greek" ), # Greek
+	( 0X1f5d , 0X1f5d , "Greek" ), # Greek
+	( 0X1f5f , 0X1f7d , "Greek" ), # Greek
+	( 0X1f80 , 0X1fb4 , "Greek" ), # Greek
+	( 0X1fb6 , 0X1fc4 , "Greek" ), # Greek
+	( 0X1fc6 , 0X1fd3 , "Greek" ), # Greek
+	( 0X1fd6 , 0X1fdb , "Greek" ), # Greek
+	( 0X1fdd , 0X1fef , "Greek" ), # Greek
+	( 0X1ff2 , 0X1ff4 , "Greek" ), # Greek
+	( 0X1ff6 , 0X1ffe , "Greek" ), # Greek
+	( 0X2000 , 0X200b , "Common" ), # Common
+	( 0X200c , 0X200d , "Inherited" ), # Inherited
+	( 0X200e , 0X2064 , "Common" ), # Common
+	( 0X2066 , 0X2070 , "Common" ), # Common
+	( 0X2071 , 0X2071 , "Latin" ), # Latin
+	( 0X2074 , 0X207e , "Common" ), # Common
+	( 0X207f , 0X207f , "Latin" ), # Latin
+	( 0X2080 , 0X208e , "Common" ), # Common
+	( 0X2090 , 0X209c , "Latin" ), # Latin
+	( 0X20a0 , 0X20be , "Common" ), # Common
+	( 0X20d0 , 0X20f0 , "Inherited" ), # Inherited
+	( 0X2100 , 0X2125 , "Common" ), # Common
+	( 0X2126 , 0X2126 , "Greek" ), # Greek
+	( 0X2127 , 0X2129 , "Common" ), # Common
+	( 0X212a , 0X212b , "Latin" ), # Latin
+	( 0X212c , 0X2131 , "Common" ), # Common
+	( 0X2132 , 0X2132 , "Latin" ), # Latin
+	( 0X2133 , 0X214d , "Common" ), # Common
+	( 0X214e , 0X214e , "Latin" ), # Latin
+	( 0X214f , 0X215f , "Common" ), # Common
+	( 0X2160 , 0X2188 , "Latin" ), # Latin
+	( 0X2189 , 0X218b , "Common" ), # Common
+	( 0X2190 , 0X23fa , "Common" ), # Common
+	( 0X2400 , 0X2426 , "Common" ), # Common
+	( 0X2440 , 0X244a , "Common" ), # Common
+	( 0X2460 , 0X27ff , "Common" ), # Common
+	( 0X2800 , 0X28ff , "Braille" ), # Braille
+	( 0X2900 , 0X2b73 , "Common" ), # Common
+	( 0X2b76 , 0X2b95 , "Common" ), # Common
+	( 0X2b98 , 0X2bb9 , "Common" ), # Common
+	( 0X2bbd , 0X2bc8 , "Common" ), # Common
+	( 0X2bca , 0X2bd1 , "Common" ), # Common
+	( 0X2bec , 0X2bef , "Common" ), # Common
+	( 0X2c00 , 0X2c2e , "Glagolitic" ), # Glagolitic
+	( 0X2c30 , 0X2c5e , "Glagolitic" ), # Glagolitic
+	( 0X2c60 , 0X2c7f , "Latin" ), # Latin
+	( 0X2c80 , 0X2cf3 , "Coptic" ), # Coptic
+	( 0X2cf9 , 0X2cff , "Coptic" ), # Coptic
+	( 0X2d00 , 0X2d25 , "Georgian" ), # Georgian
+	( 0X2d27 , 0X2d27 , "Georgian" ), # Georgian
+	( 0X2d2d , 0X2d2d , "Georgian" ), # Georgian
+	( 0X2d30 , 0X2d67 , "Tifinagh" ), # Tifinagh
+	( 0X2d6f , 0X2d70 , "Tifinagh" ), # Tifinagh
+	( 0X2d7f , 0X2d7f , "Tifinagh" ), # Tifinagh
+	( 0X2d80 , 0X2d96 , "Ethiopic" ), # Ethiopic
+	( 0X2da0 , 0X2da6 , "Ethiopic" ), # Ethiopic
+	( 0X2da8 , 0X2dae , "Ethiopic" ), # Ethiopic
+	( 0X2db0 , 0X2db6 , "Ethiopic" ), # Ethiopic
+	( 0X2db8 , 0X2dbe , "Ethiopic" ), # Ethiopic
+	( 0X2dc0 , 0X2dc6 , "Ethiopic" ), # Ethiopic
+	( 0X2dc8 , 0X2dce , "Ethiopic" ), # Ethiopic
+	( 0X2dd0 , 0X2dd6 , "Ethiopic" ), # Ethiopic
+	( 0X2dd8 , 0X2dde , "Ethiopic" ), # Ethiopic
+	( 0X2de0 , 0X2dff , "Cyrillic" ), # Cyrillic
+	( 0X2e00 , 0X2e42 , "Common" ), # Common
+	( 0X2e80 , 0X2e99 , "Han" ), # Han
+	( 0X2e9b , 0X2ef3 , "Han" ), # Han
+	( 0X2f00 , 0X2fd5 , "Han" ), # Han
+	( 0X2ff0 , 0X2ffb , "Common" ), # Common
+	( 0X3000 , 0X3004 , "Common" ), # Common
+	( 0X3005 , 0X3005 , "Han" ), # Han
+	( 0X3006 , 0X3006 , "Common" ), # Common
+	( 0X3007 , 0X3007 , "Han" ), # Han
+	( 0X3008 , 0X3020 , "Common" ), # Common
+	( 0X3021 , 0X3029 , "Han" ), # Han
+	( 0X302a , 0X302d , "Inherited" ), # Inherited
+	( 0X302e , 0X302f , "Hangul" ), # Hangul
+	( 0X3030 , 0X3037 , "Common" ), # Common
+	( 0X3038 , 0X303b , "Han" ), # Han
+	( 0X303c , 0X303f , "Common" ), # Common
+	( 0X3041 , 0X3096 , "Hiragana" ), # Hiragana
+	( 0X3099 , 0X309a , "Inherited" ), # Inherited
+	( 0X309b , 0X309c , "Common" ), # Common
+	( 0X309d , 0X309f , "Hiragana" ), # Hiragana
+	( 0X30a0 , 0X30a0 , "Common" ), # Common
+	( 0X30a1 , 0X30fa , "Katakana" ), # Katakana
+	( 0X30fb , 0X30fc , "Common" ), # Common
+	( 0X30fd , 0X30ff , "Katakana" ), # Katakana
+	( 0X3105 , 0X312d , "Bopomofo" ), # Bopomofo
+	( 0X3131 , 0X318e , "Hangul" ), # Hangul
+	( 0X3190 , 0X319f , "Common" ), # Common
+	( 0X31a0 , 0X31ba , "Bopomofo" ), # Bopomofo
+	( 0X31c0 , 0X31e3 , "Common" ), # Common
+	( 0X31f0 , 0X31ff , "Katakana" ), # Katakana
+	( 0X3200 , 0X321e , "Hangul" ), # Hangul
+	( 0X3220 , 0X325f , "Common" ), # Common
+	( 0X3260 , 0X327e , "Hangul" ), # Hangul
+	( 0X327f , 0X32cf , "Common" ), # Common
+	( 0X32d0 , 0X32fe , "Katakana" ), # Katakana
+	( 0X3300 , 0X3357 , "Katakana" ), # Katakana
+	( 0X3358 , 0X33ff , "Common" ), # Common
+	( 0X3400 , 0X4db5 , "Han" ), # Han
+	( 0X4dc0 , 0X4dff , "Common" ), # Common
+	( 0X4e00 , 0X9fd5 , "Han" ), # Han
+	( 0Xa000 , 0Xa48c , "Yi" ), # Yi
+	( 0Xa490 , 0Xa4c6 , "Yi" ), # Yi
+	( 0Xa4d0 , 0Xa4ff , "Lisu" ), # Lisu
+	( 0Xa500 , 0Xa62b , "Vai" ), # Vai
+	( 0Xa640 , 0Xa69f , "Cyrillic" ), # Cyrillic
+	( 0Xa6a0 , 0Xa6f7 , "Bamum" ), # Bamum
+	( 0Xa700 , 0Xa721 , "Common" ), # Common
+	( 0Xa722 , 0Xa787 , "Latin" ), # Latin
+	( 0Xa788 , 0Xa78a , "Common" ), # Common
+	( 0Xa78b , 0Xa7ad , "Latin" ), # Latin
+	( 0Xa7b0 , 0Xa7b7 , "Latin" ), # Latin
+	( 0Xa7f7 , 0Xa7ff , "Latin" ), # Latin
+	( 0Xa800 , 0Xa82b , "Syloti_Nagri" ), # Syloti_Nagri
+	( 0Xa830 , 0Xa839 , "Common" ), # Common
+	( 0Xa840 , 0Xa877 , "Phags_Pa" ), # Phags_Pa
+	( 0Xa880 , 0Xa8c4 , "Saurashtra" ), # Saurashtra
+	( 0Xa8ce , 0Xa8d9 , "Saurashtra" ), # Saurashtra
+	( 0Xa8e0 , 0Xa8fd , "Devanagari" ), # Devanagari
+	( 0Xa900 , 0Xa92d , "Kayah_Li" ), # Kayah_Li
+	( 0Xa92e , 0Xa92e , "Common" ), # Common
+	( 0Xa92f , 0Xa92f , "Kayah_Li" ), # Kayah_Li
+	( 0Xa930 , 0Xa953 , "Rejang" ), # Rejang
+	( 0Xa95f , 0Xa95f , "Rejang" ), # Rejang
+	( 0Xa960 , 0Xa97c , "Hangul" ), # Hangul
+	( 0Xa980 , 0Xa9cd , "Javanese" ), # Javanese
+	( 0Xa9cf , 0Xa9cf , "Common" ), # Common
+	( 0Xa9d0 , 0Xa9d9 , "Javanese" ), # Javanese
+	( 0Xa9de , 0Xa9df , "Javanese" ), # Javanese
+	( 0Xa9e0 , 0Xa9fe , "Myanmar" ), # Myanmar
+	( 0Xaa00 , 0Xaa36 , "Cham" ), # Cham
+	( 0Xaa40 , 0Xaa4d , "Cham" ), # Cham
+	( 0Xaa50 , 0Xaa59 , "Cham" ), # Cham
+	( 0Xaa5c , 0Xaa5f , "Cham" ), # Cham
+	( 0Xaa60 , 0Xaa7f , "Myanmar" ), # Myanmar
+	( 0Xaa80 , 0Xaac2 , "Tai_Viet" ), # Tai_Viet
+	( 0Xaadb , 0Xaadf , "Tai_Viet" ), # Tai_Viet
+	( 0Xaae0 , 0Xaaf6 , "Meetei_Mayek" ), # Meetei_Mayek
+	( 0Xab01 , 0Xab06 , "Ethiopic" ), # Ethiopic
+	( 0Xab09 , 0Xab0e , "Ethiopic" ), # Ethiopic
+	( 0Xab11 , 0Xab16 , "Ethiopic" ), # Ethiopic
+	( 0Xab20 , 0Xab26 , "Ethiopic" ), # Ethiopic
+	( 0Xab28 , 0Xab2e , "Ethiopic" ), # Ethiopic
+	( 0Xab30 , 0Xab5a , "Latin" ), # Latin
+	( 0Xab5b , 0Xab5b , "Common" ), # Common
+	( 0Xab5c , 0Xab64 , "Latin" ), # Latin
+	( 0Xab65 , 0Xab65 , "Greek" ), # Greek
+	( 0Xab70 , 0Xabbf , "Cherokee" ), # Cherokee
+	( 0Xabc0 , 0Xabed , "Meetei_Mayek" ), # Meetei_Mayek
+	( 0Xabf0 , 0Xabf9 , "Meetei_Mayek" ), # Meetei_Mayek
+	( 0Xac00 , 0Xd7a3 , "Hangul" ), # Hangul
+	( 0Xd7b0 , 0Xd7c6 , "Hangul" ), # Hangul
+	( 0Xd7cb , 0Xd7fb , "Hangul" ), # Hangul
+	( 0Xf900 , 0Xfa6d , "Han" ), # Han
+	( 0Xfa70 , 0Xfad9 , "Han" ), # Han
+	( 0Xfb00 , 0Xfb06 , "Latin" ), # Latin
+	( 0Xfb13 , 0Xfb17 , "Armenian" ), # Armenian
+	( 0Xfb1d , 0Xfb36 , "Hebrew" ), # Hebrew
+	( 0Xfb38 , 0Xfb3c , "Hebrew" ), # Hebrew
+	( 0Xfb3e , 0Xfb3e , "Hebrew" ), # Hebrew
+	( 0Xfb40 , 0Xfb41 , "Hebrew" ), # Hebrew
+	( 0Xfb43 , 0Xfb44 , "Hebrew" ), # Hebrew
+	( 0Xfb46 , 0Xfb4f , "Hebrew" ), # Hebrew
+	( 0Xfb50 , 0Xfbc1 , "Arabic" ), # Arabic
+	( 0Xfbd3 , 0Xfd3d , "Arabic" ), # Arabic
+	( 0Xfd3e , 0Xfd3f , "Common" ), # Common
+	( 0Xfd50 , 0Xfd8f , "Arabic" ), # Arabic
+	( 0Xfd92 , 0Xfdc7 , "Arabic" ), # Arabic
+	( 0Xfdf0 , 0Xfdfd , "Arabic" ), # Arabic
+	( 0Xfe00 , 0Xfe0f , "Inherited" ), # Inherited
+	( 0Xfe10 , 0Xfe19 , "Common" ), # Common
+	( 0Xfe20 , 0Xfe2d , "Inherited" ), # Inherited
+	( 0Xfe2e , 0Xfe2f , "Cyrillic" ), # Cyrillic
+	( 0Xfe30 , 0Xfe52 , "Common" ), # Common
+	( 0Xfe54 , 0Xfe66 , "Common" ), # Common
+	( 0Xfe68 , 0Xfe6b , "Common" ), # Common
+	( 0Xfe70 , 0Xfe74 , "Arabic" ), # Arabic
+	( 0Xfe76 , 0Xfefc , "Arabic" ), # Arabic
+	( 0Xfeff , 0Xfeff , "Common" ), # Common
+	( 0Xff01 , 0Xff20 , "Common" ), # Common
+	( 0Xff21 , 0Xff3a , "Latin" ), # Latin
+	( 0Xff3b , 0Xff40 , "Common" ), # Common
+	( 0Xff41 , 0Xff5a , "Latin" ), # Latin
+	( 0Xff5b , 0Xff65 , "Common" ), # Common
+	( 0Xff66 , 0Xff6f , "Katakana" ), # Katakana
+	( 0Xff70 , 0Xff70 , "Common" ), # Common
+	( 0Xff71 , 0Xff9d , "Katakana" ), # Katakana
+	( 0Xff9e , 0Xff9f , "Common" ), # Common
+	( 0Xffa0 , 0Xffbe , "Hangul" ), # Hangul
+	( 0Xffc2 , 0Xffc7 , "Hangul" ), # Hangul
+	( 0Xffca , 0Xffcf , "Hangul" ), # Hangul
+	( 0Xffd2 , 0Xffd7 , "Hangul" ), # Hangul
+	( 0Xffda , 0Xffdc , "Hangul" ), # Hangul
+	( 0Xffe0 , 0Xffe6 , "Common" ), # Common
+	( 0Xffe8 , 0Xffee , "Common" ), # Common
+	( 0Xfff9 , 0Xfffd , "Common" ), # Common
+	( 0X10000 , 0X1000b , "Linear_B" ), # Linear_B
+	( 0X1000d , 0X10026 , "Linear_B" ), # Linear_B
+	( 0X10028 , 0X1003a , "Linear_B" ), # Linear_B
+	( 0X1003c , 0X1003d , "Linear_B" ), # Linear_B
+	( 0X1003f , 0X1004d , "Linear_B" ), # Linear_B
+	( 0X10050 , 0X1005d , "Linear_B" ), # Linear_B
+	( 0X10080 , 0X100fa , "Linear_B" ), # Linear_B
+	( 0X10100 , 0X10102 , "Common" ), # Common
+	( 0X10107 , 0X10133 , "Common" ), # Common
+	( 0X10137 , 0X1013f , "Common" ), # Common
+	( 0X10140 , 0X1018c , "Greek" ), # Greek
+	( 0X10190 , 0X1019b , "Common" ), # Common
+	( 0X101a0 , 0X101a0 , "Greek" ), # Greek
+	( 0X101d0 , 0X101fc , "Common" ), # Common
+	( 0X101fd , 0X101fd , "Inherited" ), # Inherited
+	( 0X10280 , 0X1029c , "Lycian" ), # Lycian
+	( 0X102a0 , 0X102d0 , "Carian" ), # Carian
+	( 0X102e0 , 0X102e0 , "Inherited" ), # Inherited
+	( 0X102e1 , 0X102fb , "Common" ), # Common
+	( 0X10300 , 0X10323 , "Old_Italic" ), # Old_Italic
+	( 0X10330 , 0X1034a , "Gothic" ), # Gothic
+	( 0X10350 , 0X1037a , "Old_Permic" ), # Old_Permic
+	( 0X10380 , 0X1039d , "Ugaritic" ), # Ugaritic
+	( 0X1039f , 0X1039f , "Ugaritic" ), # Ugaritic
+	( 0X103a0 , 0X103c3 , "Old_Persian" ), # Old_Persian
+	( 0X103c8 , 0X103d5 , "Old_Persian" ), # Old_Persian
+	( 0X10400 , 0X1044f , "Deseret" ), # Deseret
+	( 0X10450 , 0X1047f , "Shavian" ), # Shavian
+	( 0X10480 , 0X1049d , "Osmanya" ), # Osmanya
+	( 0X104a0 , 0X104a9 , "Osmanya" ), # Osmanya
+	( 0X10500 , 0X10527 , "Elbasan" ), # Elbasan
+	( 0X10530 , 0X10563 , "Caucasian_Albanian" ), # Caucasian_Albanian
+	( 0X1056f , 0X1056f , "Caucasian_Albanian" ), # Caucasian_Albanian
+	( 0X10600 , 0X10736 , "Linear_A" ), # Linear_A
+	( 0X10740 , 0X10755 , "Linear_A" ), # Linear_A
+	( 0X10760 , 0X10767 , "Linear_A" ), # Linear_A
+	( 0X10800 , 0X10805 , "Cypriot" ), # Cypriot
+	( 0X10808 , 0X10808 , "Cypriot" ), # Cypriot
+	( 0X1080a , 0X10835 , "Cypriot" ), # Cypriot
+	( 0X10837 , 0X10838 , "Cypriot" ), # Cypriot
+	( 0X1083c , 0X1083c , "Cypriot" ), # Cypriot
+	( 0X1083f , 0X1083f , "Cypriot" ), # Cypriot
+	( 0X10840 , 0X10855 , "Imperial_Aramaic" ), # Imperial_Aramaic
+	( 0X10857 , 0X1085f , "Imperial_Aramaic" ), # Imperial_Aramaic
+	( 0X10860 , 0X1087f , "Palmyrene" ), # Palmyrene
+	( 0X10880 , 0X1089e , "Nabataean" ), # Nabataean
+	( 0X108a7 , 0X108af , "Nabataean" ), # Nabataean
+	( 0X108e0 , 0X108f2 , "Hatran" ), # Hatran
+	( 0X108f4 , 0X108f5 , "Hatran" ), # Hatran
+	( 0X108fb , 0X108ff , "Hatran" ), # Hatran
+	( 0X10900 , 0X1091b , "Phoenician" ), # Phoenician
+	( 0X1091f , 0X1091f , "Phoenician" ), # Phoenician
+	( 0X10920 , 0X10939 , "Lydian" ), # Lydian
+	( 0X1093f , 0X1093f , "Lydian" ), # Lydian
+	( 0X10980 , 0X1099f , "Meroitic_Hieroglyphs" ), # Meroitic_Hieroglyphs
+	( 0X109a0 , 0X109b7 , "Meroitic_Cursive" ), # Meroitic_Cursive
+	( 0X109bc , 0X109cf , "Meroitic_Cursive" ), # Meroitic_Cursive
+	( 0X109d2 , 0X109ff , "Meroitic_Cursive" ), # Meroitic_Cursive
+	( 0X10a00 , 0X10a03 , "Kharoshthi" ), # Kharoshthi
+	( 0X10a05 , 0X10a06 , "Kharoshthi" ), # Kharoshthi
+	( 0X10a0c , 0X10a13 , "Kharoshthi" ), # Kharoshthi
+	( 0X10a15 , 0X10a17 , "Kharoshthi" ), # Kharoshthi
+	( 0X10a19 , 0X10a33 , "Kharoshthi" ), # Kharoshthi
+	( 0X10a38 , 0X10a3a , "Kharoshthi" ), # Kharoshthi
+	( 0X10a3f , 0X10a47 , "Kharoshthi" ), # Kharoshthi
+	( 0X10a50 , 0X10a58 , "Kharoshthi" ), # Kharoshthi
+	( 0X10a60 , 0X10a7f , "Old_South_Arabian" ), # Old_South_Arabian
+	( 0X10a80 , 0X10a9f , "Old_North_Arabian" ), # Old_North_Arabian
+	( 0X10ac0 , 0X10ae6 , "Manichaean" ), # Manichaean
+	( 0X10aeb , 0X10af6 , "Manichaean" ), # Manichaean
+	( 0X10b00 , 0X10b35 , "Avestan" ), # Avestan
+	( 0X10b39 , 0X10b3f , "Avestan" ), # Avestan
+	( 0X10b40 , 0X10b55 , "Inscriptional_Parthian" ), # Inscriptional_Parthian
+	( 0X10b58 , 0X10b5f , "Inscriptional_Parthian" ), # Inscriptional_Parthian
+	( 0X10b60 , 0X10b72 , "Inscriptional_Pahlavi" ), # Inscriptional_Pahlavi
+	( 0X10b78 , 0X10b7f , "Inscriptional_Pahlavi" ), # Inscriptional_Pahlavi
+	( 0X10b80 , 0X10b91 , "Psalter_Pahlavi" ), # Psalter_Pahlavi
+	( 0X10b99 , 0X10b9c , "Psalter_Pahlavi" ), # Psalter_Pahlavi
+	( 0X10ba9 , 0X10baf , "Psalter_Pahlavi" ), # Psalter_Pahlavi
+	( 0X10c00 , 0X10c48 , "Old_Turkic" ), # Old_Turkic
+	( 0X10c80 , 0X10cb2 , "Old_Hungarian" ), # Old_Hungarian
+	( 0X10cc0 , 0X10cf2 , "Old_Hungarian" ), # Old_Hungarian
+	( 0X10cfa , 0X10cff , "Old_Hungarian" ), # Old_Hungarian
+	( 0X10e60 , 0X10e7e , "Arabic" ), # Arabic
+	( 0X11000 , 0X1104d , "Brahmi" ), # Brahmi
+	( 0X11052 , 0X1106f , "Brahmi" ), # Brahmi
+	( 0X1107f , 0X1107f , "Brahmi" ), # Brahmi
+	( 0X11080 , 0X110c1 , "Kaithi" ), # Kaithi
+	( 0X110d0 , 0X110e8 , "Sora_Sompeng" ), # Sora_Sompeng
+	( 0X110f0 , 0X110f9 , "Sora_Sompeng" ), # Sora_Sompeng
+	( 0X11100 , 0X11134 , "Chakma" ), # Chakma
+	( 0X11136 , 0X11143 , "Chakma" ), # Chakma
+	( 0X11150 , 0X11176 , "Mahajani" ), # Mahajani
+	( 0X11180 , 0X111cd , "Sharada" ), # Sharada
+	( 0X111d0 , 0X111df , "Sharada" ), # Sharada
+	( 0X111e1 , 0X111f4 , "Sinhala" ), # Sinhala
+	( 0X11200 , 0X11211 , "Khojki" ), # Khojki
+	( 0X11213 , 0X1123d , "Khojki" ), # Khojki
+	( 0X11280 , 0X11286 , "Multani" ), # Multani
+	( 0X11288 , 0X11288 , "Multani" ), # Multani
+	( 0X1128a , 0X1128d , "Multani" ), # Multani
+	( 0X1128f , 0X1129d , "Multani" ), # Multani
+	( 0X1129f , 0X112a9 , "Multani" ), # Multani
+	( 0X112b0 , 0X112ea , "Khudawadi" ), # Khudawadi
+	( 0X112f0 , 0X112f9 , "Khudawadi" ), # Khudawadi
+	( 0X11300 , 0X11303 , "Grantha" ), # Grantha
+	( 0X11305 , 0X1130c , "Grantha" ), # Grantha
+	( 0X1130f , 0X11310 , "Grantha" ), # Grantha
+	( 0X11313 , 0X11328 , "Grantha" ), # Grantha
+	( 0X1132a , 0X11330 , "Grantha" ), # Grantha
+	( 0X11332 , 0X11333 , "Grantha" ), # Grantha
+	( 0X11335 , 0X11339 , "Grantha" ), # Grantha
+	( 0X1133c , 0X11344 , "Grantha" ), # Grantha
+	( 0X11347 , 0X11348 , "Grantha" ), # Grantha
+	( 0X1134b , 0X1134d , "Grantha" ), # Grantha
+	( 0X11350 , 0X11350 , "Grantha" ), # Grantha
+	( 0X11357 , 0X11357 , "Grantha" ), # Grantha
+	( 0X1135d , 0X11363 , "Grantha" ), # Grantha
+	( 0X11366 , 0X1136c , "Grantha" ), # Grantha
+	( 0X11370 , 0X11374 , "Grantha" ), # Grantha
+	( 0X11480 , 0X114c7 , "Tirhuta" ), # Tirhuta
+	( 0X114d0 , 0X114d9 , "Tirhuta" ), # Tirhuta
+	( 0X11580 , 0X115b5 , "Siddham" ), # Siddham
+	( 0X115b8 , 0X115dd , "Siddham" ), # Siddham
+	( 0X11600 , 0X11644 , "Modi" ), # Modi
+	( 0X11650 , 0X11659 , "Modi" ), # Modi
+	( 0X11680 , 0X116b7 , "Takri" ), # Takri
+	( 0X116c0 , 0X116c9 , "Takri" ), # Takri
+	( 0X11700 , 0X11719 , "Ahom" ), # Ahom
+	( 0X1171d , 0X1172b , "Ahom" ), # Ahom
+	( 0X11730 , 0X1173f , "Ahom" ), # Ahom
+	( 0X118a0 , 0X118f2 , "Warang_Citi" ), # Warang_Citi
+	( 0X118ff , 0X118ff , "Warang_Citi" ), # Warang_Citi
+	( 0X11ac0 , 0X11af8 , "Pau_Cin_Hau" ), # Pau_Cin_Hau
+	( 0X12000 , 0X12399 , "Cuneiform" ), # Cuneiform
+	( 0X12400 , 0X1246e , "Cuneiform" ), # Cuneiform
+	( 0X12470 , 0X12474 , "Cuneiform" ), # Cuneiform
+	( 0X12480 , 0X12543 , "Cuneiform" ), # Cuneiform
+	( 0X13000 , 0X1342e , "Egyptian_Hieroglyphs" ), # Egyptian_Hieroglyphs
+	( 0X14400 , 0X14646 , "Anatolian_Hieroglyphs" ), # Anatolian_Hieroglyphs
+	( 0X16800 , 0X16a38 , "Bamum" ), # Bamum
+	( 0X16a40 , 0X16a5e , "Mro" ), # Mro
+	( 0X16a60 , 0X16a69 , "Mro" ), # Mro
+	( 0X16a6e , 0X16a6f , "Mro" ), # Mro
+	( 0X16ad0 , 0X16aed , "Bassa_Vah" ), # Bassa_Vah
+	( 0X16af0 , 0X16af5 , "Bassa_Vah" ), # Bassa_Vah
+	( 0X16b00 , 0X16b45 , "Pahawh_Hmong" ), # Pahawh_Hmong
+	( 0X16b50 , 0X16b59 , "Pahawh_Hmong" ), # Pahawh_Hmong
+	( 0X16b5b , 0X16b61 , "Pahawh_Hmong" ), # Pahawh_Hmong
+	( 0X16b63 , 0X16b77 , "Pahawh_Hmong" ), # Pahawh_Hmong
+	( 0X16b7d , 0X16b8f , "Pahawh_Hmong" ), # Pahawh_Hmong
+	( 0X16f00 , 0X16f44 , "Miao" ), # Miao
+	( 0X16f50 , 0X16f7e , "Miao" ), # Miao
+	( 0X16f8f , 0X16f9f , "Miao" ), # Miao
+	( 0X1b000 , 0X1b000 , "Katakana" ), # Katakana
+	( 0X1b001 , 0X1b001 , "Hiragana" ), # Hiragana
+	( 0X1bc00 , 0X1bc6a , "Duployan" ), # Duployan
+	( 0X1bc70 , 0X1bc7c , "Duployan" ), # Duployan
+	( 0X1bc80 , 0X1bc88 , "Duployan" ), # Duployan
+	( 0X1bc90 , 0X1bc99 , "Duployan" ), # Duployan
+	( 0X1bc9c , 0X1bc9f , "Duployan" ), # Duployan
+	( 0X1bca0 , 0X1bca3 , "Common" ), # Common
+	( 0X1d000 , 0X1d0f5 , "Common" ), # Common
+	( 0X1d100 , 0X1d126 , "Common" ), # Common
+	( 0X1d129 , 0X1d166 , "Common" ), # Common
+	( 0X1d167 , 0X1d169 , "Inherited" ), # Inherited
+	( 0X1d16a , 0X1d17a , "Common" ), # Common
+	( 0X1d17b , 0X1d182 , "Inherited" ), # Inherited
+	( 0X1d183 , 0X1d184 , "Common" ), # Common
+	( 0X1d185 , 0X1d18b , "Inherited" ), # Inherited
+	( 0X1d18c , 0X1d1a9 , "Common" ), # Common
+	( 0X1d1aa , 0X1d1ad , "Inherited" ), # Inherited
+	( 0X1d1ae , 0X1d1e8 , "Common" ), # Common
+	( 0X1d200 , 0X1d245 , "Greek" ), # Greek
+	( 0X1d300 , 0X1d356 , "Common" ), # Common
+	( 0X1d360 , 0X1d371 , "Common" ), # Common
+	( 0X1d400 , 0X1d454 , "Common" ), # Common
+	( 0X1d456 , 0X1d49c , "Common" ), # Common
+	( 0X1d49e , 0X1d49f , "Common" ), # Common
+	( 0X1d4a2 , 0X1d4a2 , "Common" ), # Common
+	( 0X1d4a5 , 0X1d4a6 , "Common" ), # Common
+	( 0X1d4a9 , 0X1d4ac , "Common" ), # Common
+	( 0X1d4ae , 0X1d4b9 , "Common" ), # Common
+	( 0X1d4bb , 0X1d4bb , "Common" ), # Common
+	( 0X1d4bd , 0X1d4c3 , "Common" ), # Common
+	( 0X1d4c5 , 0X1d505 , "Common" ), # Common
+	( 0X1d507 , 0X1d50a , "Common" ), # Common
+	( 0X1d50d , 0X1d514 , "Common" ), # Common
+	( 0X1d516 , 0X1d51c , "Common" ), # Common
+	( 0X1d51e , 0X1d539 , "Common" ), # Common
+	( 0X1d53b , 0X1d53e , "Common" ), # Common
+	( 0X1d540 , 0X1d544 , "Common" ), # Common
+	( 0X1d546 , 0X1d546 , "Common" ), # Common
+	( 0X1d54a , 0X1d550 , "Common" ), # Common
+	( 0X1d552 , 0X1d6a5 , "Common" ), # Common
+	( 0X1d6a8 , 0X1d7cb , "Common" ), # Common
+	( 0X1d7ce , 0X1d7ff , "Common" ), # Common
+	( 0X1d800 , 0X1da8b , "SignWriting" ), # SignWriting
+	( 0X1da9b , 0X1da9f , "SignWriting" ), # SignWriting
+	( 0X1daa1 , 0X1daaf , "SignWriting" ), # SignWriting
+	( 0X1e800 , 0X1e8c4 , "Mende_Kikakui" ), # Mende_Kikakui
+	( 0X1e8c7 , 0X1e8d6 , "Mende_Kikakui" ), # Mende_Kikakui
+	( 0X1ee00 , 0X1ee03 , "Arabic" ), # Arabic
+	( 0X1ee05 , 0X1ee1f , "Arabic" ), # Arabic
+	( 0X1ee21 , 0X1ee22 , "Arabic" ), # Arabic
+	( 0X1ee24 , 0X1ee24 , "Arabic" ), # Arabic
+	( 0X1ee27 , 0X1ee27 , "Arabic" ), # Arabic
+	( 0X1ee29 , 0X1ee32 , "Arabic" ), # Arabic
+	( 0X1ee34 , 0X1ee37 , "Arabic" ), # Arabic
+	( 0X1ee39 , 0X1ee39 , "Arabic" ), # Arabic
+	( 0X1ee3b , 0X1ee3b , "Arabic" ), # Arabic
+	( 0X1ee42 , 0X1ee42 , "Arabic" ), # Arabic
+	( 0X1ee47 , 0X1ee47 , "Arabic" ), # Arabic
+	( 0X1ee49 , 0X1ee49 , "Arabic" ), # Arabic
+	( 0X1ee4b , 0X1ee4b , "Arabic" ), # Arabic
+	( 0X1ee4d , 0X1ee4f , "Arabic" ), # Arabic
+	( 0X1ee51 , 0X1ee52 , "Arabic" ), # Arabic
+	( 0X1ee54 , 0X1ee54 , "Arabic" ), # Arabic
+	( 0X1ee57 , 0X1ee57 , "Arabic" ), # Arabic
+	( 0X1ee59 , 0X1ee59 , "Arabic" ), # Arabic
+	( 0X1ee5b , 0X1ee5b , "Arabic" ), # Arabic
+	( 0X1ee5d , 0X1ee5d , "Arabic" ), # Arabic
+	( 0X1ee5f , 0X1ee5f , "Arabic" ), # Arabic
+	( 0X1ee61 , 0X1ee62 , "Arabic" ), # Arabic
+	( 0X1ee64 , 0X1ee64 , "Arabic" ), # Arabic
+	( 0X1ee67 , 0X1ee6a , "Arabic" ), # Arabic
+	( 0X1ee6c , 0X1ee72 , "Arabic" ), # Arabic
+	( 0X1ee74 , 0X1ee77 , "Arabic" ), # Arabic
+	( 0X1ee79 , 0X1ee7c , "Arabic" ), # Arabic
+	( 0X1ee7e , 0X1ee7e , "Arabic" ), # Arabic
+	( 0X1ee80 , 0X1ee89 , "Arabic" ), # Arabic
+	( 0X1ee8b , 0X1ee9b , "Arabic" ), # Arabic
+	( 0X1eea1 , 0X1eea3 , "Arabic" ), # Arabic
+	( 0X1eea5 , 0X1eea9 , "Arabic" ), # Arabic
+	( 0X1eeab , 0X1eebb , "Arabic" ), # Arabic
+	( 0X1eef0 , 0X1eef1 , "Arabic" ), # Arabic
+	( 0X1f000 , 0X1f02b , "Common" ), # Common
+	( 0X1f030 , 0X1f093 , "Common" ), # Common
+	( 0X1f0a0 , 0X1f0ae , "Common" ), # Common
+	( 0X1f0b1 , 0X1f0bf , "Common" ), # Common
+	( 0X1f0c1 , 0X1f0cf , "Common" ), # Common
+	( 0X1f0d1 , 0X1f0f5 , "Common" ), # Common
+	( 0X1f100 , 0X1f10c , "Common" ), # Common
+	( 0X1f110 , 0X1f12e , "Common" ), # Common
+	( 0X1f130 , 0X1f16b , "Common" ), # Common
+	( 0X1f170 , 0X1f19a , "Common" ), # Common
+	( 0X1f1e6 , 0X1f1ff , "Common" ), # Common
+	( 0X1f200 , 0X1f200 , "Hiragana" ), # Hiragana
+	( 0X1f201 , 0X1f202 , "Common" ), # Common
+	( 0X1f210 , 0X1f23a , "Common" ), # Common
+	( 0X1f240 , 0X1f248 , "Common" ), # Common
+	( 0X1f250 , 0X1f251 , "Common" ), # Common
+	( 0X1f300 , 0X1f579 , "Common" ), # Common
+	( 0X1f57b , 0X1f5a3 , "Common" ), # Common
+	( 0X1f5a5 , 0X1f6d0 , "Common" ), # Common
+	( 0X1f6e0 , 0X1f6ec , "Common" ), # Common
+	( 0X1f6f0 , 0X1f6f3 , "Common" ), # Common
+	( 0X1f700 , 0X1f773 , "Common" ), # Common
+	( 0X1f780 , 0X1f7d4 , "Common" ), # Common
+	( 0X1f800 , 0X1f80b , "Common" ), # Common
+	( 0X1f810 , 0X1f847 , "Common" ), # Common
+	( 0X1f850 , 0X1f859 , "Common" ), # Common
+	( 0X1f860 , 0X1f887 , "Common" ), # Common
+	( 0X1f890 , 0X1f8ad , "Common" ), # Common
+	( 0X1f910 , 0X1f918 , "Common" ), # Common
+	( 0X1f980 , 0X1f984 , "Common" ), # Common
+	( 0X1f9c0 , 0X1f9c0 , "Common" ), # Common
+	( 0X20000 , 0X2a6d6 , "Han" ), # Han
+	( 0X2a700 , 0X2b734 , "Han" ), # Han
+	( 0X2b740 , 0X2b81d , "Han" ), # Han
+	( 0X2b820 , 0X2cea1 , "Han" ), # Han
+	( 0X2f800 , 0X2fa1d , "Han" ), # Han
+	( 0Xe0001 , 0Xe0001 , "Common" ), # Common
+	( 0Xe0020 , 0Xe007f , "Common" ), # Common
 ]
