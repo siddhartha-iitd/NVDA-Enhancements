@@ -1867,8 +1867,8 @@ class AddLanguageDialog(wx.Dialog):
 		languageLabel=wx.StaticText(self,-1,label=_("&Choose language to be added to prefered languages"))
 		languageSizer.Add(languageLabel)
 		languageListID=wx.NewId()
-		self.languageNames = unicodeScriptHandler.getAvailableLanguages()
-		# Translators: The list of languages for NVDA.
+		self.languageNames = unicodeScriptHandler.getLanguagesWithDescriptions()
+		# Translators: The list of languages for various scripts in NVDA.
 		self.languageList=wx.Choice(self,languageListID,name=_("Language"),choices=[x[1] for x in self.languageNames])
 		self.languageList.SetToolTip(wx.ToolTip("Choose the language NVDA's messages and user interface should be presented in."))
 		try:
@@ -1890,7 +1890,6 @@ class AddLanguageDialog(wx.Dialog):
 		mainSizer.Add(buttonSizer,border=20,flag=wx.LEFT|wx.RIGHT|wx.BOTTOM)
 		mainSizer.Fit(self)
 		self.SetSizer(mainSizer)
-		#self.newLanguage = "nvda"
 		addButton.Bind(wx.EVT_BUTTON,self.onOk,id=wx.ID_OK)
 
 	def onOk(self,evt):
@@ -1909,8 +1908,9 @@ class WritingScriptsDialog(SettingsDialog):
 		languageLabel=wx.StaticText(self,-1,label=_("&Priority Language for auto language detection:"))
 		languageSizer.Add(languageLabel)
 		languageListID=wx.NewId()
-		self.languageNames = unicodeScriptHandler.languagePriorityListSpec
-		# Translators: The list of languages for NVDA.
+		self.languageNames = []
+		self.languageNames.extend( unicodeScriptHandler.languagePriorityListSpec )
+		# Translators: The list of priority languages for various scripts in NVDA.
 		self.languageList=wx.Choice(self,languageListID,name=_("Language"),choices=[x[2] for x in self.languageNames])
 		self.languageList.SetToolTip(wx.ToolTip("Choose the language NVDA's messages and user interface should be presented in."))
 		try:
@@ -1949,18 +1949,14 @@ class WritingScriptsDialog(SettingsDialog):
 
 	def OnMoveUp(self,evt):
 		listIndex = self.languageList.GetSelection()
-		if listIndex == 0:
-			return
-
+		if listIndex == 0: return
 		tempItem = self.languageNames.pop( self.languageList.GetSelection() )
 		self.languageNames.insert(listIndex -1, tempItem )
 		self.updateList()
 
 	def OnMoveDown(self,evt):
 		listIndex = self.languageList.GetSelection()
-		if listIndex >= len(self.languageNames) - 1:
-			return
-
+		if listIndex >= len(self.languageNames) - 1: return
 		tempItem = self.languageNames.pop( self.languageList.GetSelection() )
 		self.languageNames.insert(listIndex + 1, tempItem )
 		self.updateList()
@@ -1978,16 +1974,12 @@ class WritingScriptsDialog(SettingsDialog):
 			self.updateList()
 
 	def onOk(self, evt):
-		languageList = []
-		for item in self.languageNames: 
-			languageList.append( item[0] ) 
-
-		config.conf["writingScriptsToLanguage"]["languagePriorityList"] = ",".join(languageList)
-
-		#log.debugWarning("config length: %d"%( len(config.conf["writingScriptsToLanguage"]) ))
-
 		if self.languageListChanged: 
-			pass
+			languageList = []
+			for item in self.languageNames: 
+				languageList.append( item[0] ) 
+			config.conf["writingScriptsToLanguage"]["languagePriorityList"] = ",".join(languageList)
+			unicodeScriptHandler.updateLanguagePriorityFromConfig()
 		super( WritingScriptsDialog , self).onOk(evt)
 
 	def updateList(self):

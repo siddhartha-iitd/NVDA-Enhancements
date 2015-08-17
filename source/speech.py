@@ -465,15 +465,10 @@ def speak(speechSequence,symbolLevel=None):
 				prevLanguage=curLanguage
 			if autoLanguageSwitching:
 				import unicodeScriptHandler
-				detectedLanguageSequence = unicodeScriptHandler.detectLanguage(item)
-				for index in xrange(len( detectedLanguageSequence )):
-					item= detectedLanguageSequence [index]
-					if isinstance(item,LangChangeCommand):
-						log.debugWarning("Detected language {}".format( item.lang ) )
-					if isinstance(item,basestring ):
-						log.debugWarning("Detected text {}".format( "item" ) )
+				detectedLanguageSequence = unicodeScriptHandler.detectLanguage(item , prevLanguage)
 				speechSequence.extend(detectedLanguageSequence )
-
+			else:
+				speechSequence.append(item)
 		else:
 			speechSequence.append(item)
 	if not speechSequence:
@@ -1480,6 +1475,19 @@ class LangChangeCommand(SpeechCommand):
 
 	def __repr__(self):
 		return "LangChangeCommand (%r)"%self.lang
+
+class ScriptChangeCommand(SpeechCommand):
+	"""A command to switch the script during script detection ."""
+
+	def __init__(self, scriptCode):
+		"""
+		@param scriptCode: the script identifier
+		@type scriptCode: int
+		"""
+		self.scriptCode =scriptCode 
+
+	def __repr__(self):
+		return "ScriptChangeCommand (%r)"%self.scriptCode
 
 class BreakCommand(object):
 	"""Forces speakWithoutPauses to flush its buffer and therefore break the sentence at this point."""
