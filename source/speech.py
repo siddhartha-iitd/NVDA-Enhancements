@@ -238,7 +238,9 @@ def _speakSpellingGen(text,locale,useCharacterDescriptions):
 				speechSequence.append(CharacterModeCommand(True))
 			if index is not None:
 				speechSequence.append(IndexCommand(index))
-			speechSequence.append(char)
+			import unicodeScriptHandler
+			detectedCharacters = unicodeScriptHandler.detectLanguage(char)
+			speechSequence.extend( detectedCharacters )
 			synth.speak(speechSequence)
 			if uppercase and synth.isSupported("pitch") and synthConfig["capPitchChange"]:
 				synth.pitch=oldPitch
