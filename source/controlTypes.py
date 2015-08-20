@@ -190,6 +190,8 @@ STATE_HASCOMMENT=0X2000000000
 STATE_OBSCURED=0x4000000000
 STATE_CROPPED=0x8000000000
 STATE_OVERFLOWING=0x10000000000
+STATE_HASCHART=0x20000000000
+STATE_HASFORMCONTROL=0x40000000000
 
 roleLabels={
 	# Translators: The word for an unknown control type.
@@ -556,6 +558,12 @@ stateLabels={
 	STATE_CROPPED:_("cropped"),
 	# Translators: a state that denotes that the object(text) is overflowing into the adjacent space
 	STATE_OVERFLOWING:_("overflowing"),
+	# Translators: a state that denotes the existence of chart(s) in a spreadsheet
+	STATE_HASCHART:_("has chart"),
+	# Translators: a state that denotes the existence of form control(s) in a spreadsheet
+	STATE_HASFORMCONTROL:_("has form control"),
+	# Translators: a state that denotes the existence of picture(s) in a spreadsheet
+	
 }
 
 negativeStateLabels={

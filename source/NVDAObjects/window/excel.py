@@ -64,6 +64,10 @@ xlCellTypeLastCell            =11         # from enum XlCellType
 xlCellTypeSameFormatConditions=-4173      # from enum XlCellType
 xlCellTypeSameValidation      =-4175      # from enum XlCellType
 xlCellTypeVisible             =12         # from enum XlCellType
+#MSoShapeType Enumeration
+msoChart=3				#Chart
+msoFormControl=8		#Form control
+msoTextBox=17			#Text box
 
 re_RC=re.compile(r'R(?:\[(\d+)\])?C(?:\[(\d+)\])?')
 re_absRC=re.compile(r'^R(\d+)C(\d+)(?::R(\d+)C(\d+))?$')
@@ -546,6 +550,25 @@ class ExcelWorksheet(ExcelBase):
 
 	def _get_name(self):
 		return self.excelWorksheetObject.name
+
+	def _get_states(self):
+		states=super(ExcelWorksheet,self).states
+		hasChart=False
+		hasFormControl=False
+		if self.excelWorksheetObject.Shapes.Count:
+			try:
+				for shape in self.excelWorksheetObject.Shapes:
+					if shape.Type==msoChart and not(hasChart):
+						hasChart=True
+					elif (shape.Type==msoFormControl or shape.Type==msoTextBox) and not(hasFormControl):
+						hasFormControl=True
+			except:
+				pass
+			if hasChart:
+				states.add(controlTypes.STATE_HASCHART)
+			if hasFormControl:
+				states.add(controlTypes.STATE_HASFORMCONTROL)
+		return states	
 
 	def _isEqual(self, other):
 		if not super(ExcelWorksheet, self)._isEqual(other):
