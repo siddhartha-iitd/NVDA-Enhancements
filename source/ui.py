@@ -35,7 +35,7 @@ HTMLDLG_VERIFY = 0x0100
 def HTMLMessage(text):
 	"""Invoke ShowHTMLDialog."""
 	dialogTemplatePath = os.path.dirname(sys.argv[0]) + "\\HTMLMessage.html" 
-	#log.debugWarning("path: {}".format( dialogTemplatePath )
+	log.debugWarning("path: {}".format( dialogTemplatePath ))
 	moniker = POINTER(IUnknown)()
 	windll.urlmon.CreateURLMonikerEx(0, unicode(dialogTemplatePath) , byref(moniker), URL_MK_UNIFORM)
 	DLG_args = automation.VARIANT("NVDA Message;{}".format( text ) )
