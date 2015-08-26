@@ -831,6 +831,12 @@ class ExcelCell(ExcelBase):
 				states.add(controlTypes.STATE_CROPPED)
 			if self._overlapInfo['obscuringRightBy'] > 0:
 				states.add(controlTypes.STATE_OVERFLOWING)
+		try:
+			inputMessage=self.excelCellObject.validation.inputMessage
+		except (COMError,NameError,AttributeError):
+			inputMessage=None
+		if inputMessage:
+			states.add(controlTypes.STATE_HASINPUTMESSAGE)
 		return states
 
 	def getCellWidthAndTextWidth(self):
@@ -959,6 +965,22 @@ class ExcelCell(ExcelBase):
 		if previous:
 			return ExcelCell(windowHandle=self.windowHandle,excelWindowObject=self.excelWindowObject,excelCellObject=previous)
 
+	def _get_description(self):
+		try:
+			inputMessageTitle=self.excelCellObject.validation.inputTitle
+		except (COMError,NameError,AttributeError):
+			inputMessageTitle=None
+		try:
+			inputMessage=self.excelCellObject.validation.inputMessage
+		except (COMError,NameError,AttributeError):
+			inputMessage=None
+		if inputMessageTitle and inputMessage:
+			return inputMessageTitle+inputMessage
+		elif inputMessage:
+			return inputMessage
+		else:
+			return
+	
 	def script_reportComment(self,gesture):
 		commentObj=self.excelCellObject.comment
 		text=commentObj.text() if commentObj else None
