@@ -34,10 +34,12 @@ HTMLDLG_VERIFY = 0x0100
 
 def HTMLMessage(text):
 	"""Invoke ShowHTMLDialog."""
-	dialogTemplatePath = os.path.dirname(sys.argv[0]) + "\\HTMLMessage.html" 
-	log.debugWarning("path: {}".format( dialogTemplatePath ))
+	htmlFileName  = os.path.realpath( 'htmlMessage.html' )
+	if not os.path.isfile(htmlFileName ): 
+		raise LookupError(htmlFileName )
+	log.debugWarning("htmlMessage.html path: {}".format(  htmlFileName  ))
 	moniker = POINTER(IUnknown)()
-	windll.urlmon.CreateURLMonikerEx(0, unicode(dialogTemplatePath) , byref(moniker), URL_MK_UNIFORM)
+	windll.urlmon.CreateURLMonikerEx(0, unicode( htmlFileName ) , byref(moniker), URL_MK_UNIFORM)
 	DLG_args = automation.VARIANT("NVDA Message;{}".format( text ) )
 	gui.mainFrame.prePopup() 
 	error_result = windll.mshtml.ShowHTMLDialogEx( gui.mainFrame.Handle , moniker , HTMLDLG_MODELESS , addressof( DLG_args ) , unicode(DLG_OPTIONS ), None)
