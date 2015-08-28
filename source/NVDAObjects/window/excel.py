@@ -1362,7 +1362,11 @@ class ExcelFormControlQuicknavIterator(ExcelQuicknavIterator):
     quickNavItemClass=ExcelFormControlQuickNavItem
     def collectionFromWorksheet( self , worksheetObject ):
         try:
-            return worksheetObject.Shapes
+        	shapes=[]
+        	for shape in worksheetObject.Shapes:
+        		if shape.Type==msoFormControl:
+        			shapes.append(shape)
+        	return shapes
         except(COMError):
             return None
 
