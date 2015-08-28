@@ -267,9 +267,9 @@ class ExcelBrowseModeTreeInterceptor(browseMode.BrowseModeTreeInterceptor):
 	passThrough=True
 
 	def _get_selection(self):
-		selection= api.getDesktopObject().objectWithFocus()._getSelection()
-		if selection.role in (controlTypes.ROLE_BUTTON, controlTypes.ROLE_CHECKBOX, controlTypes.ROLE_DROPDOWNBUTTON, controlTypes.ROLE_EDITBOX, controlTypes.ROLE_BOX, controlTypes.ROLE_LABEL, controlTypes.ROLE_LISTBOX, controlTypes.ROLE_RADIOBUTTON, controlTypes.ROLE_SCROLLBAR, controlTypes.ROLE_SPINBUTTON):
-			return selection.topLeftCell
+		obj= api.getDesktopObject().objectWithFocus()._getSelection()
+		if obj.role in (controlTypes.ROLE_BUTTON, controlTypes.ROLE_CHECKBOX, controlTypes.ROLE_DROPDOWNBUTTON, controlTypes.ROLE_EDITBOX, controlTypes.ROLE_BOX, controlTypes.ROLE_LABEL, controlTypes.ROLE_LISTBOX, controlTypes.ROLE_RADIOBUTTON, controlTypes.ROLE_SCROLLBAR, controlTypes.ROLE_SPINBUTTON):
+			return obj.topLeftCell
 		return None
 
 	def _get_isAlive(self):
@@ -308,6 +308,13 @@ class ExcelBrowseModeTreeInterceptor(browseMode.BrowseModeTreeInterceptor):
 	# Translators: the description for the elements list command in Microsoft Excel.
 	script_elementsList.__doc__ = _("Presents a list of charts, cells with comments and cells with formulas")
 	script_elementsList.ignoreTreeInterceptorPassThrough=True
+	
+	def _activatePosition(self):
+		obj=api.getDesktopObject().objectWithFocus()._getSelection()
+		self._activateNVDAObject(obj)
+ 
+	def _activateNVDAObject(self,obj):
+ 		obj.doAction()
 
 class ElementsListDialog(browseMode.ElementsListDialog):
 
@@ -1241,29 +1248,77 @@ class ExcelFormControl(ExcelWorksheet):
 
         def _get_topLeftCell(self):
             return self.excelFormControlObject.TopLeftCell
+
+	def _get_bottomRightCell(self):
+		return self.excelFormControlObject.BottomRightCell
+           
+
+	def _getFormControlScreenCoordinates(self):
+			LOGPIXELSX=88
+			LOGPIXELSY=90
+			topLeftAddress=self.topLeftCell
+			bottomRightAddress=self.bottomRightCell
+			self.excelApplicationObject=self.excelWorksheetObject.Application
+			hDC = ctypes.windll.user32.GetDC(None)
+			px = ctypes.windll.gdi32.GetDeviceCaps(hDC, LOGPIXELSX)
+			py = ctypes.windll.gdi32.GetDeviceCaps(hDC, LOGPIXELSY)
+			ctypes.windll.user32.ReleaseDC(None, hDC)
+			zoom=self.excelApplicationObject.ActiveWindow.Zoom
+			zoomRatio=zoom/100
+			pointsPerInch = self.excelApplicationObject.InchesToPoints(1) #usually 72
+			screenTopLeftX=self.excelApplicationObject.ActiveWindow.PointsToScreenPixelsX(0)
+			screenBottomRightX=screenTopLeftX
+			screenTopLeftX=int(screenTopLeftX + topLeftAddress.Left * zoomRatio * px / pointsPerInch)
+			screenBottomRightX=int(screenBottomRightX + bottomRightAddress.Left * zoomRatio * px / pointsPerInch)
+			screenTopLeftY = self.excelApplicationObject.ActiveWindow.PointsToScreenPixelsY(0)
+			screenBottomRightY= screenTopLeftY
+			screenTopLeftY = int(screenTopLeftY + topLeftAddress.Top * zoomRatio * py / pointsPerInch)
+			screenBottomRightY=int(screenBottomRightY + bottomRightAddress.Top * zoomRatio * py / pointsPerInch)
+			return (int(0.5*(screenTopLeftX+screenBottomRightX)), int(0.5*(screenTopLeftY+screenBottomRightY)))
+
 		
+	def script_doAction(self,gesture):
+		self.doAction()
+	script_doAction.canPropagate=False
+
 	def doAction(self):
-		if self.role==controlTypes.ROLE_EDITBOX:
-			self.excelFormControlObject.SetFocus
-			self.excelFormControlObject.Text = 'TextBox'
-		elif self.role==controlTypes.ROLE_BUTTON:
-			log.io("\n"+str(self.excelFormControlObject.OnAction)+"\n")
-		elif self.role==controlTypes.ROLE_CHECKBOX:
-			log.io("\n"+"Checkbox Value: "+str(self.excelFormControlObject.Value)+"\n")	
-			self.excelFormControlObject.Value = False
-
-
-        
-        __changeSelectionGestures = (
-                "kb:tab",
-                "kb:shift+tab",
-                "kb:upArrow",
-                "kb:downArrow",
-                "kb:leftArrow",
-                "kb:rightArrow",
-                "kb:f",
-                "kb:shift+f",
-        )
+		import winUser
+		fc=self.excelFormControlObject
+		self.topLeftCell.Select
+		self.topLeftCell.Activate()
+		(x,y)=self._getFormControlScreenCoordinates()
+		winUser.setCursorPos(x,y)
+		# Translators: Reported when left mouse button is clicked.
+		ui.message(_("left click"))
+		winUser.mouse_event(winUser.MOUSEEVENTF_LEFTDOWN,0,0,None,None)
+		winUser.mouse_event(winUser.MOUSEEVENTF_LEFTUP,0,0,None,None)
+		fc.Select(True)
+		
+# 		if self.role==controlTypes.ROLE_EDITBOX:
+# 			self.excelFormControlObject.SetFocus
+# 			self.excelFormControlObject.Text = 'TextBox'
+# 		elif self.role==controlTypes.ROLE_BUTTON:
+# 			log.io("\n"+str(self.excelFormControlObject.OnAction)+"\n")
+# 		elif self.role==controlTypes.ROLE_CHECKBOX:
+# 			log.io("\n"+"Checkbox Value: "+str(self.excelFormControlObject.Value)+"\n")	
+# 			self.excelFormControlObject.Value = False
+		
+	__gestures={
+		"kb:enter":"doAction",
+		"kb:space":"doAction",
+		"kb(desktop):numpadEnter":"doAction",
+	}
+	
+	__changeSelectionGestures = (
+		"kb:tab",
+		"kb:shift+tab",
+		"kb:upArrow",
+		"kb:downArrow",
+		"kb:leftArrow",
+		"kb:rightArrow",
+		"kb:f",
+		"kb:shift+f",
+    )
 
 class ExcelFormControlQuickNavItem(ExcelQuickNavItem):
   
@@ -1281,10 +1336,8 @@ class ExcelFormControlQuickNavItem(ExcelQuickNavItem):
     def moveTo(self):
         try:
             self.excelItemObject.Select(True)
-            obj = api.getDesktopObject().objectWithFocus()._getSelection()
-#             eventHandler.queueEvent("gainFocus",obj)          
-            obj.doAction()
-            eventHandler.queueEvent("gainFocus",obj)
+            obj=api.getDesktopObject().objectWithFocus()._getSelection()
+            eventHandler.queueEvent("gainFocus",obj)          
             # After Select(), though the form control is selected, 
             # pressing arrow keys moves the object
   
@@ -1304,13 +1357,6 @@ class ExcelFormControlQuickNavItem(ExcelQuickNavItem):
             return False
         return True
 
-	def _activateNVDAObject(self, obj):
-		"""Activate an object in response to a user request.
-		This should generally perform the default action or click on the object.
-		@param obj: The object to activate.
-		@type obj: L{NVDAObjects.NVDAObject}
-		"""
-		obj.doAction()
 
 class ExcelFormControlQuicknavIterator(ExcelQuicknavIterator):
     quickNavItemClass=ExcelFormControlQuickNavItem
