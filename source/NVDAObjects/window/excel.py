@@ -558,9 +558,9 @@ class ExcelWorksheet(ExcelBase):
 		if self.excelWorksheetObject.Shapes.Count:
 			try:
 				for shape in self.excelWorksheetObject.Shapes:
-					if shape.Type==msoChart and not(hasChart):
+					if not(hasChart) and shape.Type==msoChart:
 						hasChart=True
-					elif (shape.Type==msoFormControl or shape.Type==msoTextBox) and not(hasFormControl):
+					elif not(hasFormControl) and (shape.Type==msoFormControl or shape.Type==msoTextBox):
 						hasFormControl=True
 			except:
 				pass

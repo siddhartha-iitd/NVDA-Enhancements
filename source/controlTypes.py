@@ -562,7 +562,6 @@ stateLabels={
 	STATE_HASCHART:_("has chart"),
 	# Translators: a state that denotes the existence of form control(s) in a spreadsheet
 	STATE_HASFORMCONTROL:_("has form control"),
-	# Translators: a state that denotes the existence of picture(s) in a spreadsheet
 	
 }
 
