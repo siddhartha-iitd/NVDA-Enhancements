@@ -193,6 +193,7 @@ STATE_OBSCURED=0x4000000000
 STATE_CROPPED=0x8000000000
 STATE_OVERFLOWING=0x10000000000
 
+
 roleLabels={
 	# Translators: The word for an unknown control type.
 	ROLE_UNKNOWN:_("unknown"),

@@ -1235,7 +1235,16 @@ class ExcelFormControl(ExcelWorksheet):
                 return None            
         
         def _get_states(self):
-            pass
+        	states=super(ExcelFormControl,self).states
+        	newState=None
+        	if self.role==controlTypes.ROLE_RADIOBUTTON:
+        		newState=controlTypes.STATE_CHECKED if self.excelFormControlObject.OLEFormat.Object.Value==1 else None
+        	elif self.role==controlTypes.ROLE_CHECKBOX:
+        		newState=controlTypes.STATE_CHECKED if self.excelFormControlObject.OLEFormat.Object.Value==1 else None
+        	if newState:
+        		states.add(newState)
+        	return states
+
         
         def _get_name(self):
             if self.excelFormControlObject.AlternativeText:
@@ -1293,15 +1302,6 @@ class ExcelFormControl(ExcelWorksheet):
 		winUser.mouse_event(winUser.MOUSEEVENTF_LEFTDOWN,0,0,None,None)
 		winUser.mouse_event(winUser.MOUSEEVENTF_LEFTUP,0,0,None,None)
 		fc.Select(True)
-		
-# 		if self.role==controlTypes.ROLE_EDITBOX:
-# 			self.excelFormControlObject.SetFocus
-# 			self.excelFormControlObject.Text = 'TextBox'
-# 		elif self.role==controlTypes.ROLE_BUTTON:
-# 			log.io("\n"+str(self.excelFormControlObject.OnAction)+"\n")
-# 		elif self.role==controlTypes.ROLE_CHECKBOX:
-# 			log.io("\n"+"Checkbox Value: "+str(self.excelFormControlObject.Value)+"\n")	
-# 			self.excelFormControlObject.Value = False
 		
 	__gestures={
 		"kb:enter":"doAction",
