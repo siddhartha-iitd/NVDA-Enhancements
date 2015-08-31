@@ -1260,13 +1260,16 @@ class ExcelFormControl(ExcelWorksheet):
 
 	def _get_bottomRightCell(self):
 		return self.excelFormControlObject.BottomRightCell
-           
 
 	def _getFormControlScreenCoordinates(self):
 			LOGPIXELSX=88
 			LOGPIXELSY=90
 			topLeftAddress=self.topLeftCell
 			bottomRightAddress=self.bottomRightCell
+			topLeftCellWidth=topLeftAddress.Width
+			topLeftCellHeight=topLeftAddress.Height
+			bottomRightCellWidth=bottomRightAddress.Width
+			bottomRightCellHeight=bottomRightAddress.Height			
 			self.excelApplicationObject=self.excelWorksheetObject.Application
 			hDC = ctypes.windll.user32.GetDC(None)
 			px = ctypes.windll.gdi32.GetDeviceCaps(hDC, LOGPIXELSX)
@@ -1277,14 +1280,13 @@ class ExcelFormControl(ExcelWorksheet):
 			pointsPerInch = self.excelApplicationObject.InchesToPoints(1) #usually 72
 			screenTopLeftX=self.excelApplicationObject.ActiveWindow.PointsToScreenPixelsX(0)
 			screenBottomRightX=screenTopLeftX
-			screenTopLeftX=int(screenTopLeftX + topLeftAddress.Left * zoomRatio * px / pointsPerInch)
-			screenBottomRightX=int(screenBottomRightX + bottomRightAddress.Left * zoomRatio * px / pointsPerInch)
+			screenTopLeftX=int(screenTopLeftX + topLeftCellWidth/2 + topLeftAddress.Left * zoomRatio * px / pointsPerInch)
+			screenBottomRightX=int(screenBottomRightX + bottomRightCellWidth/2+ bottomRightAddress.Left * zoomRatio * px / pointsPerInch)
 			screenTopLeftY = self.excelApplicationObject.ActiveWindow.PointsToScreenPixelsY(0)
 			screenBottomRightY= screenTopLeftY
-			screenTopLeftY = int(screenTopLeftY + topLeftAddress.Top * zoomRatio * py / pointsPerInch)
-			screenBottomRightY=int(screenBottomRightY + bottomRightAddress.Top * zoomRatio * py / pointsPerInch)
+			screenTopLeftY = int(screenTopLeftY + topLeftCellHeight/2+ topLeftAddress.Top * zoomRatio * py / pointsPerInch)
+			screenBottomRightY=int(screenBottomRightY + bottomRightCellHeight/2+ bottomRightAddress.Top * zoomRatio * py / pointsPerInch)
 			return (int(0.5*(screenTopLeftX+screenBottomRightX)), int(0.5*(screenTopLeftY+screenBottomRightY)))
-
 		
 	def script_doAction(self,gesture):
 		self.doAction()
