@@ -1266,27 +1266,41 @@ class ExcelFormControl(ExcelWorksheet):
 			LOGPIXELSY=90
 			topLeftAddress=self.topLeftCell
 			bottomRightAddress=self.bottomRightCell
+			#top left cell's width in points
 			topLeftCellWidth=topLeftAddress.Width
+			#top left cell's height in points
 			topLeftCellHeight=topLeftAddress.Height
+			#bottom right cell's width in points
 			bottomRightCellWidth=bottomRightAddress.Width
+			#bottom right cell's height in points
 			bottomRightCellHeight=bottomRightAddress.Height			
 			self.excelApplicationObject=self.excelWorksheetObject.Application
 			hDC = ctypes.windll.user32.GetDC(None)
+			#pixels per inch along screen width
 			px = ctypes.windll.gdi32.GetDeviceCaps(hDC, LOGPIXELSX)
+			#pixels per inch along screen height
 			py = ctypes.windll.gdi32.GetDeviceCaps(hDC, LOGPIXELSY)
 			ctypes.windll.user32.ReleaseDC(None, hDC)
 			zoom=self.excelApplicationObject.ActiveWindow.Zoom
 			zoomRatio=zoom/100
-			pointsPerInch = self.excelApplicationObject.InchesToPoints(1) #usually 72
-			screenTopLeftX=self.excelApplicationObject.ActiveWindow.PointsToScreenPixelsX(0)
-			screenBottomRightX=screenTopLeftX
-			screenTopLeftX=int(screenTopLeftX + topLeftCellWidth/2 + topLeftAddress.Left * zoomRatio * px / pointsPerInch)
-			screenBottomRightX=int(screenBottomRightX + bottomRightCellWidth/2+ bottomRightAddress.Left * zoomRatio * px / pointsPerInch)
-			screenTopLeftY = self.excelApplicationObject.ActiveWindow.PointsToScreenPixelsY(0)
-			screenBottomRightY= screenTopLeftY
-			screenTopLeftY = int(screenTopLeftY + topLeftCellHeight/2+ topLeftAddress.Top * zoomRatio * py / pointsPerInch)
-			screenBottomRightY=int(screenBottomRightY + bottomRightCellHeight/2+ bottomRightAddress.Top * zoomRatio * py / pointsPerInch)
-			return (int(0.5*(screenTopLeftX+screenBottomRightX)), int(0.5*(screenTopLeftY+screenBottomRightY)))
+			#Conversion from inches to Points .Usually 1 inch=72points
+			pointsPerInch = self.excelApplicationObject.InchesToPoints(1) 
+			#number of pixels from the left edge of the spreadsheet's window to the left edge the first column in the spreadsheet.
+			X=self.excelApplicationObject.ActiveWindow.PointsToScreenPixelsX(0)
+			#number of pixels from the top edge of the spreadsheet's window to the top edge the first row in the spreadsheet,
+			Y=self.excelApplicationObject.ActiveWindow.PointsToScreenPixelsY(0)
+			if topLeftAddress==bottomRightAddress:
+				#Range.Left: The distance, in points, from the left edge of column A to the left edge of the range. 
+				X=int(X + (topLeftAddress.Left+topLeftCellWidth/2) * zoomRatio * px / pointsPerInch)
+				#Range.Top: The distance, in points, from the top edge of Row 1 to the top edge of the range.
+				Y=int(Y + (topLeftAddress.Top+topLeftCellHeight/2) * zoomRatio * py / pointsPerInch)
+				return (X,Y)
+			else:
+				screenTopLeftX=int(X + (topLeftCellWidth/2 + topLeftAddress.Left) * zoomRatio * px / pointsPerInch)
+				screenBottomRightX=int(X + (bottomRightCellWidth/2+bottomRightAddress.Left) * zoomRatio * px / pointsPerInch)
+				screenTopLeftY = int(Y + (topLeftCellHeight/2+ topLeftAddress.Top) * zoomRatio * py / pointsPerInch)
+				screenBottomRightY=int(Y + (bottomRightCellHeight/2+ bottomRightAddress.Top) * zoomRatio * py / pointsPerInch)
+				return (int(0.5*(screenTopLeftX+screenBottomRightX)), int(0.5*(screenTopLeftY+screenBottomRightY)))
 		
 	def script_doAction(self,gesture):
 		self.doAction()
@@ -1303,7 +1317,10 @@ class ExcelFormControl(ExcelWorksheet):
 		ui.message(_("left click"))
 		winUser.mouse_event(winUser.MOUSEEVENTF_LEFTDOWN,0,0,None,None)
 		winUser.mouse_event(winUser.MOUSEEVENTF_LEFTUP,0,0,None,None)
-		fc.Select(True)
+		try:
+			fc.Select(True)
+		except:
+			pass
 		
 	__gestures={
 		"kb:enter":"doAction",
@@ -1364,11 +1381,7 @@ class ExcelFormControlQuicknavIterator(ExcelQuicknavIterator):
     quickNavItemClass=ExcelFormControlQuickNavItem
     def collectionFromWorksheet( self , worksheetObject ):
         try:
-        	shapes=[]
-        	for shape in worksheetObject.Shapes:
-        		if shape.Type==msoFormControl:
-        			shapes.append(shape)
-        	return shapes
+        	return worksheetObject.Shapes
         except(COMError):
             return None
 
@@ -1405,6 +1418,8 @@ class ExcelFormControlQuicknavIterator(ExcelQuicknavIterator):
                 item=self.quickNavItemClass(self.itemType,self.document,collectionItem , items )
                 yield item
     
-    def filter(self,item):
-        pass
+    def filter(self,shape):
+    	if shape.Type==msoFormControl:
+    		return True
+
 
