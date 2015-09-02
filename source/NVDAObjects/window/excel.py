@@ -270,7 +270,11 @@ class ExcelBrowseModeTreeInterceptor(browseMode.BrowseModeTreeInterceptor):
 		obj= api.getDesktopObject().objectWithFocus()._getSelection()
 		if obj.role in (controlTypes.ROLE_BUTTON, controlTypes.ROLE_CHECKBOX, controlTypes.ROLE_DROPDOWNBUTTON, controlTypes.ROLE_EDITBOX, controlTypes.ROLE_BOX, controlTypes.ROLE_LABEL, controlTypes.ROLE_LISTBOX, controlTypes.ROLE_RADIOBUTTON, controlTypes.ROLE_SCROLLBAR, controlTypes.ROLE_SPINBUTTON):
 			return obj.topLeftCell
-		return None
+		elif obj.role==controlTypes.ROLE_TABLECELL:
+			return obj.excelRangeObject
+		else:
+			return None
+			
 
 	def _get_isAlive(self):
 		if not winUser.isWindow(self.rootNVDAObject.windowHandle):
@@ -1308,7 +1312,7 @@ class ExcelFormControl(ExcelWorksheet):
 
 	def doAction(self):
 		import winUser
-		fc=self.excelFormControlObject
+# 		fc=self.excelFormControlObject
 		self.topLeftCell.Select
 		self.topLeftCell.Activate()
 		(x,y)=self._getFormControlScreenCoordinates()
@@ -1317,10 +1321,10 @@ class ExcelFormControl(ExcelWorksheet):
 		ui.message(_("left click"))
 		winUser.mouse_event(winUser.MOUSEEVENTF_LEFTDOWN,0,0,None,None)
 		winUser.mouse_event(winUser.MOUSEEVENTF_LEFTUP,0,0,None,None)
-		try:
-			fc.Select(True)
-		except:
-			pass
+# 		try:
+# 			fc.Select(True)
+# 		except:
+# 			pass
 		
 	__gestures={
 		"kb:enter":"doAction",
@@ -1362,7 +1366,6 @@ class ExcelFormControlQuickNavItem(ExcelQuickNavItem):
   
         except(COMError):
             pass
-#         ui.message(self.label)
  
     @property
     def isAfterSelection(self):
