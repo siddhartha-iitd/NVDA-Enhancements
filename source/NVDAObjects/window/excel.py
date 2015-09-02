@@ -1404,22 +1404,23 @@ class ExcelFormControlQuicknavIterator(ExcelQuicknavIterator):
             col = position.Column
             if self.direction=="next":
                 for collectionItem in items:
-                    if (collectionItem.TopLeftCell.Row==row and collectionItem.TopLeftCell.Column>col) or (collectionItem.TopLeftCell.Row>row):
+                    if ((collectionItem.TopLeftCell.Row==row and collectionItem.TopLeftCell.Column>col) or (collectionItem.TopLeftCell.Row>row)) and not(self.filter(collectionItem)):
                         item=self.quickNavItemClass(self.itemType,self.document,collectionItem,items )
                         yield item
             elif self.direction=="previous":
                 for collectionItem in reversed(items):
-                    if (collectionItem.TopLeftCell.Row==row and collectionItem.TopLeftCell.Column<col) or (collectionItem.TopLeftCell.Row<row):
+                    if (collectionItem.TopLeftCell.Row==row and collectionItem.TopLeftCell.Column<col) or (collectionItem.TopLeftCell.Row<row) and not(self.filter(collectionItem)):
                         item=self.quickNavItemClass(self.itemType,self.document,collectionItem,items )
                         yield item
-                
         else:
             for collectionItem in items:
-                item=self.quickNavItemClass(self.itemType,self.document,collectionItem , items )
-                yield item
+            	if not(self.filter(collectionItem)):
+            		item=self.quickNavItemClass(self.itemType,self.document,collectionItem , items )
+            		yield item
     
     def filter(self,shape):
-    	if shape.Type==msoFormControl:
+    	if shape.Type == msoFormControl:
+    		return False
+    	else:
     		return True
-
 
