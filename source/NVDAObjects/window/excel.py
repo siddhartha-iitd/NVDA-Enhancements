@@ -1329,23 +1329,22 @@ class ExcelFormControl(ExcelWorksheet):
             self.excelApplicationObject.ActiveSheet.Shapes(str(formControlName)).Select(True)
             eventHandler.queueEvent("gainFocus",self)
 
-    __gestures= {
-        "kb:enter":"doAction",
-        "kb:space":"doAction",
-        "kb(desktop):numpadEnter":"doAction",
-    }
-    
+	__gestures= {
+            "kb:enter":"doAction",
+            "kb:space":"doAction",
+            "kb(desktop):numpadEnter":"doAction",
+        }
 
-    __changeSelectionGestures = (
-        "kb:tab",
-        "kb:shift+tab",
-        "kb:upArrow",
-        "kb:downArrow",
-        "kb:leftArrow",
-        "kb:rightArrow",
-        "kb:f",
-        "kb:shift+f",
-    )
+        __changeSelectionGestures = (
+            "kb:tab",
+            "kb:shift+tab",
+            "kb:upArrow",
+            "kb:downArrow",
+            "kb:leftArrow",
+            "kb:rightArrow",
+            "kb:f",
+            "kb:shift+f",
+        )
 
 class ExcelFormControlQuickNavItem(ExcelQuickNavItem):
   
