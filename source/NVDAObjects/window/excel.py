@@ -79,6 +79,13 @@ xlListBox=6
 xlOptionButton=7
 xlScrollBar=8
 xlSpinner=9
+#MsoTriState Enumeration
+msoTrue=-1	#True
+msoFalse=0	#False
+#CheckBox and RadioButton States
+checked=1
+unchecked=-4146
+mixed=2
 
 
 re_RC=re.compile(r'R(?:\[(\d+)\])?C(?:\[(\d+)\])?')
@@ -391,7 +398,7 @@ class ExcelBase(Window):
 		isChartActive = True if self.excelWindowObject.ActiveChart else False
 		try:
 			shapeType=self.excelWindowObject.ActiveSheet.Shapes(selection.name).type
-			isFormControl = True if (shapeType==msoFormControl or shapeType==msoTextBox) else False
+			isFormControl = True if shapeType==msoFormControl else False
 			formControl=self.excelWindowObject.ActiveSheet.Shapes(selection.name)
 		except:
 			isFormControl=False
@@ -1209,8 +1216,6 @@ class ExcelFormControl(ExcelWorksheet):
             try:
                 if self.excelFormControlObject.Type==msoFormControl:
                 	formControlType=self.excelFormControlObject.FormControlType
-                elif self.excelFormControlObject.Type==msoTextBox:
-                	formControlType=msoTextBox
                 else:
                 	None
             except:
@@ -1221,7 +1226,7 @@ class ExcelFormControl(ExcelWorksheet):
                 return controlTypes.ROLE_CHECKBOX
             elif formControlType==xlDropDown:
                 return controlTypes.ROLE_DROPDOWNBUTTON
-            elif formControlType==xlEditBox or formControlType==msoTextBox:
+            elif formControlType==xlEditBox:
                 return controlTypes.ROLE_EDITBOX
             elif formControlType==xlGroupBox:
                 return controlTypes.ROLE_BOX
@@ -1239,12 +1244,16 @@ class ExcelFormControl(ExcelWorksheet):
                 return None            
         
         def _get_states(self):
+        	self.invalidateCache()
         	states=super(ExcelFormControl,self).states
         	newState=None
         	if self.role==controlTypes.ROLE_RADIOBUTTON:
-        		newState=controlTypes.STATE_CHECKED if self.excelFormControlObject.OLEFormat.Object.Value==1 else None
+        		newState=controlTypes.STATE_CHECKED if self.excelFormControlObject.OLEFormat.Object.Value==checked else None
         	elif self.role==controlTypes.ROLE_CHECKBOX:
-        		newState=controlTypes.STATE_CHECKED if self.excelFormControlObject.OLEFormat.Object.Value==1 else None
+        		if self.excelFormControlObject.OLEFormat.Object.Value==checked:
+        			newState=controlTypes.STATE_CHECKED
+        		elif self.excelFormControlObject.OLEFormat.Object.Value==mixed:
+        			newState=controlTypes.STATE_HALFCHECKED
         	if newState:
         		states.add(newState)
         	return states
@@ -1287,7 +1296,7 @@ class ExcelFormControl(ExcelWorksheet):
 			ctypes.windll.user32.ReleaseDC(None, hDC)
 			zoom=self.excelApplicationObject.ActiveWindow.Zoom
 			zoomRatio=zoom/100
-			#Conversion from inches to Points .Usually 1 inch=72points
+			#Conversion from inches to Points, 1 inch=72points
 			pointsPerInch = self.excelApplicationObject.InchesToPoints(1) 
 			#number of pixels from the left edge of the spreadsheet's window to the left edge the first column in the spreadsheet.
 			X=self.excelApplicationObject.ActiveWindow.PointsToScreenPixelsX(0)
@@ -1312,20 +1321,19 @@ class ExcelFormControl(ExcelWorksheet):
 
 	def doAction(self):
 		import winUser
-# 		fc=self.excelFormControlObject
+		formControlName=self.excelFormControlObject.Name
+		#Move focus away from Form Control to perform click
 		self.topLeftCell.Select
 		self.topLeftCell.Activate()
 		(x,y)=self._getFormControlScreenCoordinates()
 		winUser.setCursorPos(x,y)
-		# Translators: Reported when left mouse button is clicked.
-		ui.message(_("left click"))
+		#perform Mouse Left-Click
 		winUser.mouse_event(winUser.MOUSEEVENTF_LEFTDOWN,0,0,None,None)
 		winUser.mouse_event(winUser.MOUSEEVENTF_LEFTUP,0,0,None,None)
-# 		try:
-# 			fc.Select(True)
-# 		except:
-# 			pass
-		
+		#Select the formcontrol again and report focus.
+		self.excelApplicationObject.ActiveSheet.Shapes(str(formControlName)).Select(True)
+		eventHandler.queueEvent("gainFocus",self)
+
 	__gestures={
 		"kb:enter":"doAction",
 		"kb:space":"doAction",
@@ -1363,15 +1371,12 @@ class ExcelFormControlQuickNavItem(ExcelQuickNavItem):
             eventHandler.queueEvent("gainFocus",obj)          
             # After Select(), though the form control is selected, 
             # pressing arrow keys moves the object
-  
         except(COMError):
             pass
  
     @property
     def isAfterSelection(self):
         activeCell = self.document.Application.ActiveCell
-        #log.debugWarning("active row: {} active column: {} current row: {} current column: {}".format ( activeCell.row , activeCell.column , self.excelCommentObject.row , self.excelCommentObject.column   ) )
-  
         if self.excelItemObject.TopLeftCell.row == activeCell.row:
             if self.excelItemObject.TopLeftCell.column > activeCell.column:
                 return False
@@ -1423,7 +1428,10 @@ class ExcelFormControlQuicknavIterator(ExcelQuicknavIterator):
     
     def filter(self,shape):
     	if shape.Type == msoFormControl:
-    		return False
+    		if shape.FormControlType == xlGroupBox or shape.Visible != msoTrue:
+    			return True
+    		else:
+    			return False
     	else:
     		return True
 
