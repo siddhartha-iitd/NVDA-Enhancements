@@ -80,13 +80,15 @@ xlOptionButton=7
 xlScrollBar=8
 xlSpinner=9
 #MsoTriState Enumeration
-msoTrue=-1	#True
-msoFalse=0	#False
+msoTrue=-1    #True
+msoFalse=0    #False
 #CheckBox and RadioButton States
 checked=1
 unchecked=-4146
 mixed=2
-
+#LogPixels
+LOGPIXELSX=88
+LOGPIXELSY=90
 
 re_RC=re.compile(r'R(?:\[(\d+)\])?C(?:\[(\d+)\])?')
 re_absRC=re.compile(r'^R(\d+)C(\d+)(?::R(\d+)C(\d+))?$')
@@ -418,7 +420,6 @@ class ExcelBase(Window):
 			obj=ExcelFormControl(windowHandle=self.windowHandle,excelWindowObject=self.excelWindowObject,excelFormControlObject=formControl)			
 		return obj
 
-
 class Excel7Window(ExcelBase):
 	"""An overlay class for Window for the EXCEL7 window class, which simply bounces focus to the active excel cell."""
 
@@ -437,10 +438,7 @@ class Excel7Window(ExcelBase):
 			eventHandler.executeEvent('gainFocus',selection)
 
 class ExcelWorksheet(ExcelBase):
-
-
 	treeInterceptorClass=ExcelBrowseModeTreeInterceptor
-
 	role=controlTypes.ROLE_TABLE
 
 	def _get_excelApplicationObject(self):
@@ -1215,9 +1213,9 @@ class ExcelFormControl(ExcelWorksheet):
         def _get_role(self):
             try:
                 if self.excelFormControlObject.Type==msoFormControl:
-                	formControlType=self.excelFormControlObject.FormControlType
+                    formControlType=self.excelFormControlObject.FormControlType
                 else:
-                	None
+                    None
             except:
                 return None
             if formControlType==xlButtonControl:
@@ -1244,20 +1242,19 @@ class ExcelFormControl(ExcelWorksheet):
                 return None            
         
         def _get_states(self):
-        	self.invalidateCache()
-        	states=super(ExcelFormControl,self).states
-        	newState=None
-        	if self.role==controlTypes.ROLE_RADIOBUTTON:
-        		newState=controlTypes.STATE_CHECKED if self.excelFormControlObject.OLEFormat.Object.Value==checked else None
-        	elif self.role==controlTypes.ROLE_CHECKBOX:
-        		if self.excelFormControlObject.OLEFormat.Object.Value==checked:
-        			newState=controlTypes.STATE_CHECKED
-        		elif self.excelFormControlObject.OLEFormat.Object.Value==mixed:
-        			newState=controlTypes.STATE_HALFCHECKED
-        	if newState:
-        		states.add(newState)
-        	return states
-
+            self.invalidateCache()
+            states=super(ExcelFormControl,self).states
+            newState=None
+            if self.role==controlTypes.ROLE_RADIOBUTTON:
+                newState=controlTypes.STATE_CHECKED if self.excelFormControlObject.OLEFormat.Object.Value==checked else None
+            elif self.role==controlTypes.ROLE_CHECKBOX:
+                if self.excelFormControlObject.OLEFormat.Object.Value==checked:
+                    newState=controlTypes.STATE_CHECKED
+                elif self.excelFormControlObject.OLEFormat.Object.Value==mixed:
+                    newState=controlTypes.STATE_HALFCHECKED
+            if newState:
+                states.add(newState)
+            return states
         
         def _get_name(self):
             if self.excelFormControlObject.AlternativeText:
@@ -1271,84 +1268,83 @@ class ExcelFormControl(ExcelWorksheet):
         def _get_topLeftCell(self):
             return self.excelFormControlObject.TopLeftCell
 
-	def _get_bottomRightCell(self):
-		return self.excelFormControlObject.BottomRightCell
+	    def _get_bottomRightCell(self):
+	   		return self.excelFormControlObject.BottomRightCell
 
-	def _getFormControlScreenCoordinates(self):
-			LOGPIXELSX=88
-			LOGPIXELSY=90
-			topLeftAddress=self.topLeftCell
-			bottomRightAddress=self.bottomRightCell
-			#top left cell's width in points
-			topLeftCellWidth=topLeftAddress.Width
-			#top left cell's height in points
-			topLeftCellHeight=topLeftAddress.Height
-			#bottom right cell's width in points
-			bottomRightCellWidth=bottomRightAddress.Width
-			#bottom right cell's height in points
-			bottomRightCellHeight=bottomRightAddress.Height			
-			self.excelApplicationObject=self.excelWorksheetObject.Application
-			hDC = ctypes.windll.user32.GetDC(None)
-			#pixels per inch along screen width
-			px = ctypes.windll.gdi32.GetDeviceCaps(hDC, LOGPIXELSX)
-			#pixels per inch along screen height
-			py = ctypes.windll.gdi32.GetDeviceCaps(hDC, LOGPIXELSY)
-			ctypes.windll.user32.ReleaseDC(None, hDC)
-			zoom=self.excelApplicationObject.ActiveWindow.Zoom
-			zoomRatio=zoom/100
-			#Conversion from inches to Points, 1 inch=72points
-			pointsPerInch = self.excelApplicationObject.InchesToPoints(1) 
-			#number of pixels from the left edge of the spreadsheet's window to the left edge the first column in the spreadsheet.
-			X=self.excelApplicationObject.ActiveWindow.PointsToScreenPixelsX(0)
-			#number of pixels from the top edge of the spreadsheet's window to the top edge the first row in the spreadsheet,
-			Y=self.excelApplicationObject.ActiveWindow.PointsToScreenPixelsY(0)
-			if topLeftAddress==bottomRightAddress:
-				#Range.Left: The distance, in points, from the left edge of column A to the left edge of the range. 
-				X=int(X + (topLeftAddress.Left+topLeftCellWidth/2) * zoomRatio * px / pointsPerInch)
-				#Range.Top: The distance, in points, from the top edge of Row 1 to the top edge of the range.
-				Y=int(Y + (topLeftAddress.Top+topLeftCellHeight/2) * zoomRatio * py / pointsPerInch)
-				return (X,Y)
-			else:
-				screenTopLeftX=int(X + (topLeftCellWidth/2 + topLeftAddress.Left) * zoomRatio * px / pointsPerInch)
-				screenBottomRightX=int(X + (bottomRightCellWidth/2+bottomRightAddress.Left) * zoomRatio * px / pointsPerInch)
-				screenTopLeftY = int(Y + (topLeftCellHeight/2+ topLeftAddress.Top) * zoomRatio * py / pointsPerInch)
-				screenBottomRightY=int(Y + (bottomRightCellHeight/2+ bottomRightAddress.Top) * zoomRatio * py / pointsPerInch)
-				return (int(0.5*(screenTopLeftX+screenBottomRightX)), int(0.5*(screenTopLeftY+screenBottomRightY)))
+	    def _getFormControlScreenCoordinates(self):
+	    	topLeftAddress=self.topLeftCell
+            bottomRightAddress=self.bottomRightCell
+            #top left cell's width in points
+            topLeftCellWidth=topLeftAddress.Width
+            #top left cell's height in points
+            topLeftCellHeight=topLeftAddress.Height
+            #bottom right cell's width in points
+            bottomRightCellWidth=bottomRightAddress.Width
+            #bottom right cell's height in points
+            bottomRightCellHeight=bottomRightAddress.Height            
+            self.excelApplicationObject=self.excelWorksheetObject.Application
+            hDC = ctypes.windll.user32.GetDC(None)
+            #pixels per inch along screen width
+            px = ctypes.windll.gdi32.GetDeviceCaps(hDC, LOGPIXELSX)
+            #pixels per inch along screen height
+            py = ctypes.windll.gdi32.GetDeviceCaps(hDC, LOGPIXELSY)
+            ctypes.windll.user32.ReleaseDC(None, hDC)
+            zoom=self.excelApplicationObject.ActiveWindow.Zoom
+            zoomRatio=zoom/100
+            #Conversion from inches to Points, 1 inch=72points
+            pointsPerInch = self.excelApplicationObject.InchesToPoints(1) 
+            #number of pixels from the left edge of the spreadsheet's window to the left edge the first column in the spreadsheet.
+            X=self.excelApplicationObject.ActiveWindow.PointsToScreenPixelsX(0)
+            #number of pixels from the top edge of the spreadsheet's window to the top edge the first row in the spreadsheet,
+            Y=self.excelApplicationObject.ActiveWindow.PointsToScreenPixelsY(0)
+            if topLeftAddress==bottomRightAddress:
+                #Range.Left: The distance, in points, from the left edge of column A to the left edge of the range. 
+                X=int(X + (topLeftAddress.Left+topLeftCellWidth/2) * zoomRatio * px / pointsPerInch)
+                #Range.Top: The distance, in points, from the top edge of Row 1 to the top edge of the range.
+                Y=int(Y + (topLeftAddress.Top+topLeftCellHeight/2) * zoomRatio * py / pointsPerInch)
+                return (X,Y)
+            else:
+                screenTopLeftX=int(X + (topLeftCellWidth/2 + topLeftAddress.Left) * zoomRatio * px / pointsPerInch)
+                screenBottomRightX=int(X + (bottomRightCellWidth/2+bottomRightAddress.Left) * zoomRatio * px / pointsPerInch)
+                screenTopLeftY = int(Y + (topLeftCellHeight/2+ topLeftAddress.Top) * zoomRatio * py / pointsPerInch)
+                screenBottomRightY=int(Y + (bottomRightCellHeight/2+ bottomRightAddress.Top) * zoomRatio * py / pointsPerInch)
+                return (int(0.5*(screenTopLeftX+screenBottomRightX)), int(0.5*(screenTopLeftY+screenBottomRightY)))
+
+		def script_doAction(self,gesture):
+			self.doAction()
+		script_doAction.canPropagate=False
 		
-	def script_doAction(self,gesture):
-		self.doAction()
-	script_doAction.canPropagate=False
+		def doAction(self):
+			import winUser
+			formControlName=self.excelFormControlObject.Name
+			#Move focus away from Form Control to perform click
+			self.topLeftCell.Select
+			self.topLeftCell.Activate()
+			(x,y)=self._getFormControlScreenCoordinates()
+			winUser.setCursorPos(x,y)
+			#perform Mouse Left-Click
+			winUser.mouse_event(winUser.MOUSEEVENTF_LEFTDOWN,0,0,None,None)
+			winUser.mouse_event(winUser.MOUSEEVENTF_LEFTUP,0,0,None,None)
+			#Select the formcontrol again and report focus.
+			self.excelApplicationObject.ActiveSheet.Shapes(str(formControlName)).Select(True)
+			eventHandler.queueEvent("gainFocus",self)
 
-	def doAction(self):
-		import winUser
-		formControlName=self.excelFormControlObject.Name
-		#Move focus away from Form Control to perform click
-		self.topLeftCell.Select
-		self.topLeftCell.Activate()
-		(x,y)=self._getFormControlScreenCoordinates()
-		winUser.setCursorPos(x,y)
-		#perform Mouse Left-Click
-		winUser.mouse_event(winUser.MOUSEEVENTF_LEFTDOWN,0,0,None,None)
-		winUser.mouse_event(winUser.MOUSEEVENTF_LEFTUP,0,0,None,None)
-		#Select the formcontrol again and report focus.
-		self.excelApplicationObject.ActiveSheet.Shapes(str(formControlName)).Select(True)
-		eventHandler.queueEvent("gainFocus",self)
-
-	__gestures={
-		"kb:enter":"doAction",
-		"kb:space":"doAction",
-		"kb(desktop):numpadEnter":"doAction",
-	}
+	__gestures= {
+        "kb:enter":"doAction",
+        "kb:space":"doAction",
+        "kb(desktop):numpadEnter":"doAction",
+    }
 	
+
 	__changeSelectionGestures = (
-		"kb:tab",
-		"kb:shift+tab",
-		"kb:upArrow",
-		"kb:downArrow",
-		"kb:leftArrow",
-		"kb:rightArrow",
-		"kb:f",
-		"kb:shift+f",
+        "kb:tab",
+        "kb:shift+tab",
+        "kb:upArrow",
+        "kb:downArrow",
+        "kb:leftArrow",
+        "kb:rightArrow",
+        "kb:f",
+        "kb:shift+f",
     )
 
 class ExcelFormControlQuickNavItem(ExcelQuickNavItem):
@@ -1389,7 +1385,7 @@ class ExcelFormControlQuicknavIterator(ExcelQuicknavIterator):
     quickNavItemClass=ExcelFormControlQuickNavItem
     def collectionFromWorksheet( self , worksheetObject ):
         try:
-        	return worksheetObject.Shapes
+            return worksheetObject.Shapes
         except(COMError):
             return None
 
@@ -1422,16 +1418,16 @@ class ExcelFormControlQuicknavIterator(ExcelQuicknavIterator):
                         yield item
         else:
             for collectionItem in items:
-            	if not(self.filter(collectionItem)):
-            		item=self.quickNavItemClass(self.itemType,self.document,collectionItem , items )
-            		yield item
+                if not(self.filter(collectionItem)):
+                    item=self.quickNavItemClass(self.itemType,self.document,collectionItem , items )
+                    yield item
     
     def filter(self,shape):
-    	if shape.Type == msoFormControl:
-    		if shape.FormControlType == xlGroupBox or shape.Visible != msoTrue:
-    			return True
-    		else:
-    			return False
-    	else:
-    		return True
+        if shape.Type == msoFormControl:
+            if shape.FormControlType == xlGroupBox or shape.Visible != msoTrue:
+                return True
+            else:
+                return False
+        else:
+            return True
 
