@@ -204,8 +204,8 @@ confspec = ConfigObj(StringIO(
 [upgrade]
 	newLaptopKeyboardLayout = boolean(default=false)
 
-[writingScriptsToLanguage]
-	languagePriorityList = string(default="en")
+[writingScripts]
+	languagePriorityList = string_list
 """
 ), list_values=False, encoding="UTF-8")
 confspec.newlines = "\r\n"

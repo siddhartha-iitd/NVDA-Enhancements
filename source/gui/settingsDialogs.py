@@ -1855,48 +1855,6 @@ class InputGesturesDialog(SettingsDialog):
 
 		super(InputGesturesDialog, self).onOk(evt)
 
-
-
-class AddLanguageDialog(wx.Dialog):
-
-	def __init__(self, parent, title=_("Add Language")):
-		super(AddLanguageDialog,self).__init__(parent,title=title)
-		mainSizer=wx.BoxSizer(wx.VERTICAL)
-		languageSizer=wx.BoxSizer(wx.HORIZONTAL)
-		# Translators: The label for a priority of language for NVDA 
-		languageLabel=wx.StaticText(self,-1,label=_("&Choose language to be added to prefered languages"))
-		languageSizer.Add(languageLabel)
-		languageListID=wx.NewId()
-		self.languageNames = unicodeScriptHandler.getLanguagesWithDescriptions()
-		# Translators: The list of languages for various scripts in NVDA.
-		self.languageList=wx.Choice(self,languageListID,name=_("Language"),choices=[x[1] for x in self.languageNames])
-		self.languageList.SetToolTip(wx.ToolTip("Choose the language NVDA's messages and user interface should be presented in."))
-		try:
-			self.oldLanguage=config.conf["general"]["language"]
-			index=[x[0] for x in self.languageNames].index(self.oldLanguage)
-			self.languageList.SetSelection(index)
-		except:
-			pass
-		languageSizer.Add(self.languageList)
-		if globalVars.appArgs.secure:
-			self.languageList.Disable()
-		mainSizer.Add(languageSizer,border=10,flag=wx.BOTTOM)
-		#self.addButtonID=wx.NewId()
-		# Translators: The label for a button in writing script dialog to add new languages.
-		addButton=wx.Button(self, wx.ID_OK ,_("&Add"),wx.DefaultPosition)
-		#self.Bind(wx.EVT_BUTTON,self.OnAddClick,id=self.addButtonID)
-		mainSizer.Add(addButton)
-		buttonSizer=self.CreateButtonSizer(wx.CANCEL)
-		mainSizer.Add(buttonSizer,border=20,flag=wx.LEFT|wx.RIGHT|wx.BOTTOM)
-		mainSizer.Fit(self)
-		self.SetSizer(mainSizer)
-		addButton.Bind(wx.EVT_BUTTON,self.onOk,id=wx.ID_OK)
-
-	def onOk(self,evt):
-		self.newLanguage=[x[0] for x in self.languageNames][self.languageList.GetSelection()]
-		self.EndModal(wx.ID_OK)
-
-
 class WritingScriptsDialog(SettingsDialog):
 	# Translators: The title of the Writing Scripts dialog where the user can remap languages for various scripts.
 	title = _("Writing Scripts")
@@ -1913,15 +1871,7 @@ class WritingScriptsDialog(SettingsDialog):
 		# Translators: The list of priority languages for various scripts in NVDA.
 		self.languageList=wx.Choice(self,languageListID,name=_("Language"),choices=[x[2] for x in self.languageNames])
 		self.languageList.SetToolTip(wx.ToolTip("Choose the language NVDA's messages and user interface should be presented in."))
-		try:
-			self.oldLanguage=config.conf["general"]["language"]
-			index=[x[0] for x in self.languageNames].index(self.oldLanguage)
-			self.languageList.SetSelection(index)
-		except:
-			pass
 		languageSizer.Add(self.languageList)
-		if globalVars.appArgs.secure:
-			self.languageList.Disable()
 		settingsSizer.Add(languageSizer,border=10,flag=wx.BOTTOM)
 		moveUpButtonID=wx.NewId()
 		# Translators: The label for a button in writing script dialog to increase priority of a language languages.
@@ -1962,23 +1912,25 @@ class WritingScriptsDialog(SettingsDialog):
 		self.updateList()
 
 	def OnAdd(self,evt):
-		addLanguageDialog= AddLanguageDialog(self,title=_("Add language"))
-		if addLanguageDialog.ShowModal()==wx.ID_OK:
-			languageTuple = addLanguageDialog.newLanguage , unicodeScriptHandler.getScriptName( addLanguageDialog.newLanguage) , unicodeScriptHandler.getLanguageDescription(addLanguageDialog.newLanguage)  
+		languageList = unicodeScriptHandler.getLanguagesWithDescriptions()
+		# Translators: The list of languages for various scripts in NVDA.
+		dialog = wx.SingleChoiceDialog(None, _("Language") , _("Choose language to be added to prefered languages") , choices=[x[1] for x in languageList])
+		if dialog.ShowModal() == wx.ID_OK:
+			languageTuple = languageList[ dialog.GetSelection() ][0] , unicodeScriptHandler.getScriptIDFromLangID( languageList[ dialog.GetSelection() ][0] ) , languageList[ dialog.GetSelection() ][1] 
 			self.languageNames.insert(0, languageTuple )
 			self.updateList()
+		dialog.Destroy()
 
 	def OnRemove(self,evt):
-		if gui.messageBox("Are you sure to remove this language?"):
-			self.languageNames.pop( self.languageList.GetSelection() )
-			self.updateList()
+		self.languageNames.pop( self.languageList.GetSelection() )
+		self.updateList()
 
 	def onOk(self, evt):
 		if self.languageListChanged: 
 			languageList = []
 			for item in self.languageNames: 
 				languageList.append( item[0] ) 
-			config.conf["writingScriptsToLanguage"]["languagePriorityList"] = ",".join(languageList)
+			config.conf["writingScripts"]["languagePriorityList"] = list(languageList)
 			unicodeScriptHandler.updateLanguagePriorityFromConfig()
 		super( WritingScriptsDialog , self).onOk(evt)
 
@@ -1986,4 +1938,3 @@ class WritingScriptsDialog(SettingsDialog):
 		self.languageList.Clear()
 		self.languageList.AppendItems([x[2] for x in self.languageNames])
 		self.languageListChanged = True
-

@@ -1478,18 +1478,5 @@ class LangChangeCommand(SpeechCommand):
 	def __repr__(self):
 		return "LangChangeCommand (%r)"%self.lang
 
-class ScriptChangeCommand(SpeechCommand):
-	"""A command to switch the script during script detection ."""
-
-	def __init__(self, scriptCode):
-		"""
-		@param scriptCode: the script identifier
-		@type scriptCode: int
-		"""
-		self.scriptCode =scriptCode 
-
-	def __repr__(self):
-		return "ScriptChangeCommand (%r)"%self.scriptCode
-
 class BreakCommand(object):
 	"""Forces speakWithoutPauses to flush its buffer and therefore break the sentence at this point."""
