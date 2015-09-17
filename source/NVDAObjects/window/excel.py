@@ -29,6 +29,7 @@ from .. import NVDAObjectTextInfo
 import scriptHandler
 import browseMode
 import ctypes
+import winUser
 
 
 xlCenter=-4108
@@ -1315,7 +1316,6 @@ class ExcelFormControl(ExcelWorksheet):
         script_doAction.canPropagate=False
         
         def doAction(self):
-            import winUser
             formControlName=self.excelFormControlObject.Name
             #Move focus away from Form Control to perform click
             self.topLeftCell.Select
@@ -1325,6 +1325,8 @@ class ExcelFormControl(ExcelWorksheet):
             #perform Mouse Left-Click
             winUser.mouse_event(winUser.MOUSEEVENTF_LEFTDOWN,0,0,None,None)
             winUser.mouse_event(winUser.MOUSEEVENTF_LEFTUP,0,0,None,None)
+            #Pause is required, otherwise selecting form-control again throws COM Error.
+            time.sleep(0.05)#50 milliseconds
             #Select the formcontrol again and report focus.
             self.excelApplicationObject.ActiveSheet.Shapes(str(formControlName)).Select(True)
             eventHandler.queueEvent("gainFocus",self)
