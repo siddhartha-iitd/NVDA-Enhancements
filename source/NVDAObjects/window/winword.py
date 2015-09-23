@@ -23,6 +23,7 @@ import NVDAHelper
 import XMLFormatting
 from logHandler import log
 import winUser
+import win32gui
 import oleacc
 import globalVars
 import speech
@@ -897,6 +898,27 @@ class WordDocumentTreeInterceptor(browseMode.BrowseModeDocumentTreeInterceptor):
 		"kb:shift+pageDown":None,
 	}
 
+
+def getCaretScreenPosition( ):
+	""" returns tuple (left, top, right, bottom ) for caret extent. 
+	This fn should be moved to generic winuser util """
+	info = winUser.getGUIThreadInfo(None)
+	rect = info.rcCaret
+	wnd = info.hwndCaret
+	( left, top ) = win32gui.ClientToScreen(wnd, ( rect.left,rect.top))
+	( right, bottom ) = win32gui.ClientToScreen(wnd, ( rect.right,rect.bottom))
+	return ( left, top, right, bottom )
+
+def areDistant( left1, right1, left2, right2):
+	""" True if left1-right1 distant from left-right2 ?
+	block 1 may be on right or left of block2 :  right-to-left languages"""
+	## make sure left1 is less than or equal to left2
+	if left1 > left2:
+		(left1, right1, left2, right2 ) = ( left2, right2, left1, right1 )
+	## overlapping / touching ?
+	if right1 > left2 : return False
+	return True
+
 class WordDocument(EditableTextWithoutAutoSelectDetection, Window):
 
 	treeInterceptorClass=WordDocumentTreeInterceptor
@@ -909,12 +931,31 @@ class WordDocument(EditableTextWithoutAutoSelectDetection, Window):
 	def __init__(self,*args,**kwargs):
 		super(WordDocument,self).__init__(*args,**kwargs)
 
+	def _getRangeScreenPosition(self, textinfo):
+		p=ctypes.pointer
+		left = ctypes.c_long()
+		top  = ctypes.c_long()
+		width = ctypes.c_long()
+		height = ctypes.c_long()
+		t = self.WinwordWindowObject.getPoint(p(left),p(top),p(width),p(height),textinfo._rangeObj)
+		return( left.value, top.value, left.value + width.value, top.value + height.value )
+
 	def event_caret(self):
 		curSelectionPos=self.makeTextInfo(textInfos.POSITION_SELECTION)
-		lastSelectionPos=getattr(self,'_lastSelectionPos',None)
-		self._lastSelectionPos=curSelectionPos
-		if lastSelectionPos:
-			if curSelectionPos._rangeObj.isEqual(lastSelectionPos._rangeObj):
+		## TODO: drop code, as it skips bullet code when moving to first item of list
+		#lastSelectionPos=getattr(self,'_lastSelectionPos',None)
+		#self._lastSelectionPos=curSelectionPos
+		#if lastSelectionPos:
+		#	if curSelectionPos._rangeObj.isEqual(lastSelectionPos._rangeObj):
+		#		return
+		#TODO should config listreporting be checked here ?
+		prefix = curSelectionPos._rangeObj.ListFormat.ListString
+		## If selecting with shift + cursor , make sure we don't say bullet.
+		if  len(prefix) > 0 and  curSelectionPos._rangeObj.Text is  None:
+			(caret_left,dummy,caret_right,dummy) = getCaretScreenPosition()
+			(range_left,dummy,range_right,dummy) = self._getRangeScreenPosition(curSelectionPos)
+			if areDistant(caret_left, caret_right, range_left, range_right):
+				speech.speakText(prefix,reason=controlTypes.REASON_CARET)
 				return
 		super(WordDocument,self).event_caret()
 
