@@ -22,6 +22,7 @@ from NVDAObjects.window import Window
 from NVDAObjects import NVDAObjectTextInfo, InvalidNVDAObject
 from NVDAObjects.behaviors import ProgressBar, EditableTextWithoutAutoSelectDetection, Dialog
 import braille
+import re
 
 class UIATextInfo(textInfos.TextInfo):
 
@@ -323,7 +324,10 @@ class UIA(Window):
 		UIAControlType=self.UIAElement.cachedControlType
 		UIAClassName=self.UIAElement.cachedClassName
 		if UIAClassName=="WpfTextView":
-			clsList.append(WpfTextView)
+			if "Microsoft Visual Studio" in self.windowText:
+				clsList.append(WpfTextViewForVisualStudio)
+			else:
+				clsList.append(WpfTextView)
 		# #5136: Windows 8.x and Windows 10 uses different window class and other attributes for toast notifications.
 		elif ((UIAClassName=="ToastContentHost" and UIAControlType==UIAHandler.UIA_ToolTipControlTypeId) #Windows 8.x
 		or (self.windowClassName=="Windows.UI.Core.CoreWindow" and UIAControlType==UIAHandler.UIA_WindowControlTypeId and self.UIAElement.cachedAutomationId=="NormalToastView")): # Windows 10
@@ -944,4 +948,36 @@ class WpfTextView(UIA):
 
 	def event_stateChange(self):
 		return
+
+class UIATextInfoForVisualStudio( UIATextInfo):
+
+	def __init__(self,obj,position,_rangeObj=None):
+		super(UIATextInfoForVisualStudio,self).__init__(obj,position,_rangeObj)
+		self.digitsAtStartOfLineMatch = re.compile(r"^[\d]+\s")
+
+	def _getFormatFieldAtRange(self,range,formatConfig):
+		formatField = super( UIATextInfoForVisualStudio , self)._getFormatFieldAtRange(range,formatConfig)
+		currentElement = self.NVDAObjectAtStart
+		isLineNumberAtStart = self.digitsAtStartOfLineMatch.match(range.GetText(-1))
+		if isLineNumberAtStart: 
+			currentLineNumber = int(isLineNumberAtStart.group() )
+			breakPoint = self._getBreakPointAtLine( currentLineNumber , currentElement )
+			if breakPoint: 
+				formatField.field["breakpoint"] = breakPoint
+		return formatField 
+
+	def _getBreakPointAtLine(self,line,textObject):
+		if textObject and textObject.next and textObject.next.name == "Glyph Margin Grid":
+			currentBreakPoint = textObject.next.firstChild 
+			while currentBreakPoint: 
+				currentUIAutomationId = currentBreakPoint.UIAElement.currentAutomationID
+				currentLineNumber = int(currentUIAutomationId.split(';')[1])
+				if currentLineNumber == line: return currentBreakPoint.name.split(';')[0]
+				currentBreakPoint = currentBreakPoint.next 
+
+class WpfTextViewForVisualStudio(WpfTextView):
+
+	def _get_TextInfo(self):
+		if self.UIATextPattern: return UIATextInfoForVisualStudio
+		return super(UIA,self).TextInfo
 
