@@ -64,6 +64,30 @@ xlCellTypeLastCell            =11         # from enum XlCellType
 xlCellTypeSameFormatConditions=-4173      # from enum XlCellType
 xlCellTypeSameValidation      =-4175      # from enum XlCellType
 xlCellTypeVisible             =12         # from enum XlCellType
+#MsoShapeType Enumeration
+msoFormControl=8
+msoTextBox=17
+#XlFormControl Enumeration
+xlButtonControl=0
+xlCheckBox=1
+xlDropDown=2
+xlEditBox=3
+xlGroupBox=4
+xlLabel=5
+xlListBox=6
+xlOptionButton=7
+xlScrollBar=8
+xlSpinner=9
+#MsoTriState Enumeration
+msoTrue=-1    #True
+msoFalse=0    #False
+#CheckBox and RadioButton States
+checked=1
+unchecked=-4146
+mixed=2
+#LogPixels
+LOGPIXELSX=88
+LOGPIXELSY=90
 
 re_RC=re.compile(r'R(?:\[(\d+)\])?C(?:\[(\d+)\])?')
 re_absRC=re.compile(r'^R(\d+)C(\d+)(?::R(\d+)C(\d+))?$')
@@ -154,7 +178,7 @@ class ExcelRangeBasedQuickNavItem(ExcelQuickNavItem):
 	@property
 	def isAfterSelection(self):
 		activeCell = self.document.Application.ActiveCell
-		log.debugWarning("active row: {} active column: {} current row: {} current column: {}".format ( activeCell.row , activeCell.column , self.excelItemObject.row , self.excelItemObject.column   ) )
+# 		log.debugWarning("active row: {} active column: {} current row: {} current column: {}".format ( activeCell.row , activeCell.column , self.excelItemObject.row , self.excelItemObject.column   ) )
 
 		if self.excelItemObject.row == activeCell.row:
 			if self.excelItemObject.column > activeCell.column:
@@ -250,6 +274,9 @@ class ExcelBrowseModeTreeInterceptor(browseMode.BrowseModeTreeInterceptor):
 	needsReviewCursorTextInfoWrapper=False
 	passThrough=True
 
+        def _get_selection(self):
+                return self.rootNVDAObject.excelApplicationObject.Selection
+   
 	def _get_isAlive(self):
 		if not winUser.isWindow(self.rootNVDAObject.windowHandle):
 			return False
@@ -259,11 +286,8 @@ class ExcelBrowseModeTreeInterceptor(browseMode.BrowseModeTreeInterceptor):
 			log.debugWarning("could not compair sheet names",exc_info=True)
 			return False
 
-
 	def __contains__(self,obj):
 		return winUser.isDescendantWindow(self.rootNVDAObject.windowHandle,obj.windowHandle)
-
-
 
 	def _set_selection(self,info):
 		super(ExcelBrowseModeTreeInterceptor,self)._set_selection(info)
@@ -279,6 +303,8 @@ class ExcelBrowseModeTreeInterceptor(browseMode.BrowseModeTreeInterceptor):
 			return CommentExcelCollectionQuicknavIterator( nodeType , self.rootNVDAObject.excelWorksheetObject , direction , None ).iterate()
 		elif nodeType=="formula":
 			return FormulaExcelCollectionQuicknavIterator( nodeType , self.rootNVDAObject.excelWorksheetObject , direction , None ).iterate()
+		elif nodeType=="formField":
+                        return ExcelFormControlQuicknavIterator( nodeType , self.rootNVDAObject.excelWorksheetObject , direction , None ).iterate(pos)
 		else:
 			raise NotImplementedError
 
@@ -287,6 +313,14 @@ class ExcelBrowseModeTreeInterceptor(browseMode.BrowseModeTreeInterceptor):
 	# Translators: the description for the elements list command in Microsoft Excel.
 	script_elementsList.__doc__ = _("Presents a list of charts, cells with comments and cells with formulas")
 	script_elementsList.ignoreTreeInterceptorPassThrough=True
+
+        def _activatePosition(self):
+                obj=api.getDesktopObject().objectWithFocus()
+                self._activateNVDAObject(obj)
+ 
+        def _activateNVDAObject(self,obj):
+                obj.doAction()
+
 
 class ElementsListDialog(browseMode.ElementsListDialog):
 
@@ -300,6 +334,9 @@ class ElementsListDialog(browseMode.ElementsListDialog):
 		# Translators: The label of a radio button to select the type of element
 		# in the browse mode Elements List dialog.
 		("formula", _("&Formula")),
+        # Translators: The label of a radio button to select the type of element
+        # in the browse mode Elements List dialog.
+        ("formField", _("formField")),        
 	)
 
 class ExcelBase(Window):
@@ -352,7 +389,6 @@ class ExcelBase(Window):
 			numCells=selection.count
 		except (COMError,NameError):
 			numCells=0
-
 		isChartActive = True if self.excelWindowObject.ActiveChart else False
 		obj=None
 		if isMerged:
@@ -366,7 +402,6 @@ class ExcelBase(Window):
 			import excelChart
 			obj=excelChart.ExcelChart(windowHandle=self.windowHandle,excelWindowObject=self.excelWindowObject,excelChartObject=selection)
 		return obj
-
 
 class Excel7Window(ExcelBase):
 	"""An overlay class for Window for the EXCEL7 window class, which simply bounces focus to the active excel cell."""
@@ -1150,4 +1185,223 @@ class ExcelMergedCell(ExcelCell):
 
 	def _get_colSpan(self):
 		return self.excelCellObject.mergeArea.columns.count
+
+class ExcelFormControl(ExcelWorksheet):
+
+        def __init__(self,windowHandle=None,excelWindowObject=None,excelFormControlObject=None):
+            self.excelWindowObject=excelWindowObject
+            self.excelWorksheetObject=self.excelWindowObject.ActiveSheet
+            self.excelFormControlObject=excelFormControlObject
+            super(ExcelFormControl,self).__init__(windowHandle=windowHandle, excelWindowObject=self.excelWindowObject, excelWorksheetObject=self.excelWorksheetObject)
+            for gesture in self.__changeSelectionGestures:
+                self.bindGesture(gesture, "changeSelection")
+
+        def _get_role(self):
+            try:
+                if self.excelFormControlObject.Type==msoFormControl:
+                    formControlType=self.excelFormControlObject.FormControlType
+                else:
+                    None
+            except:
+                return None
+            if formControlType==xlButtonControl:
+                return controlTypes.ROLE_BUTTON
+            elif formControlType==xlCheckBox:
+                return controlTypes.ROLE_CHECKBOX
+            elif formControlType==xlDropDown:
+                return controlTypes.ROLE_DROPDOWNBUTTON
+            elif formControlType==xlEditBox:
+                return controlTypes.ROLE_EDITBOX
+            elif formControlType==xlGroupBox:
+                return controlTypes.ROLE_BOX
+            elif formControlType==xlLabel:
+                return controlTypes.ROLE_LABEL
+            elif formControlType==xlListBox:
+                return controlTypes.ROLE_LISTBOX
+            elif formControlType==xlOptionButton:
+                return controlTypes.ROLE_RADIOBUTTON
+            elif formControlType==xlScrollBar:
+                return controlTypes.ROLE_SCROLLBAR
+            elif formControlType==xlSpinner:
+                return controlTypes.ROLE_SPINBUTTON
+            else:
+                return None            
+        
+        def _get_states(self):
+            self.invalidateCache()
+            states=super(ExcelFormControl,self).states
+            newState=None
+            if self.role==controlTypes.ROLE_RADIOBUTTON:
+                newState=controlTypes.STATE_CHECKED if self.excelFormControlObject.OLEFormat.Object.Value==checked else None
+            elif self.role==controlTypes.ROLE_CHECKBOX:
+                if self.excelFormControlObject.OLEFormat.Object.Value==checked:
+                    newState=controlTypes.STATE_CHECKED
+                elif self.excelFormControlObject.OLEFormat.Object.Value==mixed:
+                    newState=controlTypes.STATE_HALFCHECKED
+            if newState:
+                states.add(newState)
+            return states
+        
+        def _get_name(self):
+            if self.excelFormControlObject.AlternativeText:
+                return self.excelFormControlObject.AlternativeText+" "+self.excelFormControlObject.TopLeftCell.address(False,False,1,False) + "-" + self.excelFormControlObject.BottomRightCell.address(False,False,1,False)
+            else:
+                return self.excelFormControlObject.Name+" "+self.excelFormControlObject.TopLeftCell.address(False,False,1,False) + "-" + self.excelFormControlObject.BottomRightCell.address(False,False,1,False)
+
+        def _get_index(self):
+            return self.excelFormControlObject.ZOrderPosition
+
+        def _get_topLeftCell(self):
+            return self.excelFormControlObject.TopLeftCell
+
+        def _get_bottomRightCell(self):
+               return self.excelFormControlObject.BottomRightCell
+
+        def _getFormControlScreenCoordinates(self):
+            topLeftAddress=self.topLeftCell
+            bottomRightAddress=self.bottomRightCell
+            #top left cell's width in points
+            topLeftCellWidth=topLeftAddress.Width
+            #top left cell's height in points
+            topLeftCellHeight=topLeftAddress.Height
+            #bottom right cell's width in points
+            bottomRightCellWidth=bottomRightAddress.Width
+            #bottom right cell's height in points
+            bottomRightCellHeight=bottomRightAddress.Height            
+            self.excelApplicationObject=self.excelWorksheetObject.Application
+            hDC = ctypes.windll.user32.GetDC(None)
+            #pixels per inch along screen width
+            px = ctypes.windll.gdi32.GetDeviceCaps(hDC, LOGPIXELSX)
+            #pixels per inch along screen height
+            py = ctypes.windll.gdi32.GetDeviceCaps(hDC, LOGPIXELSY)
+            ctypes.windll.user32.ReleaseDC(None, hDC)
+            zoom=self.excelApplicationObject.ActiveWindow.Zoom
+            zoomRatio=zoom/100
+            #Conversion from inches to Points, 1 inch=72points
+            pointsPerInch = self.excelApplicationObject.InchesToPoints(1) 
+            #number of pixels from the left edge of the spreadsheet's window to the left edge the first column in the spreadsheet.
+            X=self.excelApplicationObject.ActiveWindow.PointsToScreenPixelsX(0)
+            #number of pixels from the top edge of the spreadsheet's window to the top edge the first row in the spreadsheet,
+            Y=self.excelApplicationObject.ActiveWindow.PointsToScreenPixelsY(0)
+            if topLeftAddress==bottomRightAddress:
+                #Range.Left: The distance, in points, from the left edge of column A to the left edge of the range. 
+                X=int(X + (topLeftAddress.Left+topLeftCellWidth/2) * zoomRatio * px / pointsPerInch)
+                #Range.Top: The distance, in points, from the top edge of Row 1 to the top edge of the range.
+                Y=int(Y + (topLeftAddress.Top+topLeftCellHeight/2) * zoomRatio * py / pointsPerInch)
+                return (X,Y)
+            else:
+                screenTopLeftX=int(X + (topLeftCellWidth/2 + topLeftAddress.Left) * zoomRatio * px / pointsPerInch)
+                screenBottomRightX=int(X + (bottomRightCellWidth/2+bottomRightAddress.Left) * zoomRatio * px / pointsPerInch)
+                screenTopLeftY = int(Y + (topLeftCellHeight/2+ topLeftAddress.Top) * zoomRatio * py / pointsPerInch)
+                screenBottomRightY=int(Y + (bottomRightCellHeight/2+ bottomRightAddress.Top) * zoomRatio * py / pointsPerInch)
+                return (int(0.5*(screenTopLeftX+screenBottomRightX)), int(0.5*(screenTopLeftY+screenBottomRightY)))
+
+        def script_doAction(self,gesture):
+            self.doAction()
+        script_doAction.canPropagate=False
+        
+        def doAction(self):
+            (x,y)=self._getFormControlScreenCoordinates()
+            winUser.setCursorPos(x,y)
+            #perform Mouse Left-Click
+            winUser.mouse_event(winUser.MOUSEEVENTF_LEFTDOWN,0,0,None,None)
+            winUser.mouse_event(winUser.MOUSEEVENTF_LEFTUP,0,0,None,None)
+            eventHandler.queueEvent("gainFocus",self)
+
+        __gestures= {
+            "kb:enter":"doAction",
+            "kb:space":"doAction",
+            "kb(desktop):numpadEnter":"doAction",
+        }
+
+        __changeSelectionGestures = (
+            "kb:tab",
+            "kb:shift+tab",
+            "kb:upArrow",
+            "kb:downArrow",
+            "kb:leftArrow",
+            "kb:rightArrow",
+            "kb:f",
+            "kb:shift+f",
+        )
+
+class ExcelFormControlQuickNavItem(ExcelQuickNavItem):
+  
+    def __init__( self , nodeType , document , formControlObject , formControlCollection ):
+        self.formControlObjectIndex = formControlObject.ZOrderPosition
+        if formControlObject.AlternativeText:
+            self.label = formControlObject.AlternativeText+" "+formControlObject.Name+" " + formControlObject.TopLeftCell.address(False,False,1,False) + "-" + formControlObject.BottomRightCell.address(False,False,1,False)
+        else:
+            self.label = formControlObject.Name + " " + formControlObject.TopLeftCell.address(False,False,1,False) + "-" + formControlObject.BottomRightCell.address(False,False,1,False)
+        super( ExcelFormControlQuickNavItem ,self).__init__( nodeType , document , formControlObject , formControlCollection )
+  
+    def __lt__(self,other):
+        return self.formControlObjectIndex < other.formControlObjectIndex
+  
+    def moveTo(self):
+        self.excelItemObject.TopLeftCell.Select
+        self.excelItemObject.TopLeftCell.Activate()
+        obj=ExcelFormControl(windowHandle=self.document.Application.Hwnd,excelWindowObject=self.document.Application.ActiveWindow,excelFormControlObject=self.excelItemObject)
+        eventHandler.queueEvent("gainFocus",obj)
+ 
+    @property
+    def isAfterSelection(self):
+        activeCell = self.document.Application.ActiveCell
+        if self.excelItemObject.TopLeftCell.row == activeCell.row:
+            if self.excelItemObject.TopLeftCell.column > activeCell.column:
+                return False
+        elif self.excelItemObject.TopLeftCell.row > activeCell.row:
+            return False
+        return True
+
+
+class ExcelFormControlQuicknavIterator(ExcelQuicknavIterator):
+    quickNavItemClass=ExcelFormControlQuickNavItem
+    def collectionFromWorksheet( self , worksheetObject ):
+        try:
+            return worksheetObject.Shapes
+        except(COMError):
+            return None
+
+    def iterate(self, position):
+        """
+        returns a generator that emits L{QuickNavItem} objects for this collection.
+        @param position: an excelRangeObject representing either the TopLeftCell of the currently selected form control 
+                         or ActiveCell in a worksheet
+        """
+        # Returns the Row containing TopLeftCell of an item
+        def topLeftCellRow(item):
+            row=item.TopLeftCell.Row
+            return row
+        items=self.collectionFromWorksheet(self.document)
+        if not items:
+            return
+        items=sorted(items,key=topLeftCellRow)
+        if position:
+            row = position.Row
+            col = position.Column
+            if self.direction=="next":
+                for collectionItem in items:
+                    if ((collectionItem.TopLeftCell.Row==row and collectionItem.TopLeftCell.Column>col) or (collectionItem.TopLeftCell.Row>row)) and not(self.filter(collectionItem)):
+                        item=self.quickNavItemClass(self.itemType,self.document,collectionItem,items )
+                        yield item
+            elif self.direction=="previous":
+                for collectionItem in reversed(items):
+                    if (collectionItem.TopLeftCell.Row==row and collectionItem.TopLeftCell.Column<col) or (collectionItem.TopLeftCell.Row<row) and not(self.filter(collectionItem)):
+                        item=self.quickNavItemClass(self.itemType,self.document,collectionItem,items )
+                        yield item
+        else:
+            for collectionItem in items:
+                if not(self.filter(collectionItem)):
+                    item=self.quickNavItemClass(self.itemType,self.document,collectionItem , items )
+                    yield item
+
+    def filter(self,shape):
+        if shape.Type == msoFormControl:
+            if shape.FormControlType == xlGroupBox or shape.Visible != msoTrue:
+                return True
+            else:
+                return False
+        else:
+            return True
 
