@@ -1863,14 +1863,13 @@ class WritingScriptsDialog(SettingsDialog):
 		self.languageListChanged = False
 		languageSizer=wx.BoxSizer(wx.HORIZONTAL)
 		# Translators: The label for a priority of language for NVDA 
-		languageLabel=wx.StaticText(self,-1,label=_("&Priority Language for auto language detection:"))
+		languageLabel=wx.StaticText(self,-1,label=_("&Preferred languages for auto language detection:"))
 		languageSizer.Add(languageLabel)
 		languageListID=wx.NewId()
 		self.languageNames = []
 		self.languageNames.extend( unicodeScriptHandler.languagePriorityListSpec )
 		# Translators: The list of priority languages for various scripts in NVDA.
-		self.languageList=wx.Choice(self,languageListID,name=_("Language"),choices=[x[2] for x in self.languageNames])
-		self.languageList.SetToolTip(wx.ToolTip("Choose the language NVDA's messages and user interface should be presented in."))
+		self.languageList=wx.ListBox(self,languageListID,choices=[x[2] for x in self.languageNames])
 		languageSizer.Add(self.languageList)
 		settingsSizer.Add(languageSizer,border=10,flag=wx.BOTTOM)
 		moveUpButtonID=wx.NewId()
@@ -1902,17 +1901,19 @@ class WritingScriptsDialog(SettingsDialog):
 		if listIndex == 0: return
 		tempItem = self.languageNames.pop( self.languageList.GetSelection() )
 		self.languageNames.insert(listIndex -1, tempItem )
-		self.updateList()
+		self.updateList(listIndex-1)
 
 	def OnMoveDown(self,evt):
 		listIndex = self.languageList.GetSelection()
 		if listIndex >= len(self.languageNames) - 1: return
 		tempItem = self.languageNames.pop( self.languageList.GetSelection() )
 		self.languageNames.insert(listIndex + 1, tempItem )
-		self.updateList()
+		self.updateList(listIndex+1)
 
 	def OnAdd(self,evt):
-		languageList = unicodeScriptHandler.getLanguagesWithDescriptions()
+		#while adding new languages we filter out existing languages in the prefered language list
+		ignoreLanguages = {x[0] for x in self.languageNames}
+		languageList = unicodeScriptHandler.getLanguagesWithDescriptions(ignoreLanguages)
 		# Translators: The list of languages for various scripts in NVDA.
 		dialog = wx.SingleChoiceDialog(None, _("Language") , _("Choose language to be added to prefered languages") , choices=[x[1] for x in languageList])
 		if dialog.ShowModal() == wx.ID_OK:
@@ -1923,7 +1924,7 @@ class WritingScriptsDialog(SettingsDialog):
 
 	def OnRemove(self,evt):
 		self.languageNames.pop( self.languageList.GetSelection() )
-		self.updateList()
+		self.updateList(self.languageList.GetSelection())
 
 	def onOk(self, evt):
 		if self.languageListChanged: 
@@ -1934,7 +1935,8 @@ class WritingScriptsDialog(SettingsDialog):
 			unicodeScriptHandler.updateLanguagePriorityFromConfig()
 		super( WritingScriptsDialog , self).onOk(evt)
 
-	def updateList(self):
+	def updateList(self,currentSelection=0):
 		self.languageList.Clear()
 		self.languageList.AppendItems([x[2] for x in self.languageNames])
+		self.languageList.SetSelection(currentSelection)
 		self.languageListChanged = True

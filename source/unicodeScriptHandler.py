@@ -1,3 +1,7 @@
+#A part of NonVisual Desktop Access (NVDA)
+#Copyright (C) 2015 NV Access Limited
+#This file is covered by the GNU General Public License.
+#See the file COPYING for more details.
 
 import profile
 import speech
@@ -7,11 +11,18 @@ import languageHandler
 import config
 from logHandler import log
 from unicodeScriptData import scriptCode
+from collections import OrderedDict
 
 # maintains list of priority languages as a list of languageID, ScriptName, and LanguageDescription
 languagePriorityListSpec = []
 
+scriptIDToLangID = {}
+
 def initialize():
+	#reverse of langIDToScriptID, required to obtain language id for a specific script 
+	for languageID in langIDToScriptID:
+		if not (langIDToScriptID[languageID] in scriptIDToLangID):
+			scriptIDToLangID[ langIDToScriptID[languageID] ] =  languageID 
 	updateLanguagePriorityFromConfig()
 
 def updateLanguagePriorityFromConfig():
@@ -26,40 +37,37 @@ def updateLanguagePriorityFromConfig():
 	except KeyError:
 		pass
 
-langIDToScriptID= {
-	"af_ZA" : "Latin",
-	"am" : "Armenian",
-	"ar" : "Arabic",
-	"as" : "Bengali",
-	"bg" : "Cyrillic",
-	"bn" : "Bengali",
-	"ca" : "Latin",
-	"cs" : "Latin",
-	"da" : "Latin",
-	"de" : "Latin",
-	"el" : "Latin",
-	"en" : "Latin",
-	"es" : "Latin",
-	"fr" : "Latin",
-	"gu" : "Gujarati",
-	"hi" : "Devanagari",
-	"kn" : "Kannada",
-	"ml" : "Malayalam",
-	"mn" : "Mongolian",
-	"mr" : "Devanagari",
-	"ne" : "Devanagari",
-	"or" : "Oriya",
-	"pa" : "Gurmukhi",
-	"sa" : "Devanagari",
-	"sq" : "Caucasian_Albanian",
-	"ta" : "Tamil",
-	"te" : "Telugu",
-}
+langIDToScriptID = OrderedDict([
+	("am" , "Armenian"),
+	("ar" , "Arabic"),
+	("as" , "Bengali"),
+	("bg" , "Cyrillic"),
+	("bn" , "Bengali"),
+	("en" , "Latin"),
+	("af_ZA" , "Latin"),
+	("ca" , "Latin"),
+	("cs" , "Latin"),
+	("da" , "Latin"),
+	("de" , "Latin"),
+	("el" , "Latin"),
+	("es" , "Latin"),
+	("fr" , "Latin"),
+	("gu" , "Gujarati"),
+	("kn" , "Kannada"),
+	("ml" , "Malayalam"),
+	("mn" , "Mongolian"),
+	("hi" , "Devanagari"),
+	("mr" , "Devanagari"),
+	("ne" , "Devanagari"),
+	("sa" , "Devanagari"),
+	("or" , "Oriya"),
+	("pa" , "Gurmukhi"),
+	("sq" , "Caucasian_Albanian"),
+	("ta" , "Tamil"),
+	("te" , "Telugu"),
+])
 
-#reverse of langIDToScriptID, required to obtain language id for a specific script 
-scriptIDToLangID = {script: lang for lang, script in langIDToScriptID.iteritems()} 
-
-def getLanguagesWithDescriptions():
+def getLanguagesWithDescriptions(ignoreLanguages=None):
 	"""generates a list of locale names, plus their full localized language and country names.
 	@rtype: list of tuples
 	"""
@@ -67,9 +75,10 @@ def getLanguagesWithDescriptions():
 	allLanguages  = langIDToScriptID.keys()
 	allLanguages.sort()
 	languageDescriptions = []
-	addedLangs = {lang[0] for lang in languagePriorityListSpec}
+	if not ignoreLanguages:
+		ignoreLanguages = {lang[0] for lang in languagePriorityListSpec}
 	for language in allLanguages:  
-		if language in addedLangs: 
+		if language in ignoreLanguages: 
 			continue
 		else:
 			desc=languageHandler.getLanguageDescription(language )

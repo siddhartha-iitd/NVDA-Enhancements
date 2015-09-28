@@ -1,5 +1,13 @@
+#A part of NonVisual Desktop Access (NVDA)
+#Copyright (C) 2015 NV Access Limited
+#This file is covered by the GNU General Public License.
+#See the file COPYING for more details.
 
 import urllib2, re, textwrap
+
+"""unicodeScriptPrep module is used to build unicodeScriptData.py file. This module obtains scripts.txt from unicode.org and builds an array of unicode ranges. 
+After  the array is created, it is written to the unicodeScriptData.py module.
+To generate the unicodeScriptData.py, just call this module with python."""
 
 def generateUnicodeScriptData():
 	"""build unicodeScriptData.py from scripts.txt"""
