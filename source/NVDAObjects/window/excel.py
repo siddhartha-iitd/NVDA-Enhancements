@@ -1010,11 +1010,24 @@ class ExcelSelection(ExcelBase):
 		return states
 
 	def _get_name(self):
-		firstCell=self.excelRangeObject.Item(1)
-		lastCell=self.excelRangeObject.Item(self.excelRangeObject.Count)
-		# Translators: This is presented in Excel to show the current selection, for example 'a1 c3 through a10 c10'
-		return _("{firstAddress} {firstContent} through {lastAddress} {lastContent}").format(firstAddress=self.getCellAddress(firstCell),firstContent=firstCell.Text,lastAddress=self.getCellAddress(lastCell),lastContent=lastCell.Text)
-
+		text=""
+		selection=self.excelRangeObject
+		selectionText=selection.Address(False,False,xlA1,False)
+		textList=selectionText.split(',')
+		for item in textList:
+			textItem=item.split(':')
+			firstAddress=textItem[0]
+			try:
+				lastAddress=textItem[1]
+			except IndexError:
+				lastAddress=None
+		    # Translators: This is presented in Excel to show the current selection (single or multiple blocks), for example 'a1 c3 through a10 c10'
+			try:
+				text+= _("{firstAddress} {firstContent} through {lastAddress} {lastContent} ").format(firstAddress=firstAddress,firstContent=selection.parent.Range(firstAddress).Text,lastAddress=lastAddress,lastContent=selection.parent.Range(lastAddress).Text)
+			except COMError:
+				text+=_("{firstAddress} {firstContent}").format(firstAddress=firstAddress,firstContent=selection.parent.Range(firstAddress).Text)
+		return text
+	
 	def _get_parent(self):
 		worksheet=self.excelRangeObject.Worksheet
 		return ExcelWorksheet(windowHandle=self.windowHandle,excelWindowObject=self.excelWindowObject,excelWorksheetObject=worksheet)
