@@ -294,6 +294,7 @@ class BrowseModeTreeInterceptor(treeInterceptorHandler.TreeInterceptor):
 		"kb:NVDA+f7": "elementsList",
 		"kb:enter": "activatePosition",
 		"kb:space": "activatePosition",
+		"kb(desktop):numpadEnter":"activatePosition",
 		"kb:NVDA+shift+space":"toggleSingleLetterNav",
 	}
 
