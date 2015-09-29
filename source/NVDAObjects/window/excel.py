@@ -1360,39 +1360,39 @@ class ExcelFormControlQuicknavIterator(ExcelQuicknavIterator):
 			return None
 
     def iterate(self, position):
-    	"""
-    	returns a generator that emits L{QuickNavItem} objects for this collection.
-    	@param position: an excelRangeObject representing either the TopLeftCell of the currently selected form control
-    	or ActiveCell in a worksheet
-    	"""
-    	# Returns the Row containing TopLeftCell of an item
-    	def topLeftCellRow(item):
-    		row=item.TopLeftCell.Row
-    		return row
-    	items=self.collectionFromWorksheet(self.document)
-    	if not items:
-    		return
-    	items=sorted(items,key=topLeftCellRow)
-    	if position:
-    		row = position.Row
-    		col = position.Column
-    		if self.direction=="next":
-    			for collectionItem in items:
-    				if ((collectionItem.TopLeftCell.Row==row and collectionItem.TopLeftCell.Column>col) or (collectionItem.TopLeftCell.Row>row)) and not(self.filter(collectionItem)):
-    					item=self.quickNavItemClass(self.itemType,self.document,collectionItem,items,self.treeInterceptorObj)
-    					yield item
-    		elif self.direction=="previous":
-    			for collectionItem in reversed(items):
-    				if (collectionItem.TopLeftCell.Row==row and collectionItem.TopLeftCell.Column<col) or (collectionItem.TopLeftCell.Row<row) and not(self.filter(collectionItem)):
-    					item=self.quickNavItemClass(self.itemType,self.document,collectionItem,items,self.treeInterceptorObj )
-    					yield item
-    	else:
-    		for collectionItem in items:
-    			if not(self.filter(collectionItem)):
-    				item=self.quickNavItemClass(self.itemType,self.document,collectionItem , items,self.treeInterceptorObj )
-    				yield item
+		"""
+		returns a generator that emits L{QuickNavItem} objects for this collection.
+		@param position: an excelRangeObject representing either the TopLeftCell of the currently selected form control
+		or ActiveCell in a worksheet
+		"""
+		# Returns the Row containing TopLeftCell of an item
+		def topLeftCellRow(item):
+			row=item.TopLeftCell.Row
+			return row
+		items=self.collectionFromWorksheet(self.document)
+		if not items:
+			return
+		items=sorted(items,key=topLeftCellRow)
+		if position:
+			row = position.Row
+			col = position.Column
+			if self.direction=="next":
+				for collectionItem in items:
+					if ((collectionItem.TopLeftCell.Row==row and collectionItem.TopLeftCell.Column>col) or (collectionItem.TopLeftCell.Row>row)) and not(self.filter(collectionItem)):
+						item=self.quickNavItemClass(self.itemType,self.document,collectionItem,items,self.treeInterceptorObj)
+						yield item
+			elif self.direction=="previous":
+				for collectionItem in reversed(items):
+					if (collectionItem.TopLeftCell.Row==row and collectionItem.TopLeftCell.Column<col) or (collectionItem.TopLeftCell.Row<row) and not(self.filter(collectionItem)):
+						item=self.quickNavItemClass(self.itemType,self.document,collectionItem,items,self.treeInterceptorObj )
+						yield item
+		else:
+			for collectionItem in items:
+				if not(self.filter(collectionItem)):
+					item=self.quickNavItemClass(self.itemType,self.document,collectionItem , items,self.treeInterceptorObj )
+					yield item
 
-	def filter(self,shape):
+    def filter(self,shape):
 		if shape.Type == msoFormControl:
 			if shape.FormControlType == xlGroupBox or shape.Visible != msoTrue:
 				return True
