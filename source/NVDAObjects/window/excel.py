@@ -1343,9 +1343,6 @@ class ExcelFormControlQuickNavItem(ExcelQuickNavItem):
 			return False
 		return True
 
-    def _getNVDAObject(self):
-		return self.nvdaObj
-
 class ExcelFormControlQuicknavIterator(ExcelQuicknavIterator):
     quickNavItemClass=ExcelFormControlQuickNavItem
 
