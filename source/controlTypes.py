@@ -483,7 +483,7 @@ roleLabels={
 	# Translators: Identifies an edit box.
 	ROLE_EDITBOX:_("edit box"),
 	# Translators: Identifies a list box.
-	ROLE_LISTBOX:_("list box"),	
+	ROLE_LISTBOX:_("list box"),
 }
 
 stateLabels={

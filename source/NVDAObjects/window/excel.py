@@ -1325,16 +1325,16 @@ class ExcelFormControlQuickNavItem(ExcelQuickNavItem):
 			self.label = formControlObject.Name + " " + formControlObject.TopLeftCell.address(False,False,1,False) + "-" + formControlObject.BottomRightCell.address(False,False,1,False)
 
     def __lt__(self,other):
-    	return self.formControlObjectIndex < other.formControlObjectIndex
+		return self.formControlObjectIndex < other.formControlObjectIndex
 
-	def moveTo(self):
+    def moveTo(self):
 		self.excelItemObject.TopLeftCell.Select
 		self.excelItemObject.TopLeftCell.Activate()
 		self.nvdaObj.treeInterceptor=self.treeInterceptorObj
 		eventHandler.queueEvent("gainFocus",self.nvdaObj)
 
-	@property
-	def isAfterSelection(self):
+    @property
+    def isAfterSelection(self):
 		activeCell = self.document.Application.ActiveCell
 		if self.excelItemObject.TopLeftCell.row == activeCell.row:
 			if self.excelItemObject.TopLeftCell.column > activeCell.column:
@@ -1343,17 +1343,17 @@ class ExcelFormControlQuickNavItem(ExcelQuickNavItem):
 			return False
 		return True
 
-	def _getNVDAObject(self):
+    def _getNVDAObject(self):
 		return self.nvdaObj
 
 class ExcelFormControlQuicknavIterator(ExcelQuicknavIterator):
     quickNavItemClass=ExcelFormControlQuickNavItem
 
     def __init__(self, itemType , document , direction , includeCurrent,treeInterceptorObj):
-    	super(ExcelFormControlQuicknavIterator,self).__init__(itemType , document , direction , includeCurrent)
-    	self.treeInterceptorObj=treeInterceptorObj
+		super(ExcelFormControlQuicknavIterator,self).__init__(itemType , document , direction , includeCurrent)
+		self.treeInterceptorObj=treeInterceptorObj
 
-	def collectionFromWorksheet( self , worksheetObject ):
+    def collectionFromWorksheet( self , worksheetObject ):
 		try:
 			return worksheetObject.Shapes
 		except(COMError):
