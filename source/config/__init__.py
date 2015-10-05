@@ -172,7 +172,7 @@ confspec = ConfigObj(StringIO(
 	reportParagraphIndentation = boolean(default=False)
 	reportTables = boolean(default=true)
 	includeLayoutTables = boolean(default=False)
-	reportTableHeaders = boolean(default=True)
+	reportTableHeaders = string(default="After")
 	reportTableCellCoords = boolean(default=True)
 	reportLinks = boolean(default=true)
 	reportComments = boolean(default=true)

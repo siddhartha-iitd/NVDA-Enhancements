@@ -1092,11 +1092,19 @@ class DocumentFormattingDialog(SettingsDialog):
 		self.tablesCheckBox=wx.CheckBox(self,wx.NewId(),label=_("Report &tables"))
 		self.tablesCheckBox.SetValue(config.conf["documentFormatting"]["reportTables"])
 		settingsSizer.Add(self.tablesCheckBox,border=10,flag=wx.BOTTOM)
-		# Translators: This is the label for a checkbox in the
+		# Translators: This is the label for a combobox in the
 		# document formatting settings dialog.
-		self.tableHeadersCheckBox=wx.CheckBox(self,wx.NewId(),label=_("Report table row/column h&eaders"))
-		self.tableHeadersCheckBox.SetValue(config.conf["documentFormatting"]["reportTableHeaders"])
-		settingsSizer.Add(self.tableHeadersCheckBox,border=10,flag=wx.BOTTOM)
+		tableHeaderOrderLabel=wx.StaticText(self,-1,label=_("Report table row/column h&eaders"))
+		settingsSizer.Add(tableHeaderOrderLabel)
+		tableHeaderOrderListID=wx.NewId()
+		self.tableHeaderOrder=("off","before","after")
+		self.tableHeaderOrderList=wx.Choice(self,tableHeaderOrderListID,choices=[order  for order in self.tableHeaderOrder])
+		try:
+			index= self.tableHeaderOrder.index(config.conf["documentFormatting"]["reportTableHeaders"])
+			self.tableHeaderOrderList.SetSelection(index)
+		except:
+			log.debugWarning("Could not set table header order list to current option",exc_info=True) 
+		settingsSizer.Add(self.tableHeaderOrderList,border=10,flag=wx.BOTTOM)
 		# Translators: This is the label for a checkbox in the
 		# document formatting settings dialog.
 		self.tableCellCoordsCheckBox=wx.CheckBox(self,wx.NewId(),label=_("Report table cell c&oordinates"))
@@ -1156,7 +1164,7 @@ class DocumentFormattingDialog(SettingsDialog):
 		config.conf["documentFormatting"]["reportLineIndentation"]=self.lineIndentationCheckBox.IsChecked()
 		config.conf["documentFormatting"]["reportParagraphIndentation"]=self.paragraphIndentationCheckBox.IsChecked()
 		config.conf["documentFormatting"]["reportTables"]=self.tablesCheckBox.IsChecked()
-		config.conf["documentFormatting"]["reportTableHeaders"]=self.tableHeadersCheckBox.IsChecked()
+		config.conf["documentFormatting"]["reportTableHeaders"]= self.tableHeaderOrder[self.tableHeaderOrderList.GetSelection()]
 		config.conf["documentFormatting"]["reportTableCellCoords"]=self.tableCellCoordsCheckBox.IsChecked() 
 		config.conf["documentFormatting"]["reportLinks"]=self.linksCheckBox.IsChecked()
 		config.conf["documentFormatting"]["reportHeadings"]=self.headingsCheckBox.IsChecked()

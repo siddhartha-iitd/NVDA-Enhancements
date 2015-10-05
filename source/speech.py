@@ -338,7 +338,7 @@ def speakObject(obj,reason=controlTypes.REASON_QUERY,index=None):
 		allowProperties["cellCoordsText"]=False
 		# rowNumber and columnNumber might be needed even if we're not reporting coordinates.
 		allowProperties["includeTableCellCoords"]=False
-	if not formatConf["reportTableHeaders"]:
+	if formatConf["reportTableHeaders"] == "off":
 		allowProperties["rowHeaderText"]=False
 		allowProperties["columnHeaderText"]=False
 	if (not formatConf["reportTables"]
@@ -891,6 +891,21 @@ def speakTextInfo(info,useCache=True,formatConfig=None,unit=None,reason=controlT
 def getSpeechTextForProperties(reason=controlTypes.REASON_QUERY,**propertyValues):
 	global oldTreeLevel, oldTableID, oldRowNumber, oldColumnNumber
 	textList=[]
+	cellCoordsText=propertyValues.get('cellCoordsText')
+	rowNumber=propertyValues.get('rowNumber')
+	columnNumber=propertyValues.get('columnNumber')
+	includeTableCellCoords=propertyValues.get('includeTableCellCoords',True)
+	if config.conf["documentFormatting"]["reportTableHeaders"] == "before":
+		if cellCoordsText or rowNumber or columnNumber:
+			tableID = propertyValues.get("_tableID")
+			# Always treat the table as different if there is no tableID.
+			sameTable = (tableID and tableID == oldTableID)
+			if rowNumber and (not sameTable or rowNumber != oldRowNumber):
+				rowHeaderText = propertyValues.get("rowHeaderText")
+				if rowHeaderText: textList.append(rowHeaderText)
+			if columnNumber and (not sameTable or columnNumber != oldColumnNumber):
+				columnHeaderText = propertyValues.get("columnHeaderText")
+				if columnHeaderText: textList.append(columnHeaderText)
 	name=propertyValues.get('name')
 	if name:
 		textList.append(name)
@@ -904,10 +919,6 @@ def getSpeechTextForProperties(reason=controlTypes.REASON_QUERY,**propertyValues
 		speakRole=False
 		role=controlTypes.ROLE_UNKNOWN
 	value=propertyValues.get('value') if role not in controlTypes.silentValuesForRoles else None
-	cellCoordsText=propertyValues.get('cellCoordsText')
-	rowNumber=propertyValues.get('rowNumber')
-	columnNumber=propertyValues.get('columnNumber')
-	includeTableCellCoords=propertyValues.get('includeTableCellCoords',True)
 	if speakRole and (reason not in (controlTypes.REASON_SAYALL,controlTypes.REASON_CARET,controlTypes.REASON_FOCUS) or not (name or value or cellCoordsText or rowNumber or columnNumber) or role not in controlTypes.silentRolesOnFocus) and (role!=controlTypes.ROLE_MATH or reason not in (controlTypes.REASON_CARET,controlTypes.REASON_SAYALL)):
 		textList.append(controlTypes.roleLabels[role])
 	if value:
@@ -965,7 +976,7 @@ def getSpeechTextForProperties(reason=controlTypes.REASON_QUERY,**propertyValues
 		if rowNumber and (not sameTable or rowNumber != oldRowNumber):
 			rowHeaderText = propertyValues.get("rowHeaderText")
 			if rowHeaderText:
-				textList.append(rowHeaderText)
+				if config.conf["documentFormatting"]["reportTableHeaders"] == "after": textList.append(rowHeaderText)
 			if includeTableCellCoords and not cellCoordsText: 
 				# Translators: Speaks current row number (example output: row 3).
 				textList.append(_("row %s")%rowNumber)
@@ -973,7 +984,7 @@ def getSpeechTextForProperties(reason=controlTypes.REASON_QUERY,**propertyValues
 		if columnNumber and (not sameTable or columnNumber != oldColumnNumber):
 			columnHeaderText = propertyValues.get("columnHeaderText")
 			if columnHeaderText:
-				textList.append(columnHeaderText)
+				if config.conf["documentFormatting"]["reportTableHeaders"] == "after": textList.append(columnHeaderText)
 			if includeTableCellCoords and not cellCoordsText:
 				# Translators: Speaks current column number (example output: column 3).
 				textList.append(_("column %s")%columnNumber)
