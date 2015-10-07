@@ -1135,6 +1135,23 @@ To remove a gesture from a command, select the gesture and press the Remove butt
 
 When you are finished making changes, press the OK button to save them or the Cancel button to discard them.
 
++++ Writing Scripts +++
+This dialog allows you to choose prefered language to be selected for a specific script. NVDA maintains a list of languages along with unicode script for each language. NVDA determines a language in the following order :
+- If the currently detected unicode script has a language in prefered language listbox, then NVDA chooses the first language from this listbox.
+- If the above step fails, NVDA checks if currently detected unicode script matches with NVDA user interface language, if yes, that language is chosen.
+- if both of the above checks fail, then NVDA selects first language from its language to unicode Script mapping.
+-
+==== Preferred languages for auto language detection ====
+With This listbox, users can add, remove or change priority for languages for Unicode scripts, and the first language matching with the currently detected Unicode script is chosen.
+==== Move Up ====
+With this Button, users can increase the priority of the currently selected language in the Preferred languages list.
+==== Move down ====
+With this Button, users can decrease the priority of the currently selected language in the Preferred languages list.
+==== Add ====
+With this Button, users can add a language from list of available languages. This list would not show languages that are already added in Preferred languages.
+==== Remove ====
+With this Button, users can remove the currently selected language from the Preferred languages list.
+
 ++ Saving and Reloading the configuration ++
 By default NVDA will automatically save your settings on exit.
 Note, however, that this option can be changed under the general options in the preferences menu.
