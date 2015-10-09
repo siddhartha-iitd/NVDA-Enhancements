@@ -263,7 +263,7 @@ class ExcelBrowseModeTreeInterceptor(browseMode.BrowseModeTreeInterceptor):
 			log.debugWarning("could not compair sheet names",exc_info=True)
 			return False
 
-	def scriptHelper(self,direction):
+	def navigationHelper(self,direction):
 		self.windowHandle=self.rootNVDAObject.windowHandle
 		self.excelWindowObject=self.rootNVDAObject.excelWindowObject
 		try:
@@ -318,80 +318,28 @@ class ExcelBrowseModeTreeInterceptor(browseMode.BrowseModeTreeInterceptor):
 		eventHandler.executeEvent('gainFocus',obj)
     
 	def script_moveLeft(self,gesture):
-		self.scriptHelper("left")
+		self.navigationHelper("left")
 	
 	def script_moveRight(self,gesture):
-		self.scriptHelper("right")
+		self.navigationHelper("right")
 
 	def script_moveUp(self,gesture):
-		self.scriptHelper("up")
+		self.navigationHelper("up")
 
 	def script_moveDown(self,gesture):
-		self.scriptHelper("down")
+		self.navigationHelper("down")
 
 	def script_startOfColumn(self,gesture):
-		self.scriptHelper("startcol")
+		self.navigationHelper("startcol")
 
 	def script_startOfRow(self,gesture):
-		self.scriptHelper("startrow")
+		self.navigationHelper("startrow")
 
 	def script_endOfRow(self,gesture):
-		self.scriptHelper("endrow")
+		self.navigationHelper("endrow")
 
 	def script_endOfColumn(self,gesture):
-		self.scriptHelper("endcol")
-
-	def getColumnNameFromNumber(self,colNum):
-		 colList = (self.rootNVDAObject.excelWorksheetObject.Cells(1, colNum).Address(True, False)).split('$')
-		 return ''.join(colList)[:-1]
- 
-	def script_readRow(self,gesture):
-		self.scriptHelper(-1)
-		ws = self.rootNVDAObject.excelWorksheetObject
-		currentRow = self.cellPosition.Row
-		# Translators: the description for the Row Number of current row in excel Browse Mode.
-		ui.message(_("Reading Row {rowNumber}".format(rowNumber=currentRow)))
-		lastColumn = ws.Cells(currentRow, ws.Columns.Count).End(xlToLeft).Column
-		col = 1
-		while col <= lastColumn:
-			if ws.Cells(currentRow,col).MergeCells:
-				mergedAreaColumnCount = ws.Cells(currentRow,col).MergeArea.columns.count
-				# Translators: the description for the Column Span of a Merged Area in excel Browse Mode
-				locationText = _("Column {fromCol} to {toCol}".format(fromCol=self.getColumnNameFromNumber(col),toCol=self.getColumnNameFromNumber(col+mergedAreaColumnCount-1))) if mergedAreaColumnCount > 1 else _("Column {singleCol}".format(singleCol=self.getColumnNameFromNumber(col)))
-				cellValueText = ws.Cells(currentRow,col).Text
-				col += mergedAreaColumnCount
-			else:
-				# Translators: the description for the Column Name of current cell in a row in excel Browse Mode
-				locationText = _("Column {colName}".format(colName=self.getColumnNameFromNumber(col)))
-				cellValueText = ws.Cells(currentRow,col).Text
-				col += 1
-			if cellValueText:
-				ui.message(locationText)
-				ui.message(cellValueText)
- 
-	def script_readColumn(self,gesture):
-		self.scriptHelper(-1)
-		ws = self.rootNVDAObject.excelWorksheetObject
-		currentCol = self.cellPosition.Column
-		# Translators: the description for the Column Number of current column in excel Browse Mode
-		ui.message(_("Reading Column {colNum}".format(colNum=self.getColumnNameFromNumber(currentCol))))
-		lastRow = ws.Cells(ws.Rows.Count, currentCol).End(xlUp).Row
-		row = 1
-		while row <= lastRow:
-			if ws.Cells(row,currentCol).MergeCells:
-				mergedAreaRowCount = ws.Cells(row,currentCol).MergeArea.rows.count
-				# Translators: the description for the Row Span of a Merged Area in excel Browse Mode
-				locationText = _("Row {fromRow} to {toRow}".format(fromRow=row,toRow=row+mergedAreaRowCount-1)) if mergedAreaRowCount > 1 else _("Row {rowNum}".format(rowNum=row))
-				cellValueText = ws.Cells(row,currentCol).Text
-				row += mergedAreaRowCount
-			else:
-				# Translators: the description for the row number in excel Browse Mode
-				locationText = _("Row {rowNum}".format(rowNum=row))
-				cellValueText = ws.Cells(row,currentCol).Text
-				row += 1
-			if cellValueText:
-				ui.message(locationText)
-				ui.message(cellValueText)
+		self.navigationHelper("endcol")
 
 	def script_activatePosition(self,gesture):
 		excelApplicationObject = self.rootNVDAObject.excelWorksheetObject.Application
@@ -404,35 +352,6 @@ class ExcelBrowseModeTreeInterceptor(browseMode.BrowseModeTreeInterceptor):
 			return		
 		focus = api.getFocusObject()
 		vbuf = focus.treeInterceptor
-		if not vbuf:
-			# #2023: Search the focus and its ancestors for an object for which browse mode is optional.
-			for obj in itertools.chain((api.getFocusObject(),), reversed(api.getFocusAncestors())):
-				if obj.shouldCreateTreeInterceptor:
-					continue
-				try:
-					obj.treeInterceptorClass
-				except:
-					continue
-				break
-			else:
-				return
-			# Force the tree intercepter to be created.
-			obj.shouldCreateTreeInterceptor = True
-			ti = treeInterceptorHandler.update(obj)
-			if not ti:
-				return
-			if focus in ti:
-				# Update the focus, as it will have cached that there is no tree intercepter.
-				focus.treeInterceptor = ti
-				# If we just happened to create a browse mode TreeInterceptor
-				# Then ensure that browse mode is reported here. From the users point of view, browse mode was turned on.
-				if isinstance(ti,browseMode.BrowseModeTreeInterceptor) and not ti.passThrough:
-					browseMode.reportPassThrough(ti,False)
-					braille.handler.handleGainFocus(ti)
-			return
-
-		if not isinstance(vbuf, browseMode.BrowseModeTreeInterceptor):
-			return
 		# Toggle browse mode pass-through.
 		vbuf.passThrough = not vbuf.passThrough
 		if isinstance(vbuf,virtualBuffers.VirtualBuffer):
@@ -483,8 +402,6 @@ class ExcelBrowseModeTreeInterceptor(browseMode.BrowseModeTreeInterceptor):
         "kb:control+downArrow":"endOfColumn",
         "kb:control+leftArrow":"startOfRow",
         "kb:control+rightArrow":"endOfRow",
-        "kb:control+alt+,":"readRow",
-        "kb:control+alt+.":"readColumn",
 		"kb:enter": "activatePosition",
 		"kb(desktop):numpadEnter":"activatePosition",
 		"kb:space": "activatePosition",
