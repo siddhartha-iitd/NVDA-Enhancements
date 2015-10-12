@@ -343,24 +343,15 @@ class ExcelBrowseModeTreeInterceptor(browseMode.BrowseModeTreeInterceptor):
 
 	def script_activatePosition(self,gesture):
 		excelApplicationObject = self.rootNVDAObject.excelWorksheetObject.Application
-		rowNum = excelApplicationObject.ActiveCell.Row
-		colNum = excelApplicationObject.ActiveCell.Column
-		excelRangeObject = excelApplicationObject.Cells(rowNum,colNum)
 		if excelApplicationObject.ActiveSheet.ProtectContents and excelRangeObject.Locked:
 			# Translators: the description for the Locked cells in excel Browse Mode, if focused for editing
 			ui.message(_("This cell is non-editable"))
 			return		
-		focus = api.getFocusObject()
-		vbuf = focus.treeInterceptor
 		# Toggle browse mode pass-through.
-		vbuf.passThrough = not vbuf.passThrough
-		if isinstance(vbuf,virtualBuffers.VirtualBuffer):
-			# If we are enabling pass-through, the user has explicitly chosen to do so, so disable auto-pass-through.
-			# If we're disabling pass-through, re-enable auto-pass-through.
-			vbuf.disableAutoPassThrough = vbuf.passThrough
-		browseMode.reportPassThrough(vbuf)
-		excelRangeObject.Select
-		excelRangeObject.Activate()
+		self.passThrough = not self.passThrough
+		browseMode.reportPassThrough(self)
+		excelApplicationObject.ActiveCell.Select
+		excelApplicationObject.ActiveCell.Activate()
 
 	# Translators: Input help mode message for toggle focus and browse mode command in web browsing and other situations.
 	script_activatePosition.__doc__=_("Toggles between browse mode and focus mode. When in focus mode, keys will pass straight through to the application, allowing you to interact directly with a control. When in browse mode, you can navigate the document with the cursor, quick navigation keys, etc.")
