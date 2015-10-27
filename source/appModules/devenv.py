@@ -50,6 +50,7 @@ from NVDAObjects.window import Window
 from NVDAObjects.window import DisplayModelEditableText
 
 import appModuleHandler
+import ui
 
 
 #
@@ -87,6 +88,13 @@ SB_VERT = 1
 
 
 class AppModule(appModuleHandler.AppModule):
+	def event_selection(self, obj, nextHandler):
+		objectChildID=obj.IAccessibleChildID
+		if objectChildID==0:
+			ui.message(obj.getChild(0).name)
+		else:
+			ui.message(obj.parent.getChild(objectChildID).name)
+		
 	def chooseNVDAObjectOverlayClasses(self, obj, clsList):
 		# Only use this overlay class if the top level automation object for the IDE can be retrieved,
 		# as it will not work otherwise.
